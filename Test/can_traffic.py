@@ -4,6 +4,7 @@ import socket
 import struct
 import sys
 import time
+import random
 
 # CAN frame packing/unpacking (see `struct can_frame` in <linux/can.h>)
 can_frame_fmt = "=IB3x8s"
@@ -24,9 +25,17 @@ if len(sys.argv) != 2:
 # create a raw socket and bind it to the given CAN interface
 s = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
 s.bind((sys.argv[1],))
+
+
+packer = struct.Struct('ff')
+x = 0
+y = 0
 while True:
+    x += random.randrange(-10, 10)
+    y += random.randrange(-10, 10)
     try:
-        s.send(build_can_frame(0x600, b'\x11\x11\x11'))
+        data = packer.pack(x,y)
+        s.send(build_can_frame(0x600, data))
         print("sended")
     except socket.error:
         print('Error1 sending CAN frame')
