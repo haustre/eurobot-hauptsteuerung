@@ -2,8 +2,25 @@ __author__ = 'mw'
 
 import time
 from ethernet import Client
+from PyQt4 import QtGui
+import sys
 
-def main():
+class Table(QtGui.QTableWidget):
+    def __init__(self, header):
+        super().__init__(1, len(header))
+        self.setHorizontalHeaderLabels(header)
+        self.verticalHeader().setVisible(False)
+        #self.resizeColumnsToContents()
+        #self.resizeRowsToContents()
+
+
+def main(args):
+    app = QtGui.QApplication(args)
+    header = ['Time', 'Source', 'Type']
+    can_table = Table(header)
+    can_table.show()
+    sys.exit(app.exec_())
+
     host = 'localhost'  #Test
     port = 42233        #Test
     data = {'message':'hello world!', 'test': 123.4}
@@ -16,4 +33,4 @@ def main():
             pass
         time.sleep(0.1)
 
-main()
+main(sys.argv)
