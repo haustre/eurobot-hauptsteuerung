@@ -7,14 +7,14 @@ import time
 
 
 class Can(object):
-    def __init__(self, can_id, can_mask):
+    def __init__(self, can_id, can_mask, interface):
         self.can_frame_fmt = "=IB3x8s"
         self.queue_receive = Queue()
         self.queue_send = Queue()
         self.s = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
         can_filter = struct.pack("=II", can_id, can_mask)
         self.s.setsockopt(socket.SOL_CAN_RAW, socket.CAN_RAW_FILTER, can_filter)
-        self.s.bind(('vcan0', ))
+        self.s.bind((interface, ))
         self.t_connection = threading.Thread(target=self.connection, args=[self.s])
         self.t_connection.setDaemon(1)
         self.t_connection.start()
@@ -87,11 +87,10 @@ class Queue(object):
                 self.msg.pop()
 
 if __name__ == '__main__':
-    #can_id, can_mask = 0x600, 0x600
-    can_id, can_mask = 0x001, 0x003
-    s_debug = Can(can_id, can_mask)
+    can_id, can_mask = 0x600, 0x600
+    s = Can(can_id, can_mask, 'vcan0')
     while True:
-        data = s_debug.receive()
+        data = s.receive()
         if data:
             print(data)
         time.sleep(0.01)

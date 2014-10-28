@@ -3,7 +3,7 @@ __author__ = 'mw'
 import time
 from ethernet import Client
 
-if __name__ == '__main__':
+def main():
     host = 'localhost'  #Test
     port = 42233        #Test
     data = {'message':'hello world!', 'test': 123.4}
@@ -15,3 +15,5 @@ if __name__ == '__main__':
             print(data)
             pass
         time.sleep(0.1)
+
+main()
