@@ -27,45 +27,49 @@ class CanWindow(QtGui.QWidget):
     def __init__(self):
         super().__init__()
         self.threads = []
+        header = ['Time', 'Source', 'Type', 'Value']
+        self.can_table = Table(header)
         self.init_ui()
 
     def init_ui(self):
-        header = ['Time', 'Source', 'Type', 'Value']
-        can_table = Table(header)
-
-        edit_host = EditHost()
+        edit_host = EditHost(self)
         vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(can_table)
+        vbox.addWidget(self.can_table)
         vbox.addWidget(edit_host)
-        #vbox.addStretch(1)
-        edit_host.host_button.clicked.connect(self.change_host)
 
         self.setLayout(vbox)
 
-    def change_host(self):
-        print("Test2")
+    def connect_host(self, host, port):
+        print(host, port)
+        self.can_table.add_row([host, port])
+
 
 
 class EditHost(QtGui.QWidget):
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__()
+        self.parent = parent
         host_label = QtGui.QLabel('Host:')
-        host_line = QtGui.QLineEdit('192.168.1.X')
+        self.host_line = QtGui.QLineEdit('192.168.1.X')
         port_label = QtGui.QLabel('Port:')
-        port_line = QtGui.QLineEdit('4223')
-        self.host_button = QtGui.QPushButton('Change')
+        self.port_line = QtGui.QLineEdit('42233')
+        host_button = QtGui.QPushButton('Connect')
+        host_button.clicked.connect(self.connect_host)
 
         grid = QtGui.QGridLayout()
         grid.addWidget(host_label, 0, 0)
-        grid.addWidget(host_line, 0, 1)
+        grid.addWidget(self.host_line, 0, 1)
         grid.addWidget(port_label, 1, 0)
-        grid.addWidget(port_line, 1, 1)
-        grid.addWidget(self.host_button, 1, 2)
+        grid.addWidget(self.port_line, 1, 1)
+        grid.addWidget(host_button, 1, 2)
         self.setLayout(grid)
 
-    def change_host(self):
-        print("Test")
-        #super().change_host()
+    def connect_host(self):
+        '''
+        Todo:
+        Input überprüfen
+        '''
+        self.parent.connect_host(self.host_line.text(), self.port_line.text())
 
 
 
