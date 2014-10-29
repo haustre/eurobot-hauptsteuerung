@@ -1,29 +1,12 @@
 __author__ = 'mw'
 
 import time
-from ethernet import Client
-from PyQt4 import QtGui
 import sys
-import threading
 
+from PyQt4 import QtGui
 
-class Table(QtGui.QTableWidget):
-    def __init__(self, header):
-        super().__init__(5, len(header))
-        self.header = header
-        self.setHorizontalHeaderLabels(header)
-        self.verticalHeader().setVisible(False)
-        #self.resizeColumnsToContents()
-        #self.resizeRowsToContents()
-        #self.test()
-
-    def test(self):
-        for i in range(100):
-            self.setRowCount(self.rowCount() + 1)
-            for ii in range(len(self.header)):
-                newitem = QtGui.QTableWidgetItem(str(i+0.2*ii))
-                self.setItem(i, ii, newitem)
-                time.sleep(0.1)
+from qt_table import Table
+from ethernet import Client
 
 
 def test():
@@ -39,26 +22,49 @@ def test():
             pass
         time.sleep(0.1)
 
+class CanWindow(QtGui.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.threads = []
+        self.init_ui()
 
-def test2():
-    while 1:
-        print("Hallo")
-        time.sleep(2)
+    def init_ui(self):
+        header = ['Time', 'Source', 'Type']
+        can_table = Table(header)
+
+        host_label = QtGui.QLabel('Host:')
+        host_line = QtGui.QLineEdit('192.168.1.X')
+        port_label = QtGui.QLabel('Port:')
+        port_line = QtGui.QLineEdit('4223')
+
+        host_button = QtGui.QPushButton('Change')
+        host_button.clicked.connect(self.change_host)
+
+        host_box = QtGui.QHBoxLayout()
+        host_box.addWidget(host_label)
+        host_box.addWidget(host_line)
+        port_box = QtGui.QHBoxLayout()
+        port_box.addWidget(port_label)
+        port_box.addWidget(port_line)
+        port_box.addWidget(host_button)
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(can_table)
+        vbox.addLayout(host_box)
+        vbox.addLayout(port_box)
+        vbox.addStretch(1)
+        self.setLayout(vbox)
+        self.setGeometry(300, 300, 380, 370)
+        self.show()
+
+    def change_host(self):
+        print("Test")
 
 
 def main(args):
     app = QtGui.QApplication(args)
-    header = ['Time', 'Source', 'Type']
-    can_table = Table(header)
-    can_table.show()
-
-    t = threading.Thread(target=test2)
-    t.setDaemon(1)
-    t.start()
-
-
+    can_window = CanWindow()
+    can_window.show()
     sys.exit(app.exec_())
-
-
 
 main(sys.argv)
