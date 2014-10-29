@@ -29,17 +29,16 @@ class CanWindow(QtGui.QWidget):
         self.threads = []
         self.init_ui()
 
-
-
     def init_ui(self):
-        header = ['Time', 'Source', 'Type']
+        header = ['Time', 'Source', 'Type', 'Value']
         can_table = Table(header)
 
         edit_host = EditHost()
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(can_table)
         vbox.addWidget(edit_host)
-        vbox.addStretch(1)
+        #vbox.addStretch(1)
+        edit_host.host_button.clicked.connect(self.change_host)
 
         self.setLayout(vbox)
 
@@ -54,24 +53,15 @@ class EditHost(QtGui.QWidget):
         host_line = QtGui.QLineEdit('192.168.1.X')
         port_label = QtGui.QLabel('Port:')
         port_line = QtGui.QLineEdit('4223')
+        self.host_button = QtGui.QPushButton('Change')
 
-        host_button = QtGui.QPushButton('Change')
-        host_button.clicked.connect(self.change_host)
-
-        host_box = QtGui.QHBoxLayout()
-        host_box.addWidget(host_label)
-        host_box.addWidget(host_line)
-        port_box = QtGui.QHBoxLayout()
-        port_box.addWidget(port_label)
-        port_box.addWidget(port_line)
-        port_box.addWidget(host_button)
-
-        vbox = QtGui.QVBoxLayout()
-        vbox.addLayout(host_box)
-        vbox.addLayout(port_box)
-        vbox.addStretch(1)
-        self.setLayout(vbox)
-        #self.show()
+        grid = QtGui.QGridLayout()
+        grid.addWidget(host_label, 0, 0)
+        grid.addWidget(host_line, 0, 1)
+        grid.addWidget(port_label, 1, 0)
+        grid.addWidget(port_line, 1, 1)
+        grid.addWidget(self.host_button, 1, 2)
+        self.setLayout(grid)
 
     def change_host(self):
         print("Test")
