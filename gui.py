@@ -5,7 +5,7 @@ import sys
 
 from PyQt4 import QtGui
 
-from qt_table import Table
+from gui.qt_table import Table
 from ethernet import Client
 
 
