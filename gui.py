@@ -22,16 +22,34 @@ def test():
             pass
         time.sleep(0.1)
 
+
 class CanWindow(QtGui.QWidget):
     def __init__(self):
         super().__init__()
         self.threads = []
         self.init_ui()
 
+
+
     def init_ui(self):
         header = ['Time', 'Source', 'Type']
         can_table = Table(header)
 
+        edit_host = EditHost()
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(can_table)
+        vbox.addWidget(edit_host)
+        vbox.addStretch(1)
+
+        self.setLayout(vbox)
+
+    def change_host(self):
+        print("Test2")
+
+
+class EditHost(QtGui.QWidget):
+    def __init__(self):
+        super().__init__()
         host_label = QtGui.QLabel('Host:')
         host_line = QtGui.QLineEdit('192.168.1.X')
         port_label = QtGui.QLabel('Port:')
@@ -49,16 +67,16 @@ class CanWindow(QtGui.QWidget):
         port_box.addWidget(host_button)
 
         vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(can_table)
         vbox.addLayout(host_box)
         vbox.addLayout(port_box)
         vbox.addStretch(1)
         self.setLayout(vbox)
-        self.setGeometry(300, 300, 380, 370)
-        self.show()
+        #self.show()
 
     def change_host(self):
         print("Test")
+        #super().change_host()
+
 
 
 def main(args):
