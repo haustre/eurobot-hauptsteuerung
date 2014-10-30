@@ -4,23 +4,11 @@ import time
 import sys
 
 from PyQt4 import QtGui
+from PyQt4 import QtCore
 
 from gui.qt_table import Table
 from ethernet import Client
-
-
-def test():
-    host = 'localhost'  #Test
-    port = 42233        #Test
-    data = {'message':'hello world!', 'test': 123.4}
-    tcp = Client(host, port)
-    #tcp.write(data)
-    while 1:
-        data = tcp.read()
-        if data:
-            print(data)
-            pass
-        time.sleep(0.1)
+import threading
 
 
 class CanWindow(QtGui.QWidget):
@@ -41,8 +29,33 @@ class CanWindow(QtGui.QWidget):
 
     def connect_host(self, host, port):
         print(host, port)
-        self.can_table.add_row([host, port])
+        t = threading.Thread(target=self.test, args=[host, port])
+        t.setDaemon(1)
+        t.start()
 
+    def test(self, host, port):
+        tcp = Client(host, int(port))
+        while True:
+            data = tcp.read()
+            if data:
+                print(data)
+                self.can_table.add_row([str(data[0]), str(data[1])])
+            time.sleep(0.01)
+
+
+class TcpConnection(QtCore.QThread):
+    def __init__(self, parent,  host, port):
+        super().__init__()
+        self.parent = parent
+        self.tcp = Client(host, int(port))
+
+    def run(self):
+        while 1:
+            data = self.tcp.read()
+            if data:
+                print(data)
+                #self.parent.can_table.add_row(data)
+            time.sleep(3)
 
 
 class EditHost(QtGui.QWidget):
@@ -50,7 +63,7 @@ class EditHost(QtGui.QWidget):
         super().__init__()
         self.parent = parent
         host_label = QtGui.QLabel('Host:')
-        self.host_line = QtGui.QLineEdit('192.168.1.X')
+        self.host_line = QtGui.QLineEdit('localhost')
         port_label = QtGui.QLabel('Port:')
         self.port_line = QtGui.QLineEdit('42233')
         host_button = QtGui.QPushButton('Connect')
