@@ -36,7 +36,7 @@ while True:
     try:
         data = packer.pack(x,y)
         s.send(build_can_frame(0x600, data))
-        print("sended")
+        #print("sended")
     except socket.error:
         print('Error1 sending CAN frame')
     time.sleep(0.005)

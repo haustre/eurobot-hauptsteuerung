@@ -16,7 +16,7 @@ def main():
         if data:
             data = packer.unpack(data)
             tcp.write(data)
-            print(data)
+            #print(data)
         time.sleep(0.01)
 
 main()
