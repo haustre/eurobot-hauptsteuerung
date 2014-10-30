@@ -70,7 +70,6 @@ class EditHost(QtGui.QWidget):
         self.parent.connect_host(self.host_line.text(), self.port_line.text())
 
 
-
 def main(args):
     app = QtGui.QApplication(args)
     can_window = CanWindow()
