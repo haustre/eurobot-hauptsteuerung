@@ -9,7 +9,7 @@ from PyQt4 import QtCore
 from gui.qt_table import Table
 from ethernet import Client
 import threading
-
+import datetime
 
 class CanWindow(QtGui.QWidget):
     def __init__(self):
@@ -38,24 +38,10 @@ class CanWindow(QtGui.QWidget):
         while True:
             data = tcp.read()
             if data:
-                print(data)
-                self.can_table.add_row([str(data[0]), str(data[1])])
+                current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
+                print(current_time, data)
+                self.can_table.add_row([current_time, str(data[0]), str(data[1])])
             time.sleep(0.01)
-
-
-class TcpConnection(QtCore.QThread):
-    def __init__(self, parent,  host, port):
-        super().__init__()
-        self.parent = parent
-        self.tcp = Client(host, int(port))
-
-    def run(self):
-        while 1:
-            data = self.tcp.read()
-            if data:
-                print(data)
-                #self.parent.can_table.add_row(data)
-            time.sleep(3)
 
 
 class EditHost(QtGui.QWidget):
