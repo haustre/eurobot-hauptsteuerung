@@ -22,11 +22,14 @@ class Table(QtGui.QTableWidget):
                 #time.sleep(0.1)
 
     def add_row(self, data):
-        max_row_count = 10000
-        row_count = self.rowCount()
-        self.setRowCount(row_count + 1)
+        max_row_count = 10
         for i in range(len(data)):
             newitem = QtGui.QTableWidgetItem(data[i])
+            row_count = self.rowCount()
+            self.setRowCount(row_count + 1)
             self.setItem(row_count, i, newitem)
-        if row_count > max_row_count:
-            self.removeRow(0)
+            print(row_count)
+            if row_count > max_row_count:
+                self.removeRow(0)
+                row_count = self.rowCount()
+                self.setRowCount(row_count - 1)
