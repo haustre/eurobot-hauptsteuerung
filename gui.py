@@ -39,7 +39,7 @@ class CanWindow(QtGui.QWidget):
             data = tcp.read()
             if data:
                 current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
-                self.can_table.add_row([current_time, str(data[0]), str(data[1])])
+                self.can_table.add_row([current_time, str(data[0][0]), str(data[0][1])])
             time.sleep(0.01)
 
 

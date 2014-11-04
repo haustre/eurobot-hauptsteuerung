@@ -128,7 +128,7 @@ class Queue(object):
 
     def read(self, pointer_nr=None):
         with self.read_lock:
-            if pointer_nr != None:
+            if pointer_nr is not None:
                 pointer = self.tcp_pointer[pointer_nr]
                 if pointer >= 0:
                     self.tcp_pointer[pointer_nr] -= 1
@@ -137,23 +137,24 @@ class Queue(object):
                     return None
             else:
                 if self.pointer >= 0:
-                    self.pointer -= 1
-                    return self.msg[self.pointer + 1]
+                    pointer_now = self.pointer
+                    self.pointer = 0
+                    return self.msg[0: pointer_now]
 
     def write(self, data):
-        BUFFERSIZE = 20
+        buffersize = 20
         with self.read_lock:
             self.msg.insert(0, data)
             if len(self.tcp_pointer) > 0:
                 for i in range(len(self.tcp_pointer)):
                     self.tcp_pointer[i] += 1
-                    if self.tcp_pointer[i] > BUFFERSIZE - 1:
-                        self.tcp_pointer[i] = BUFFERSIZE - 1
+                    if self.tcp_pointer[i] > buffersize - 1:
+                        self.tcp_pointer[i] = buffersize - 1
             if True:
                 self.pointer += 1
-                if self.pointer > BUFFERSIZE - 1:
-                    self.pointer = BUFFERSIZE - 1
-            if len(self.msg) > BUFFERSIZE:
+                if self.pointer > buffersize - 1:
+                    self.pointer = buffersize - 1
+            if len(self.msg) > buffersize:
                 self.msg.pop()
 
 if __name__ == '__main__':
