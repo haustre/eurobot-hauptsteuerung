@@ -143,7 +143,7 @@ class Queue(object):
                     return self.msg[pointer_now]
 
     def write(self, data):
-        buffersize = 20
+        buffersize = 2000
         with self.read_lock:
             self.msg.insert(0, data)
             if len(self.tcp_pointer) > 0:

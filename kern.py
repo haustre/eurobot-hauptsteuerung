@@ -18,7 +18,7 @@ def main():
             for line in data:
                 tcp_data.append(packer.unpack(line))
             tcp.write(tcp_data)
-            print(tcp_data)
+            #print(tcp_data)
         time.sleep(0.1)
 
 main()

@@ -30,15 +30,17 @@ s.bind((sys.argv[1],))
 packer = struct.Struct('ff')
 x = 0
 y = 0
+count = 0
 while True:
     x += random.randrange(-10, 10)
     y += random.randrange(-10, 10)
     try:
         data = packer.pack(x,y)
         s.send(build_can_frame(0x600, data))
-        print("sended")
+        print(count)
+        count += 1
     except socket.error:
         print('Error1 sending CAN frame')
-    time.sleep(0.01)
+    time.sleep(0.0005)
 
 

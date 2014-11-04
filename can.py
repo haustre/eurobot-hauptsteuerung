@@ -40,7 +40,7 @@ class Can(object):
         return data
 
     def connection(self, s):
-         while 1:
+        while 1:
             #send
             try:
                 data = self.recv_can(s)
@@ -69,7 +69,7 @@ class Queue(object):
         self.msg = []
         self.read_lock = threading.Lock()
         self.pointer = -1
-        self.buffersize = 20
+        self.buffersize = 5000
 
     def read(self):
         with self.read_lock:
