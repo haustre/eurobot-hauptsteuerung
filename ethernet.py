@@ -70,6 +70,8 @@ class Server(TcpConnection):
     def __init__(self):
         super().__init__()
         host = 'localhost'  #Test
+        #host = socket.gethostbyname(socket.gethostname())
+        print(host)
         port = 42233        #Test
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((host, port))
