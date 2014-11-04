@@ -32,7 +32,7 @@ class Can(object):
         pass
 
     def receive(self):
-        return self.queue_receive.read()
+        return self.queue_receive.read_all()
 
     def recv_can(self, s):
         frame, addr = s.recvfrom(16)
@@ -69,7 +69,7 @@ class Queue(object):
         self.msg = []
         self.read_lock = threading.Lock()
         self.pointer = -1
-        self.BUFFERSIZE = 20
+        self.buffersize = 20
 
     def read(self):
         with self.read_lock:
@@ -77,13 +77,19 @@ class Queue(object):
                 self.pointer -= 1
                 return self.msg[self.pointer + 1]
 
+    def read_all(self):
+        with self.read_lock:
+            if self.pointer >= 0:
+                self.pointer -= 1
+                return self.msg[0: self.pointer + 1]
+
     def write(self, data):
         with self.read_lock:
             self.msg.insert(0, data)
             self.pointer += 1
-            if self.pointer > self.BUFFERSIZE - 1:
-                self.pointer = self.BUFFERSIZE - 1
-            if len(self.msg) > self.BUFFERSIZE:
+            if self.pointer > self.buffersize - 1:
+                self.pointer = self.buffersize - 1
+            if len(self.msg) > self.buffersize:
                 self.msg.pop()
 
 if __name__ == '__main__':

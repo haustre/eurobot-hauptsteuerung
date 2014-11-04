@@ -62,7 +62,8 @@ class TcpConnection(object):
         return self.queue_receive.read()
 
     def write(self, data):
-        self.queue_send.write(data)
+        for line in data:
+            self.queue_send.write(line)
 
 
 class Server(TcpConnection):
@@ -132,14 +133,14 @@ class Queue(object):
                 pointer = self.tcp_pointer[pointer_nr]
                 if pointer >= 0:
                     self.tcp_pointer[pointer_nr] -= 1
-                    return self.msg[pointer]
+                    return self.msg[0: pointer]
                 else:
                     return None
             else:
                 if self.pointer >= 0:
                     pointer_now = self.pointer
                     self.pointer = 0
-                    return self.msg[0: pointer_now]
+                    return self.msg[pointer_now]
 
     def write(self, data):
         buffersize = 20
