@@ -29,7 +29,8 @@ class Table(QtGui.QTableWidget):
             self.setRowCount(row_count + 1)
             self.setItem(row_count, i, newitem)
             print(row_count)
-            if row_count > max_row_count:
-                self.removeRow(0)
-                row_count = self.rowCount()
-                self.setRowCount(row_count - 1)
+        if row_count > max_row_count:
+            print("remove")
+            self.removeRow(1)
+            row_count = self.rowCount()
+            self.setRowCount(row_count - 1)
