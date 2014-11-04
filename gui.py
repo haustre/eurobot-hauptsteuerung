@@ -38,9 +38,10 @@ class CanWindow(QtGui.QWidget):
         while True:
             data = tcp.read()
             if data:
-                current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
-                self.can_table.add_row([current_time, str(data[0][0]), str(data[0][1])])
-            time.sleep(0.01)
+                for line in data:
+                    current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
+                    self.can_table.add_row([current_time, str(line[0]), str(line[1])])
+            time.sleep(0.5)
 
 
 class EditHost(QtGui.QWidget):

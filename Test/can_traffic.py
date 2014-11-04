@@ -39,6 +39,6 @@ while True:
         print("sended")
     except socket.error:
         print('Error1 sending CAN frame')
-    time.sleep(0.5)
+    time.sleep(0.01)
 
 
