@@ -4,13 +4,14 @@ import socket
 import struct
 import threading
 import time
+import queue
 
 
 class Can(object):
     def __init__(self, can_id, can_mask, interface):
         self.can_frame_fmt = "=IB3x8s"
-        self.queue_receive = Queue()
-        self.queue_send = Queue()
+        self.queue_receive = queue.Queue()
+        self.queue_send = queue.Queue()
         self.s = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
         can_filter = struct.pack("=II", can_id, can_mask)
         self.s.setsockopt(socket.SOL_CAN_RAW, socket.CAN_RAW_FILTER, can_filter)
@@ -32,7 +33,12 @@ class Can(object):
         pass
 
     def receive(self):
-        return self.queue_receive.read()
+        try:
+            data = self.queue_receive.get_nowait()
+        except queue.Empty:
+            pass
+        else:
+            return data
 
     def recv_can(self, s):
         frame, addr = s.recvfrom(16)
@@ -58,33 +64,8 @@ class Can(object):
                 print("Server Fail2")
                 break
             else:
-                self.queue_receive.write(data)
+                self.queue_receive.put_nowait(data)     # Todo:überprüffen ob voll
 
-
-
-
-class Queue(object):
-
-    def __init__(self):
-        self.msg = []
-        self.read_lock = threading.Lock()
-        self.pointer = -1
-        self.BUFFERSIZE = 20
-
-    def read(self):
-        with self.read_lock:
-            if self.pointer >= 0:
-                self.pointer -= 1
-                return self.msg[self.pointer + 1]
-
-    def write(self, data):
-        with self.read_lock:
-            self.msg.insert(0, data)
-            self.pointer += 1
-            if self.pointer > self.BUFFERSIZE - 1:
-                self.pointer = self.BUFFERSIZE - 1
-            if len(self.msg) > self.BUFFERSIZE:
-                self.msg.pop()
 
 if __name__ == '__main__':
     can_id, can_mask = 0x600, 0x600
