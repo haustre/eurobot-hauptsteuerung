@@ -80,7 +80,7 @@ class Queue(object):
     def read_all(self):
         with self.read_lock:
             if self.pointer >= 0:
-                self.pointer -= 1
+                self.pointer = 0
                 return self.msg[0: self.pointer + 1]
 
     def write(self, data):

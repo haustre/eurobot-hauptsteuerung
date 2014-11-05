@@ -1,7 +1,7 @@
 __author__ = 'mw'
 
 from PyQt4 import QtGui
-
+import time
 
 class Table(QtGui.QTableWidget):
     def __init__(self, header):
@@ -28,3 +28,4 @@ class Table(QtGui.QTableWidget):
         for i in range(len(data)):
             newitem = QtGui.QTableWidgetItem(data[i])
             self.setItem(row_count-1, i, newitem)
+        print(row_count)
