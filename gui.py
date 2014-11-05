@@ -15,6 +15,7 @@ class CanWindow(QtGui.QWidget):
     def __init__(self):
         super().__init__()
         self.threads = []
+        self.connected = False
         header = ['Time', 'Source', 'Type', 'Value']
         self.can_table = Table(header)
         self.init_ui()
@@ -30,18 +31,23 @@ class CanWindow(QtGui.QWidget):
     def connect_host(self, host, port):
         print(host, port)
         t = threading.Thread(target=self.test, args=[host, port])
+        self.threads.append(t)
         t.setDaemon(1)
         t.start()
 
     def test(self, host, port):
         tcp = Client(host, int(port))
-        while True:
-            data = tcp.read()
-            if data:
-                current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
-                for line in data:
-                    self.can_table.add_row([current_time, str(line[0]), str(line[1])])
-            time.sleep(0.5)
+        if tcp.connected is True:
+            self.connected = True
+            while True:
+                data = tcp.read()
+                if data:
+                    current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
+                    for line in data:
+                        self.can_table.add_row([current_time, str(line[0]), str(line[1])])
+                time.sleep(0.5)
+        else:
+            return
 
 
 class EditHost(QtGui.QWidget):
@@ -64,11 +70,10 @@ class EditHost(QtGui.QWidget):
         self.setLayout(grid)
 
     def connect_host(self):
-        '''
-        Todo:
-        Input überprüfen
-        '''
-        self.parent.connect_host(self.host_line.text(), self.port_line.text())
+        if self.parent.connected is False:
+            self.parent.connect_host(self.host_line.text(), self.port_line.text())
+        else:
+            print("Already connected")
 
 
 

@@ -106,10 +106,16 @@ class Client(TcpConnection):
 
     def __init__(self, host, port):
         super().__init__()
-        self.s.connect((host, port))
-        t = threading.Thread(target=super().connection, args=[self.s])
-        t.setDaemon(1)
-        t.start()
+        self.connected = False
+        try:
+            self.s.connect((host, port))
+            self.connected = True
+        except socket.gaierror:
+            print("Name or service not known")
+        else:
+            t = threading.Thread(target=super().connection, args=[self.s])
+            t.setDaemon(1)
+            t.start()
 
 
 class Queue(object):
