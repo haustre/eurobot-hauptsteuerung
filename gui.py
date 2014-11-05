@@ -4,12 +4,11 @@ import time
 import sys
 
 from PyQt4 import QtGui
-from PyQt4 import QtCore
-
 from gui.qt_table import Table
 from ethernet import Client
 import threading
 import datetime
+
 
 class CanWindow(QtGui.QWidget):
     def __init__(self):
@@ -74,7 +73,6 @@ class EditHost(QtGui.QWidget):
             self.parent.connect_host(self.host_line.text(), self.port_line.text())
         else:
             print("Already connected")
-
 
 
 def main(args):

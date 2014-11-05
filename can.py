@@ -61,8 +61,6 @@ class Can(object):
                 self.queue_receive.write(data)
 
 
-
-
 class Queue(object):
 
     def __init__(self):
