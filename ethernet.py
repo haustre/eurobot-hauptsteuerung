@@ -12,7 +12,6 @@ class TcpConnection(object):
         self.queue_send = Queue()
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-
     def recv_json(self, s):
         data = ''
         size = s.recv(8).decode('UTF-8')
@@ -70,8 +69,9 @@ class Server(TcpConnection):
 
     def __init__(self):
         super().__init__()
-        host = 'localhost'  #Test
+        host = ''
         port = 42233        #Test
+        print(host, port)
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((host, port))
         self.s.listen(3)
