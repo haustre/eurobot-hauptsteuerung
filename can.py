@@ -40,6 +40,17 @@ class Can(object):
         else:
             return data
 
+    def receive_all(self):
+        data = []
+        while True:
+            try:
+                line = self.queue_receive.get_nowait()
+                data.append(line)
+            except queue.Empty:
+                break
+        return data
+
+
     def recv_can(self, s):
         frame, addr = s.recvfrom(16)
         can_id, data = self.dissect_can_frame(frame)

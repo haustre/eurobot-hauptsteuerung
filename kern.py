@@ -12,7 +12,7 @@ def main():
     s_debug = Can(can_id, can_mask, 'vcan0')
     tcp = Server()
     while True:
-        data = s_debug.receive()
+        data = s_debug.receive_all()
         if data:
             tcp_data = []
             for line in data:
