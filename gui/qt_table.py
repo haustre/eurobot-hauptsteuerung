@@ -9,6 +9,7 @@ class Table(QtGui.QTableWidget):
         self.header = header
         self.setHorizontalHeaderLabels(header)
         self.verticalHeader().setVisible(False)
+        self.autoScroll = True
         #self.resizeColumnsToContents()
         #self.resizeRowsToContents()
 
@@ -20,8 +21,9 @@ class Table(QtGui.QTableWidget):
         for i in range(len(data)):
             newitem = QtGui.QTableWidgetItem(data[i])
             self.setItem(row_count - 2, i, newitem)
-        slide_bar = self.verticalScrollBar()
-        slide_bar.setValue(slide_bar.maximum())
+        if self.autoScroll is True:
+            slide_bar = self.verticalScrollBar()
+            slide_bar.setValue(slide_bar.maximum())
         self.showColumn(row_count)
         print(row_count)
 
