@@ -53,7 +53,8 @@ class TcpConnection(object):
                 print("Server Fail2")
                 break
             else:
-                self.queue_receive.write(data)
+                #print("recv:  " + str(data))
+                self.queue_receive.write_all(data)
 
         s.close()
 
@@ -139,17 +140,19 @@ class Queue(object):
                 pointer = self.tcp_pointer[pointer_nr]
                 if pointer >= 0:
                     self.tcp_pointer[pointer_nr] -= 1
-                    return self.msg[0: pointer]
+                    self.tcp_pointer[pointer_nr] = -1
+                    return self.msg[0: pointer+1]
                 else:
                     return None
             else:
-                if self.pointer >= 0:
-                    pointer_now = self.pointer
-                    self.pointer = 0
-                    return self.msg[pointer_now]
+                pointer = self.pointer
+                if pointer >= 0:
+                    self.pointer = -1
+                    return self.msg[0: pointer+1]
 
     def write(self, data):
-        buffersize = 2000
+        print("msg: " + str(self.msg))
+        buffersize = 5
         with self.read_lock:
             self.msg.insert(0, data)
             if len(self.tcp_pointer) > 0:
@@ -157,12 +160,16 @@ class Queue(object):
                     self.tcp_pointer[i] += 1
                     if self.tcp_pointer[i] > buffersize - 1:
                         self.tcp_pointer[i] = buffersize - 1
-            if True:
+            else:
                 self.pointer += 1
                 if self.pointer > buffersize - 1:
                     self.pointer = buffersize - 1
             if len(self.msg) > buffersize:
                 self.msg.pop()
+
+    def write_all(self, data):
+        for line in data:
+            self.write(line)
 
 if __name__ == '__main__':
     tcp = Server()
