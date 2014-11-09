@@ -20,7 +20,7 @@ class Table(QtGui.QTableWidget):
         for i in range(len(data)):
             newitem = QtGui.QTableWidgetItem(data[i])
             self.setItem(row_count-1, i, newitem)
-        #self.scrollToItem(newitem, QtGui.QAbstractItemView.PositionAtCenter)
-        #self.selectRow(row_count-1)
+        self.scrollToItem(newitem, QtGui.QAbstractItemView.PositionAtCenter)
+        self.selectRow(row_count-1)
         self.showColumn(row_count)
         print(row_count)
