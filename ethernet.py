@@ -139,7 +139,6 @@ class Queue(object):
             if pointer_nr is not None:
                 pointer = self.tcp_pointer[pointer_nr]
                 if pointer >= 0:
-                    self.tcp_pointer[pointer_nr] -= 1
                     self.tcp_pointer[pointer_nr] = -1
                     return self.msg[0: pointer+1]
                 else:
