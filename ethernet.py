@@ -151,7 +151,7 @@ class Queue(object):
                     return self.msg[0: pointer+1]
 
     def write(self, data):
-        print("msg: " + str(self.msg))
+        #print("msg: " + str(self.msg))
         buffersize = 5
         with self.read_lock:
             self.msg.insert(0, data)
