@@ -23,6 +23,6 @@ def main():
                 tcp_data.append(packer.unpack(line))
             tcp.write(tcp_data)
             #print(tcp_data)
-        time.sleep(0.1)
+        time.sleep(0.01)
 
 main()

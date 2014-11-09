@@ -44,6 +44,6 @@ while True:
         count += 1
     except socket.error:
         print('Error1 sending CAN frame')
-    time.sleep(1)
+    time.sleep(1/1000)
 
 
