@@ -16,8 +16,8 @@ class Table(QtGui.QTableWidget):
     def add_row(self, data):
         row_count = self.rowCount()
         row_count += 1
-        self.setRowCount(row_count)
         self.hideRow(row_count - 1)
+        self.setRowCount(row_count)
         for i in range(len(data)):
             newitem = QtGui.QTableWidgetItem(data[i])
             self.setItem(row_count - 2, i, newitem)
