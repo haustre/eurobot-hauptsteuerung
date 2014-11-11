@@ -23,4 +23,4 @@ class Table(QtGui.QTableWidget):
         self.scrollToItem(newitem, QtGui.QAbstractItemView.PositionAtCenter)
         self.selectRow(row_count-1)
         self.showColumn(row_count)
-        print(row_count)
+        #print(row_count)
