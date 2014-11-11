@@ -128,7 +128,7 @@ class Queue(object):
         self.tcp_pointer = []
 
     def add_pointer(self):
-        pointer = len(self.msg) - 1
+        pointer = -1
         with self.read_lock:
             self.tcp_pointer.append(pointer)
             pointer_nr = len(self.tcp_pointer) - 1
