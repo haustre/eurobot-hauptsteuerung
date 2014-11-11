@@ -33,19 +33,15 @@ class CanWindow(QtGui.QWidget):
         #self.threads.append(t)
         #t.setDaemon(1)
         #t.start()
-        thread = test(host, port)
-        self.connect(thread, QtCore.SIGNAL('testsignal'), self.test)
+        thread = test(self, host, port)
         self.threads.append(thread)
         thread.start()
 
-    def test(self, data):
-        for line in data:
-            self.can_table.add_row([str(line[0]), str(line[1])])
-
 
 class test(QtCore.QThread):
-    def __init__(self, host, port):
+    def __init__(self, parent, host, port):
         QtCore.QThread.__init__(self)
+        self.parent = parent
         self.host = host
         self.port = port
         self.connected = False
@@ -58,10 +54,8 @@ class test(QtCore.QThread):
                 data = tcp.read()
                 if data:
                     current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
-                    #for line in data:
-                        #self.parent.can_table.add_row([current_time, str(line[0]), str(line[1])])
-                        #self.emit(QtCore.SIGNAL('testsignal'), line)
-                    self.emit(QtCore.SIGNAL('testsignal'), data)
+                    for line in data:
+                        self.parent.can_table.add_row([current_time, str(line[0]), str(line[1])])
                 time.sleep(0.5)
         else:
             return
