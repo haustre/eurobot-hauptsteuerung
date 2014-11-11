@@ -4,12 +4,15 @@ import socket
 import threading
 import json
 import time
+import queue
 
 
 class TcpConnection(object):
     def __init__(self):
-        self.queue_receive = Queue()
-        self.queue_send = Queue()
+        self.queue_size = 1000
+        self.queue_receive = queue.Queue(self.queue_size)
+        #self.queue_send = Queue()
+        self.queues_send = []
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def recv_json(self, s):
@@ -32,9 +35,17 @@ class TcpConnection(object):
             sent += s.send(data_send[sent:])
 
     def connection(self, s):
-        pointer_nr = self.queue_send.add_pointer()
+        #pointer_nr = self.queue_send.add_pointer()
+        queue_send = queue.Queue(self.queue_size)
+        connection_nr = len(self.queues_send)
+        self.queues_send.append(queue_send)
+
         while 1:
-            send = self.queue_send.read(pointer_nr=pointer_nr)
+            queue_send = self.queues_send[connection_nr]
+            try:
+                send = queue_send.get_nowait()
+            except queue.Empty:
+                send = None
             if send:
                 self.send_json(s, send)
             try:
@@ -53,17 +64,25 @@ class TcpConnection(object):
                 print("Server Fail2")
                 break
             else:
-                #print("recv:  " + str(data))
-                self.queue_receive.write_all(data)
+                #self.queue_receive.write_all(data)
+                for line in data:
+                    self.queue_receive.put_nowait(line)
 
         s.close()
 
     def read(self):
-        return self.queue_receive.read()
+        data = []
+        while 1:
+            try:
+                line = self.queue_receive.get_nowait()
+            except queue.Empty:
+                break
+            data.append(line)
+        return data
 
     def write(self, data):
-        for line in data:
-            self.queue_send.write(line)
+        for queue in self.queues_send:
+            queue.put_nowait(data)
 
 
 class Server(TcpConnection):
