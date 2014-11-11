@@ -139,7 +139,6 @@ class Queue(object):
             if pointer_nr is not None:
                 pointer = self.tcp_pointer[pointer_nr]
                 if pointer >= 0:
-                    self.tcp_pointer[pointer_nr] -= 1
                     self.tcp_pointer[pointer_nr] = -1
                     return self.msg[0: pointer+1]
                 else:
@@ -152,7 +151,7 @@ class Queue(object):
 
     def write(self, data):
         #print("msg: " + str(self.msg))
-        buffersize = 5
+        buffersize = 1000
         with self.read_lock:
             self.msg.insert(0, data)
             if len(self.tcp_pointer) > 0:
