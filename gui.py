@@ -40,6 +40,7 @@ class CanWindow(QtGui.QWidget):
             self.connected = True
             while True:
                 data = tcp.read()
+                print(data)
                 if data:
                     current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
                     for line in data:

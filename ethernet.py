@@ -148,12 +148,14 @@ class Queue(object):
                 if pointer >= 0:
                     self.pointer = -1
                     return self.msg[0: pointer+1]
+                    #return self.msg[pointer::-1]
 
     def write(self, data):
         #print("msg: " + str(self.msg))
         buffersize = 1000
         with self.read_lock:
             self.msg.insert(0, data)
+            print(self.msg)
             if len(self.tcp_pointer) > 0:
                 for i in range(len(self.tcp_pointer)):
                     self.tcp_pointer[i] += 1
