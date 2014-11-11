@@ -41,8 +41,9 @@ class CanWindow(QtGui.QWidget):
         thread.start()
 
     def test(self, data):
+        current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
         for line in data:
-            self.can_table.add_row([str(line[0]), str(line[1])])
+            self.can_table.add_row([current_time, str(line[0]), str(line[1])])
 
 
 class test(QtCore.QThread):
