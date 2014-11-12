@@ -47,11 +47,9 @@ class TcpConnection(object):
                 try:
                     line = queue_send.get_nowait()
                     send.append(line)
-                    print(line)
                 except queue.Empty:
                     break
             if send:
-                print(send)
                 self.send_json(s, send)
             try:
                 data = self.recv_json(s)
@@ -59,7 +57,7 @@ class TcpConnection(object):
                 continue
             except socket.error:
                 print("Server shutdown")
-                return
+                break
             except:  # some error or connection reset by peer
                 #clientExit(s, str(peer))
                 print("Server Fail1")
@@ -74,6 +72,7 @@ class TcpConnection(object):
                     self.queue_receive.put_nowait(line)
 
         s.close()
+        self.queues_send.pop(connection_nr)
 
     def read(self):
         data = []
@@ -83,7 +82,6 @@ class TcpConnection(object):
             except queue.Empty:
                 break
             data.append(line)
-        print(data)
         return data
 
     def write(self, data):
