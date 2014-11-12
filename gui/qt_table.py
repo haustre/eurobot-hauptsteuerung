@@ -14,6 +14,7 @@ class Table(QtGui.QTableWidget):
         #self.resizeRowsToContents()
 
     def add_row(self, data):
+        max_row_count = 10000
         row_count = self.rowCount()
         row_count += 1
         self.hideRow(row_count - 1)
@@ -21,6 +22,8 @@ class Table(QtGui.QTableWidget):
         for i in range(len(data)):
             newitem = QtGui.QTableWidgetItem(data[i])
             self.setItem(row_count - 2, i, newitem)
+        if row_count > max_row_count:
+            self.removeRow(0)
         if self.autoScroll is True:
             slide_bar = self.verticalScrollBar()
             slide_bar.setValue(slide_bar.maximum())
