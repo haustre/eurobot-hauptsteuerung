@@ -3,10 +3,12 @@ __author__ = 'mw'
 import time
 import sys
 
+from PyQt4 import QtGui, QtCore
+from gui.qt_table import Table
 from PyQt4 import QtGui
 import gui.qt_table
 from ethernet import Client
-import threading
+#import threading
 import datetime
 
 
@@ -29,13 +31,30 @@ class CanWindow(QtGui.QWidget):
 
     def connect_host(self, host, port):
         print(host, port)
-        t = threading.Thread(target=self.test, args=[host, port])
-        self.threads.append(t)
-        t.setDaemon(1)
-        t.start()
+        #t = threading.Thread(target=self.test, args=[host, port])
+        #self.threads.append(t)
+        #t.setDaemon(1)
+        #t.start()
+        thread = test(host, port)
+        self.connect(thread, QtCore.SIGNAL('testsignal'), self.test)
+        self.threads.append(thread)
+        thread.start()
 
-    def test(self, host, port):
-        tcp = Client(host, int(port))
+    def test(self, data):
+        current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
+        for line in data:
+            self.can_table.add_row([current_time, str(line[0]), str(line[1])])
+
+
+class test(QtCore.QThread):
+    def __init__(self, host, port):
+        QtCore.QThread.__init__(self)
+        self.host = host
+        self.port = port
+        self.connected = False
+
+    def run(self):
+        tcp = Client(self.host, int(self.port))
         if tcp.connected is True:
             self.connected = True
             while True:
@@ -43,8 +62,10 @@ class CanWindow(QtGui.QWidget):
                 print(data)
                 if data:
                     current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
-                    for line in data:
-                        self.can_table.add_row([current_time, str(line[0]), str(line[1])])
+                    #for line in data:
+                        #self.parent.can_table.add_row([current_time, str(line[0]), str(line[1])])
+                        #self.emit(QtCore.SIGNAL('testsignal'), line)
+                    self.emit(QtCore.SIGNAL('testsignal'), data)
                 time.sleep(0.5)
         else:
             return
