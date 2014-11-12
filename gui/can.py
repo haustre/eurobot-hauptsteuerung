@@ -1,7 +1,6 @@
 __author__ = 'mw'
 
 from PyQt4 import QtGui, QtCore
-import time
 
 import ethernet
 
@@ -58,17 +57,12 @@ class Test(QtCore.QThread):
         QtCore.QThread.__init__(self)
         self.host = host
         self.port = port
-        self.connected = False
 
     def run(self):
         tcp = ethernet.Client(self.host, int(self.port))
-        if tcp.connected is True:
-            self.connected = True
-            while True:
-                data = tcp.read_block()
-                self.emit(QtCore.SIGNAL('testsignal'), data)
-                if tcp.connected is False:
-                    self.connected = False
-                    break
-        else:
-            return
+        while True:
+            data = tcp.read_block()
+            if tcp.connected is False:
+                break
+            self.emit(QtCore.SIGNAL('tcp_data'), data)
+        self.emit(QtCore.SIGNAL('tcp connection lost'))

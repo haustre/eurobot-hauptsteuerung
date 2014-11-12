@@ -28,15 +28,20 @@ class CanWindow(QtGui.QWidget):
 
     def connect_host(self):
         if self.connected is False:
+            self.connected = True
             host = self.edit_host.host_line.text()
             port = self.edit_host.port_line.text()
             print(host, port)
             thread = gui.can.Test(host, port)
-            self.connect(thread, QtCore.SIGNAL('testsignal'), self.test)
+            self.connect(thread, QtCore.SIGNAL('tcp_data'), self.test)
+            self.connect(thread, QtCore.SIGNAL('tcp connection lost'), self.lost_connection)
             self.threads.append(thread)
             thread.start()
         else:
             print("Already connected")
+
+    def lost_connection(self):
+        self.connected = False
 
     def test(self, data):
         current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]

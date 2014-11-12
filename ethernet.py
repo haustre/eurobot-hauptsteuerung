@@ -71,10 +71,10 @@ class TcpConnection(object):
                 #self.queue_receive.write_all(data)
                 for line in data:
                     self.queue_receive.put_nowait(line)
-
         s.close()
         self.queues_send.pop(connection_nr)
         self.connected = False
+        self.queue_receive.put_nowait("Connection lost")
 
     def read_no_block(self):
         data = []
