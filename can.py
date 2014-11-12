@@ -50,7 +50,6 @@ class Can(object):
                 break
         return data
 
-
     def recv_can(self, s):
         frame, addr = s.recvfrom(16)
         can_id, data = self.dissect_can_frame(frame)
