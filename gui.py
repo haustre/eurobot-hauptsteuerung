@@ -29,6 +29,7 @@ class CanWindow(QtGui.QWidget):
     def connect_host(self):
         if self.connected is False:
             self.connected = True
+            self.edit_host.host_button.setEnabled(False)
             host = self.edit_host.host_line.text()
             port = self.edit_host.port_line.text()
             print(host, port)
@@ -42,6 +43,7 @@ class CanWindow(QtGui.QWidget):
 
     def lost_connection(self):
         self.connected = False
+        self.edit_host.host_button.setEnabled(True)
 
     def test(self, data):
         current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]

@@ -59,7 +59,7 @@ class TcpConnection(object):
             except:  # some error or connection reset by peer
                 print("Server Fail1")
                 break
-            if not len(data): # a disconnect (socket.close() by client)
+            if not len(data):  # a disconnect (socket.close() by client)
                 print("Server Fail2")
                 break
             else:
@@ -145,16 +145,3 @@ class Client(TcpConnection):
         super().connection(s)
         self.connected = False
         self.queue_receive.put_nowait("Connection lost")
-
-
-if __name__ == '__main__':
-    tcp = Server()
-    count = 0
-    while 1:
-        data = tcp.read()
-        if data:
-            print(data)
-            pass
-        tcp.write("Test:" + str(count))
-        count += 1
-        time.sleep(1)
