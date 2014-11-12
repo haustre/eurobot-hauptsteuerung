@@ -9,10 +9,8 @@ import queue
 
 class TcpConnection(object):
     def __init__(self):
-        self.connected = False
         self.queue_size = 1000
         self.queue_receive = queue.Queue(self.queue_size)
-        #self.queue_send = Queue()
         self.queues_send = []
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -36,7 +34,6 @@ class TcpConnection(object):
             sent += s.send(data_send[sent:])
 
     def connection(self, s):
-        #pointer_nr = self.queue_send.add_pointer()
         queue_send = queue.Queue(self.queue_size)
         connection_nr = len(self.queues_send)
         self.queues_send.append(queue_send)
@@ -60,21 +57,16 @@ class TcpConnection(object):
                 print("Server shutdown")
                 break
             except:  # some error or connection reset by peer
-                #clientExit(s, str(peer))
                 print("Server Fail1")
                 break
             if not len(data): # a disconnect (socket.close() by client)
-                #clientExit(s, str(peer))
                 print("Server Fail2")
                 break
             else:
-                #self.queue_receive.write_all(data)
                 for line in data:
                     self.queue_receive.put_nowait(line)
         s.close()
         self.queues_send.pop(connection_nr)
-        self.connected = False
-        self.queue_receive.put_nowait("Connection lost")
 
     def read_no_block(self):
         data = []
@@ -138,15 +130,21 @@ class Client(TcpConnection):
 
     def __init__(self, host, port):
         super().__init__()
+        self.connected = False
         try:
             self.s.connect((host, port))
             self.connected = True
         except socket.gaierror:
             print("Name or service not known")
         else:
-            t = threading.Thread(target=super().connection, args=[self.s])
+            t = threading.Thread(target=self.connection, args=[self.s])
             t.setDaemon(1)
             t.start()
+
+    def connection(self, s):
+        super().connection(s)
+        self.connected = False
+        self.queue_receive.put_nowait("Connection lost")
 
 
 if __name__ == '__main__':
