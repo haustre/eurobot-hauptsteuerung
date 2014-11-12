@@ -63,9 +63,11 @@ class test(QtCore.QThread):
                 if data:
                     current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
                     #for line in data:
-                        #self.parent.can_table.add_row([current_time, str(line[0]), str(line[1])])
-                        #self.emit(QtCore.SIGNAL('testsignal'), line)
+                    #    self.can_table.add_row([current_time, str(line[0]), str(line[1])])
                     self.emit(QtCore.SIGNAL('testsignal'), data)
+                if tcp.connected is False:
+                    self.connected = False
+                    break
                 time.sleep(0.5)
         else:
             return

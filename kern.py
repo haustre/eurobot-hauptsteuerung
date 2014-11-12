@@ -20,8 +20,9 @@ def main():
         if data:
             tcp_data = []
             for line in data:
-                tcp_data.append(packer.unpack(line))
-            tcp.write(tcp_data)
+                #tcp_data.append(packer.unpack(line))
+                tcp.write(packer.unpack(line))
+            #tcp.write(tcp_data)
             #print(tcp_data)
         time.sleep(0.01)
 

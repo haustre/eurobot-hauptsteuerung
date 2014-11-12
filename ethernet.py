@@ -4,12 +4,16 @@ import socket
 import threading
 import json
 import time
+import queue
 
 
 class TcpConnection(object):
     def __init__(self):
-        self.queue_receive = Queue()
-        self.queue_send = Queue()
+        self.connected = False
+        self.queue_size = 1000
+        self.queue_receive = queue.Queue(self.queue_size)
+        #self.queue_send = Queue()
+        self.queues_send = []
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def recv_json(self, s):
@@ -32,9 +36,20 @@ class TcpConnection(object):
             sent += s.send(data_send[sent:])
 
     def connection(self, s):
-        pointer_nr = self.queue_send.add_pointer()
+        #pointer_nr = self.queue_send.add_pointer()
+        queue_send = queue.Queue(self.queue_size)
+        connection_nr = len(self.queues_send)
+        self.queues_send.append(queue_send)
+
         while 1:
-            send = self.queue_send.read(pointer_nr=pointer_nr)
+            queue_send = self.queues_send[connection_nr]
+            send = []
+            while 1:
+                try:
+                    line = queue_send.get_nowait()
+                    send.append(line)
+                except queue.Empty:
+                    break
             if send:
                 self.send_json(s, send)
             try:
@@ -43,7 +58,7 @@ class TcpConnection(object):
                 continue
             except socket.error:
                 print("Server shutdown")
-                return
+                break
             except:  # some error or connection reset by peer
                 #clientExit(s, str(peer))
                 print("Server Fail1")
@@ -53,17 +68,30 @@ class TcpConnection(object):
                 print("Server Fail2")
                 break
             else:
-                #print("recv:  " + str(data))
-                self.queue_receive.write_all(data)
+                #self.queue_receive.write_all(data)
+                for line in data:
+                    self.queue_receive.put_nowait(line)
 
         s.close()
+        self.queues_send.pop(connection_nr)
+        self.connected = False
 
     def read(self):
-        return self.queue_receive.read()
+        data = []
+        while 1:
+            try:
+                line = self.queue_receive.get_nowait()
+            except queue.Empty:
+                break
+            data.append(line)
+        return data
 
     def write(self, data):
-        for line in data:
-            self.queue_send.write(line)
+        for send_queue in self.queues_send:
+            try:
+                send_queue.put_nowait(data)
+            except queue.Full:
+                print("Tcp send Queue full!!")
 
 
 class Server(TcpConnection):
@@ -107,7 +135,6 @@ class Client(TcpConnection):
 
     def __init__(self, host, port):
         super().__init__()
-        self.connected = False
         try:
             self.s.connect((host, port))
             self.connected = True
@@ -119,58 +146,6 @@ class Client(TcpConnection):
             t.start()
 
 
-class Queue(object):
-
-    def __init__(self):
-        self.msg = []
-        self.read_lock = threading.Lock()
-        self.pointer = -1
-        self.tcp_pointer = []
-
-    def add_pointer(self):
-        pointer = -1
-        with self.read_lock:
-            self.tcp_pointer.append(pointer)
-            pointer_nr = len(self.tcp_pointer) - 1
-            return pointer_nr
-
-    def read(self, pointer_nr=None):
-        with self.read_lock:
-            if pointer_nr is not None:
-                pointer = self.tcp_pointer[pointer_nr]
-                if pointer >= 0:
-                    self.tcp_pointer[pointer_nr] = -1
-                    return self.msg[0: pointer+1]
-                else:
-                    return None
-            else:
-                pointer = self.pointer
-                if pointer >= 0:
-                    self.pointer = -1
-                    return self.msg[0: pointer+1]
-                    #return self.msg[pointer::-1]
-
-    def write(self, data):
-        #print("msg: " + str(self.msg))
-        buffersize = 1000
-        with self.read_lock:
-            self.msg.insert(0, data)
-            print(self.msg)
-            if len(self.tcp_pointer) > 0:
-                for i in range(len(self.tcp_pointer)):
-                    self.tcp_pointer[i] += 1
-                    if self.tcp_pointer[i] > buffersize - 1:
-                        self.tcp_pointer[i] = buffersize - 1
-            else:
-                self.pointer += 1
-                if self.pointer > buffersize - 1:
-                    self.pointer = buffersize - 1
-            if len(self.msg) > buffersize:
-                self.msg.pop()
-
-    def write_all(self, data):
-        for line in data:
-            self.write(line)
 
 if __name__ == '__main__':
     tcp = Server()
