@@ -65,12 +65,10 @@ class Test(QtCore.QThread):
         if tcp.connected is True:
             self.connected = True
             while True:
-                data = tcp.read()
-                if data:
-                    self.emit(QtCore.SIGNAL('testsignal'), data)
+                data = tcp.read_block()
+                self.emit(QtCore.SIGNAL('testsignal'), data)
                 if tcp.connected is False:
                     self.connected = False
                     break
-                time.sleep(0.5)
         else:
             return

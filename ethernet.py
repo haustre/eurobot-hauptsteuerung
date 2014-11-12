@@ -76,7 +76,7 @@ class TcpConnection(object):
         self.queues_send.pop(connection_nr)
         self.connected = False
 
-    def read(self):
+    def read_no_block(self):
         data = []
         while 1:
             try:
@@ -85,6 +85,9 @@ class TcpConnection(object):
                 break
             data.append(line)
         return data
+
+    def read_block(self):
+        return self.queue_receive.get()
 
     def write(self, data):
         for send_queue in self.queues_send:
