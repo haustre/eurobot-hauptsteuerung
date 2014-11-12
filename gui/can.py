@@ -34,9 +34,8 @@ class Table(QtGui.QTableWidget):
 
 
 class EditHost(QtGui.QWidget):
-    def __init__(self, parent):
+    def __init__(self):
         super().__init__()
-        self.parent = parent
         host_label = QtGui.QLabel('Host:')
         self.host_line = QtGui.QLineEdit('localhost')
         port_label = QtGui.QLabel('Port:')
@@ -66,3 +65,20 @@ class TcpConnection(QtCore.QThread):
                 break
             self.emit(QtCore.SIGNAL('tcp_data'), data)
         self.emit(QtCore.SIGNAL('tcp connection lost'))
+
+
+class SendCan(QtGui.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.msg_type_label = QtGui.QLabel('Message Type:')
+        self.msg_label = QtGui.QLabel('Message:')
+        self.msg_line_label = QtGui.QLineEdit('123456')
+        self.msg_type_combo = QtGui.QComboBox()
+        msg_types = ["Game_end", "Position", "Close_range_dedection", "Goto_position"]
+        self.msg_type_combo.addItems(msg_types)
+
+        grid = QtGui.QGridLayout()
+        grid.addWidget(self.msg_type_label, 0, 0)
+        grid.addWidget(self.msg_type_combo, 0, 1)
+
+        self.setLayout(grid)

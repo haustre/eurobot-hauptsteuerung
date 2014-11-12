@@ -16,13 +16,15 @@ class CanWindow(QtGui.QWidget):
         self.connected = False
         header = ['Time', 'Source', 'Type', 'Value']
         self.can_table = gui.can.Table(header)
-        self.edit_host = gui.can.EditHost(self)
+        self.edit_host = gui.can.EditHost()
+        self.send_can = gui.can.SendCan()
         self.init_ui()
 
     def init_ui(self):
         self.edit_host.host_button.clicked.connect(self.connect_host)
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.can_table)
+        vbox.addWidget(self.send_can)
         vbox.addWidget(self.edit_host)
         self.setLayout(vbox)
 
