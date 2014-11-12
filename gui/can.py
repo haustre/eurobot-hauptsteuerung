@@ -43,7 +43,6 @@ class EditHost(QtGui.QWidget):
         port_label = QtGui.QLabel('Port:')
         self.port_line = QtGui.QLineEdit('42233')
         self.host_button = QtGui.QPushButton('Connect')
-        #host_button.clicked.connect(self.connect_host)
 
         grid = QtGui.QGridLayout()
         grid.addWidget(host_label, 0, 0)
@@ -52,12 +51,6 @@ class EditHost(QtGui.QWidget):
         grid.addWidget(self.port_line, 1, 1)
         grid.addWidget(self.host_button, 1, 2)
         self.setLayout(grid)
-
-    def connect_host(self):
-        if self.parent.connected is False:
-            self.parent.connect_host(self.host_line.text(), self.port_line.text())
-        else:
-            print("Already connected")
 
 
 class Test(QtCore.QThread):
