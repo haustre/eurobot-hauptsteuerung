@@ -33,8 +33,8 @@ class CanWindow(QtGui.QWidget):
             host = self.edit_host.host_line.text()
             port = self.edit_host.port_line.text()
             print(host, port)
-            thread = gui.can.Test(host, port)
-            self.connect(thread, QtCore.SIGNAL('tcp_data'), self.test)
+            thread = gui.can.TcpConnection(host, port)
+            self.connect(thread, QtCore.SIGNAL('tcp_data'), self.new_tcp_data)
             self.connect(thread, QtCore.SIGNAL('tcp connection lost'), self.lost_connection)
             self.threads.append(thread)
             thread.start()
@@ -45,7 +45,7 @@ class CanWindow(QtGui.QWidget):
         self.connected = False
         self.edit_host.host_button.setEnabled(True)
 
-    def test(self, data):
+    def new_tcp_data(self, data):
         current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
         self.can_table.add_row([current_time, str(data[0]), str(data[1])])
 

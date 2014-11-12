@@ -52,7 +52,7 @@ class EditHost(QtGui.QWidget):
         self.setLayout(grid)
 
 
-class Test(QtCore.QThread):
+class TcpConnection(QtCore.QThread):
     def __init__(self, host, port):
         QtCore.QThread.__init__(self)
         self.host = host
