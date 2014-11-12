@@ -42,15 +42,15 @@ class EditHost(QtGui.QWidget):
         self.host_line = QtGui.QLineEdit('localhost')
         port_label = QtGui.QLabel('Port:')
         self.port_line = QtGui.QLineEdit('42233')
-        host_button = QtGui.QPushButton('Connect')
-        host_button.clicked.connect(self.connect_host)
+        self.host_button = QtGui.QPushButton('Connect')
+        #host_button.clicked.connect(self.connect_host)
 
         grid = QtGui.QGridLayout()
         grid.addWidget(host_label, 0, 0)
         grid.addWidget(self.host_line, 0, 1)
         grid.addWidget(port_label, 1, 0)
         grid.addWidget(self.port_line, 1, 1)
-        grid.addWidget(host_button, 1, 2)
+        grid.addWidget(self.host_button, 1, 2)
         self.setLayout(grid)
 
     def connect_host(self):
