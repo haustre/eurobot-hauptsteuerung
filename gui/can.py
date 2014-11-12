@@ -1,6 +1,9 @@
 __author__ = 'mw'
 
 from PyQt4 import QtGui, QtCore
+import time
+
+import ethernet
 
 
 class Table(QtGui.QTableWidget):
@@ -55,3 +58,26 @@ class EditHost(QtGui.QWidget):
             self.parent.connect_host(self.host_line.text(), self.port_line.text())
         else:
             print("Already connected")
+
+
+class Test(QtCore.QThread):
+    def __init__(self, host, port):
+        QtCore.QThread.__init__(self)
+        self.host = host
+        self.port = port
+        self.connected = False
+
+    def run(self):
+        tcp = ethernet.Client(self.host, int(self.port))
+        if tcp.connected is True:
+            self.connected = True
+            while True:
+                data = tcp.read()
+                if data:
+                    self.emit(QtCore.SIGNAL('testsignal'), data)
+                if tcp.connected is False:
+                    self.connected = False
+                    break
+                time.sleep(0.5)
+        else:
+            return
