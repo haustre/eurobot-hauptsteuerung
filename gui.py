@@ -45,6 +45,9 @@ class CanWindow(QtGui.QWidget):
                     current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
                     for line in data:
                         self.can_table.add_row([current_time, str(line[0]), str(line[1])])
+                if tcp.connected is False:
+                    self.connected = False
+                    break
                 time.sleep(0.5)
         else:
             return

@@ -9,6 +9,7 @@ import queue
 
 class TcpConnection(object):
     def __init__(self):
+        self.connected = False
         self.queue_size = 1000
         self.queue_receive = queue.Queue(self.queue_size)
         #self.queue_send = Queue()
@@ -73,6 +74,7 @@ class TcpConnection(object):
 
         s.close()
         self.queues_send.pop(connection_nr)
+        self.connected = False
 
     def read(self):
         data = []
@@ -133,7 +135,6 @@ class Client(TcpConnection):
 
     def __init__(self, host, port):
         super().__init__()
-        self.connected = False
         try:
             self.s.connect((host, port))
             self.connected = True
