@@ -77,6 +77,15 @@ class Can(object):
                 self.queue_receive.put_nowait(data)     # Todo:überprüffen ob voll
 
 
+class CanPacker(object):
+    def __init__(self):
+        #types =
+        pass
+    
+    def unpack(self, address, data):
+        pass
+        #packer.unpack(data)
+
 if __name__ == '__main__':
     can_id, can_mask = 0x600, 0x600
     s = Can(can_id, can_mask, 'vcan0')
