@@ -44,8 +44,8 @@ class Can(object):
 
     def recv_connection(self):
         while 1:
-                data = self.recv_can()
-                self.queue_debugg.put_nowait(data)     # Todo:überprüffen ob voll
+                id, data = self.recv_can()
+                self.queue_debugg.put_nowait((id, data))     # Todo:überprüffen ob voll
 
     def send_connection(self):
         while 1:
@@ -58,11 +58,43 @@ class Can(object):
 
 class _CanPacker(object):
     def __init__(self):
-        types = ["",            # Emergency Shutdown
-                 "",            # Emergency Stop
-                 "Game_end"]    # Game End
-        pass
-    
+        self.types = \
+            ["Emergency Shutdown",
+             "Emergency Stop",
+             "Game End",
+             "Current Position Robot 1",
+             "Current Position Robot 2",
+             "Current Position Enemy 1",
+             "Current Position Enemy 2",
+             "Close Range Dedection",
+             "Goto Position",
+             "Drive Status"]
+
+        self.protocols = \
+            ["",
+             "",
+             "Game_end",
+             "Position",
+             "Position",
+             "Position",
+             "Position",
+             "Close_range_dedection",
+             "Goto_position",
+             "Drive_status"]
+
+        self.packers = \
+            ["",
+             "",
+             "B",
+             "?BBB",
+             "?BBB",
+             "?BBB",
+             "?BBB",
+             "?BB",
+             "BBBB",
+             "B?"]
+
+
     def pack(self, type, data):
         priority = 0x3  # Debugg
         sender = 0x0  # Kern
