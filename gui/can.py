@@ -12,7 +12,7 @@ class Table(QtGui.QTableWidget):
         self.header = header
         self.setHorizontalHeaderLabels(header)
         self.verticalHeader().setVisible(False)
-        self.autoScroll = True
+        self.autoScroll = False
         #self.resizeColumnsToContents()
         #self.resizeRowsToContents()
 
