@@ -3,6 +3,7 @@ __author__ = 'mw'
 from PyQt4 import QtGui, QtCore
 
 import ethernet
+import datetime
 
 
 class Table(QtGui.QTableWidget):
@@ -32,15 +33,31 @@ class Table(QtGui.QTableWidget):
         self.showColumn(row_count)
         print(row_count)
 
+    def change_autoscroll(self, value):
+        if value == 2:
+            self.autoScroll = True
+        else:
+            self.autoScroll = False
+
 
 class CanTable(QtGui.QWidget):
     def __init__(self):
         super().__init__()
         vbox = QtGui.QVBoxLayout()
         header = ['Time', 'Source', 'Type', 'Value']
-        table = Table(header)
-        vbox.addWidget(table)
+        self.table = Table(header)
+        autoscroll_box = QtGui.QCheckBox('Autoscroll')
+        self.connect(autoscroll_box, QtCore.SIGNAL('stateChanged(int)'), self.table.change_autoscroll)
+
+        vbox.addWidget(self.table)
+        vbox.addWidget(autoscroll_box)
+
         self.setLayout(vbox)
+
+    def add_data(self, data):
+        current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
+        self.table.add_row([current_time, str(data[0]), str(data[1])])
+
 
 class EditHost(QtGui.QWidget):
     def __init__(self):
