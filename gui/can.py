@@ -16,7 +16,7 @@ class Table(QtGui.QTableWidget):
         #self.resizeColumnsToContents()
         #self.resizeRowsToContents()
 
-    def add_row(self, data):
+    def add_row(self, data, color=None):
         max_row_count = 10000
         row_count = self.rowCount()
         row_count += 1
@@ -24,6 +24,8 @@ class Table(QtGui.QTableWidget):
         self.setRowCount(row_count)
         for i in range(len(data)):
             newitem = QtGui.QTableWidgetItem(data[i])
+            if color is not None:
+                newitem.setBackground(QtGui.QColor(color))
             self.setItem(row_count - 2, i, newitem)
         if row_count > max_row_count:
             self.removeRow(0)

@@ -47,7 +47,6 @@ class CanWindow(QtGui.QWidget):
         self.edit_host.host_button.setEnabled(True)
 
 
-
 class CreateGroupBox(QtGui.QGroupBox):
     def __init__(self, widget, text):
         super().__init__()
