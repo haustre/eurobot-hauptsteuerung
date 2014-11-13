@@ -14,8 +14,7 @@ class CanWindow(QtGui.QWidget):
         super().__init__()
         self.threads = []
         self.connected = False
-        header = ['Time', 'Source', 'Type', 'Value']
-        self.can_table = gui.can.Table(header)
+        self.can_table = gui.can.CanTable()
         self.edit_host = gui.can.EditHost()
         self.send_can = gui.can.SendCan()
         self.init_ui()
@@ -50,6 +49,18 @@ class CanWindow(QtGui.QWidget):
     def new_tcp_data(self, data):
         current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
         self.can_table.add_row([current_time, str(data[0]), str(data[1])])
+
+
+class CreateGroupBox(QtGui.QGroupBox):
+    def __init__(self, widget, text):
+        super().__init__()
+        box1 = QtGui.QVBoxLayout()
+        box1.addWidget(widget)
+        groupbox = QtGui.QGroupBox(text)
+        groupbox.setLayout(box1)
+        box2 = QtGui.QVBoxLayout()
+        box2.addWidget(groupbox)
+        self.setLayout(box2)
 
 
 def main(args):

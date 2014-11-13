@@ -33,6 +33,15 @@ class Table(QtGui.QTableWidget):
         print(row_count)
 
 
+class CanTable(QtGui.QWidget):
+    def __init__(self):
+        super().__init__()
+        vbox = QtGui.QVBoxLayout()
+        header = ['Time', 'Source', 'Type', 'Value']
+        table = Table(header)
+        vbox.addWidget(table)
+        self.setLayout(vbox)
+
 class EditHost(QtGui.QWidget):
     def __init__(self):
         super().__init__()
@@ -77,8 +86,18 @@ class SendCan(QtGui.QWidget):
         msg_types = ["Game_end", "Position", "Close_range_dedection", "Goto_position"]
         self.msg_type_combo.addItems(msg_types)
 
+        hbox = QtGui.QHBoxLayout()
+        for i in range(2):
+            line = QtGui.QLineEdit('123')
+            hbox.addWidget(line)
+
+
         grid = QtGui.QGridLayout()
         grid.addWidget(self.msg_type_label, 0, 0)
         grid.addWidget(self.msg_type_combo, 0, 1)
 
-        self.setLayout(grid)
+        vbox = QtGui.QVBoxLayout()
+        vbox.addLayout(grid)
+        vbox.addLayout(hbox)
+
+        self.setLayout(vbox)
