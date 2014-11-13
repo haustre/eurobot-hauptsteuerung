@@ -7,7 +7,7 @@ import time
 import queue
 
 
-class TcpConnection(object):
+class _TcpConnection(object):
     def __init__(self):
         self.queue_size = 1000
         self.queue_receive = queue.Queue(self.queue_size)
@@ -89,7 +89,7 @@ class TcpConnection(object):
                 print("Tcp send Queue full!!")
 
 
-class Server(TcpConnection):
+class Server(_TcpConnection):
 
     def __init__(self):
         super().__init__()
@@ -126,7 +126,7 @@ class Server(TcpConnection):
             t.start()
 
 
-class Client(TcpConnection):
+class Client(_TcpConnection):
 
     def __init__(self, host, port):
         super().__init__()

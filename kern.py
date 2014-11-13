@@ -1,6 +1,6 @@
 __author__ = 'mw'
 
-from can import Can
+import can
 from ethernet import Server
 import time
 import struct
@@ -12,14 +12,11 @@ def main():
        print('Provide CAN device name (can0, vcan0 etc.)')
        sys.exit(0)
     packer = struct.Struct('ff')
-    can_id, can_mask = 0x600, 0x600
-    s_debug = Can(can_id, can_mask, sys.argv[1])
+    can_rcv = can.CanRecv(sys.argv[1])
     tcp = Server()
     while True:
-        data = s_debug.receive_all()
-        if data:
-            for line in data:
-                tcp.write(packer.unpack(line))
-        time.sleep(0.01)
-
+        can_id, can_msg = can_rcv.recv()
+        tcp_msg = packer.unpack(can_msg)
+        print(tcp_msg)
+        tcp.write(tcp_msg)
 main()
