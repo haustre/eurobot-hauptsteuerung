@@ -8,13 +8,11 @@ import queue
 
 
 class Can(object):
-    def __init__(self, can_id, can_mask, interface):
+    def __init__(self, interface):
         self.can_frame_fmt = "=IB3x8s"
-        self.queue_receive = queue.Queue()
-        self.queue_send = queue.Queue()
         self.s = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
-        can_filter = struct.pack("=II", can_id, can_mask)
-        self.s.setsockopt(socket.SOL_CAN_RAW, socket.CAN_RAW_FILTER, can_filter)
+        #can_filter = struct.pack("=II", can_id, can_mask)
+        self.s.setsockopt(socket.SOL_CAN_RAW, socket.CAN_RAW_FILTER)
         self.s.bind((interface, ))
         self.t_connection = threading.Thread(target=self.connection, args=[self.s])
         self.t_connection.setDaemon(1)
@@ -28,27 +26,6 @@ class Can(object):
     def dissect_can_frame(self, frame):
         can_id, can_dlc, data = struct.unpack(self.can_frame_fmt, frame)
         return can_id, data[:can_dlc]
-
-    def write(self, can_id, data):
-        pass
-
-    def receive(self):
-        try:
-            data = self.queue_receive.get_nowait()
-        except queue.Empty:
-            pass
-        else:
-            return data
-
-    def receive_all(self):
-        data = []
-        while True:
-            try:
-                line = self.queue_receive.get_nowait()
-                data.append(line)
-            except queue.Empty:
-                break
-        return data
 
     def recv_can(self, s):
         frame, addr = s.recvfrom(16)
@@ -77,14 +54,42 @@ class Can(object):
                 self.queue_receive.put_nowait(data)     # Todo:überprüffen ob voll
 
 
+class CanRecv(Can):
+    def __init__(self):
+        self.queue_receive = queue.Queue()
+        super().__init__()
+
+    def connection(self, s):
+        while 1:
+                data = self.recv_can(s)
+                self.queue_receive.put_nowait(data)     # Todo:überprüffen ob voll
+
+
+class CanSend(Can):
+    def __init__(self):
+        self.queue_send = queue.Queue()
+        super().__init__()
+
+    def connection(self, s):
+        while 1:
+            send_can(self.queue_send)
+
+
+
 class CanPacker(object):
     def __init__(self):
-        #types =
+        types = ["",            # Emergency Shutdown
+                 "",            # Emergency Stop
+                 "Game_end"]    # Game End
         pass
     
-    def unpack(self, address, data):
-        pass
+    def pack(self, type, data):
+        priority = 0x3  # Debugg
+        sender = 0x0  # Kern
+        id = priority << 9 + type << 3 + sender
         #packer.unpack(data)
+
+
 
 if __name__ == '__main__':
     can_id, can_mask = 0x600, 0x600
