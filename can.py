@@ -43,16 +43,14 @@ class _Can(object):
 
 class CanRecv(_Can):
     def __init__(self, interface):
-        self.queue_receive = queue.Queue()
+        self.queue_debugg = queue.Queue()
         super().__init__(interface)
 
     def connection(self):
         while 1:
                 data = self.recv_can()
-                self.queue_receive.put_nowait(data)     # Todo:überprüffen ob voll
+                self.queue_debugg.put_nowait(data)     # Todo:überprüffen ob voll
 
-    def recv(self):
-        return self.queue_receive.get()
 
 
 class CanSend(_Can):

@@ -15,7 +15,7 @@ def main():
     can_rcv = can.CanRecv(sys.argv[1])
     tcp = Server()
     while True:
-        can_id, can_msg = can_rcv.recv()
+        can_id, can_msg = can_rcv.queue_debugg.get()
         tcp_msg = packer.unpack(can_msg)
         print(tcp_msg)
         tcp.write(tcp_msg)
