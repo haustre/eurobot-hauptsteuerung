@@ -12,7 +12,7 @@ def main():
        print('Provide CAN device name (can0, vcan0 etc.)')
        sys.exit(0)
     packer = struct.Struct('ff')
-    can_rcv = can.CanRecv(sys.argv[1])
+    can_rcv = can.Can(sys.argv[1])
     tcp = Server()
     while True:
         can_id, can_msg = can_rcv.queue_debugg.get()

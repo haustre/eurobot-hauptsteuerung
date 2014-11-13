@@ -7,17 +7,22 @@ import time
 import queue
 
 
-class _Can(object):
+class Can(object):
     def __init__(self, interface):
+        self.queue_send = queue.Queue()
+        self.queue_debugg = queue.Queue()
         self.can_frame_fmt = "=IB3x8s"
         self.socket = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
         can_id, can_mask = 0x600, 0x600
         can_filter = struct.pack("=II", can_id, can_mask)
         self.socket.setsockopt(socket.SOL_CAN_RAW, socket.CAN_RAW_FILTER, can_filter)
         self.socket.bind((interface, ))
-        self.t_connection = threading.Thread(target=self.connection)
-        self.t_connection.setDaemon(1)
-        self.t_connection.start()
+        self.t_recv_connection = threading.Thread(target=self.recv_connection)
+        self.t_recv_connection.setDaemon(1)
+        self.t_recv_connection.start()
+        self.t_send_connection = threading.Thread(target=self.send_connection)
+        self.t_send_connection.setDaemon(1)
+        self.t_send_connection.start()
 
     def build_can_frame(self, can_id, data):
         can_dlc = len(data)
@@ -37,28 +42,12 @@ class _Can(object):
         frame = self.build_can_frame(id, msg)
         self.socket.send(frame)
 
-    def connection(self):
-        pass
-
-
-class CanRecv(_Can):
-    def __init__(self, interface):
-        self.queue_debugg = queue.Queue()
-        super().__init__(interface)
-
-    def connection(self):
+    def recv_connection(self):
         while 1:
                 data = self.recv_can()
                 self.queue_debugg.put_nowait(data)     # Todo:überprüffen ob voll
 
-
-
-class CanSend(_Can):
-    def __init__(self, interface):
-        self.queue_send = queue.Queue()
-        super().__init__(interface)
-
-    def connection(self):
+    def send_connection(self):
         while 1:
             id, msg = self.queue_send.get()
             self.send_can(id, msg)  # blocking
