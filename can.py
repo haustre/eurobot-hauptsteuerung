@@ -78,15 +78,21 @@ class _CanPacker(object):
         id = priority << 9 + type << 3 + sender
         #packer.unpack(data)
 
+    def unpack(self, id, msg):
+        msg_frame = self.position_protocol(msg)
+
     def position_protocol(self, msg):
         packer = struct.Struct('BHHH')
         data_correct, angle, y_position, x_position = packer.unpack(msg)
-
-        msf_frame = object()
-        setattr(msf_frame, 'type', MsgTypes.Current_Position_Enemy_1)
-        setattr(msf_frame, 'angle', angle)
-        setattr(msf_frame, 'y_position', y_position)
-        setattr(msf_frame, 'x_position', x_position)
+        position_is_correct, angle_is_correct = self.decode_booleans(data_correct)
+        #msg_frame = object()
+        msg_frame = lambda: None
+        setattr(msg_frame, 'position_is_correct', position_is_correct)
+        setattr(msg_frame, 'angle_is_correct', angle_is_correct)
+        setattr(msg_frame, 'angle', angle)
+        setattr(msg_frame, 'y_position', y_position)
+        setattr(msg_frame, 'x_position', x_position)
+        return msg_frame
 
     def encode_booleans(self, bool_lst):
         res = 0
