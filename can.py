@@ -78,7 +78,7 @@ class _CanPacker(object):
         id = priority << 9 + type << 3 + sender
         #packer.unpack(data)
 
-    def Current_Position_Robot_1(self, msg):
+    def position_protocol(self, msg):
         packer = struct.Struct('BHHH')
         data_correct, angle, y_position, x_position = packer.unpack(msg)
 
