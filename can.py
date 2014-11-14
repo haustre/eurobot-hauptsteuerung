@@ -59,17 +59,12 @@ class Can(object):
 
 class _CanPacker(object):
     def __init__(self):
-        self.packers = \
-            ["",
-             "",
-             "B",
-             "?BBB",
-             "?BBB",
-             "?BBB",
-             "?BBB",
-             "?BB",
-             "BBBB",
-             "B?"]
+        self.protocols = {
+            MsgTypes.Current_Position_Robot_1: self.position_protocol,
+            MsgTypes.Current_Position_Robot_2: self.position_protocol,
+            MsgTypes.Current_Position_Enemy_1: self.position_protocol,
+            MsgTypes.Current_Position_Enemy_2: self.position_protocol
+        }
 
     def pack(self, type, data):
 
@@ -79,20 +74,25 @@ class _CanPacker(object):
         #packer.unpack(data)
 
     def unpack(self, id, msg):
-        msg_frame = self.position_protocol(msg)
+        mask = 0b00111111000
+        type_nr = id & mask
+        msg_type = MsgTypes[type_nr]
+        protocol = self.protocols[msg_type]
+        msg_frame = protocol(msg)
+        msg_frame['type'] = msg_type
 
     def position_protocol(self, msg):
         packer = struct.Struct('BHHH')
         data_correct, angle, y_position, x_position = packer.unpack(msg)
         position_is_correct, angle_is_correct = self.decode_booleans(data_correct)
-        #msg_frame = object()
-        msg_frame = lambda: None
-        setattr(msg_frame, 'position_is_correct', position_is_correct)
-        setattr(msg_frame, 'angle_is_correct', angle_is_correct)
-        setattr(msg_frame, 'angle', angle)
-        setattr(msg_frame, 'y_position', y_position)
-        setattr(msg_frame, 'x_position', x_position)
-        return msg_frame
+        msg_dict = {
+            'position_is_correct': position_is_correct,
+            'angle_is_correct': angle_is_correct,
+            'angle': angle,
+            'y_position': y_position,
+            'x_position': x_position
+        }
+        return msg_dict
 
     def encode_booleans(self, bool_lst):
         res = 0
@@ -109,16 +109,16 @@ class _CanPacker(object):
 
 
 class MsgTypes(Enum):
-    EmergencyShutdown = 1
-    Emergency_Stop = 2
-    Game_End = 3
-    Current_Position_Robot_1 = 4
-    Current_Position_Robot_2 = 5
-    Current_Position_Enemy_1 = 6
-    Current_Position_Enemy_2 = 7
-    Close_Range_Dedection = 8
-    Goto_Position = 9
-    Drive_Status = 10
+    EmergencyShutdown = 0
+    Emergency_Stop = 1
+    Game_End = 2
+    Current_Position_Robot_1 = 3
+    Current_Position_Robot_2 = 4
+    Current_Position_Enemy_1 = 5
+    Current_Position_Enemy_2 = 6
+    Close_Range_Dedection = 7
+    Goto_Position = 8
+    Drive_Status = 9
 
 
 if __name__ == '__main__':
