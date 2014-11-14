@@ -5,6 +5,7 @@ import struct
 import threading
 import time
 import queue
+from enum import Enum
 
 
 class Can(object):
@@ -58,30 +59,6 @@ class Can(object):
 
 class _CanPacker(object):
     def __init__(self):
-        self.types = \
-            ["Emergency Shutdown",
-             "Emergency Stop",
-             "Game End",
-             "Current Position Robot 1",
-             "Current Position Robot 2",
-             "Current Position Enemy 1",
-             "Current Position Enemy 2",
-             "Close Range Dedection",
-             "Goto Position",
-             "Drive Status"]
-
-        self.protocols = \
-            ["",
-             "",
-             "Game_end",
-             "Position",
-             "Position",
-             "Position",
-             "Position",
-             "Close_range_dedection",
-             "Goto_position",
-             "Drive_status"]
-
         self.packers = \
             ["",
              "",
@@ -94,13 +71,45 @@ class _CanPacker(object):
              "BBBB",
              "B?"]
 
-
     def pack(self, type, data):
+
         priority = 0x3  # Debugg
         sender = 0x0  # Kern
         id = priority << 9 + type << 3 + sender
         #packer.unpack(data)
 
+    def position_protocol(self, msg):
+        packer = struct.Struct('BHHH')
+        data_correct, angle, y_position, x_position = packer.unpack(msg)
+
+        msf_frame = object()
+        setattr(msf_frame, 'angle', angle)
+
+    def encode_booleans(self, bool_lst):
+        res = 0
+        for i, bval in enumerate(bool_lst):
+            res += int(bval) << i
+        return res
+
+    def decode_booleans(self, intval, bits):
+        res = []
+        for bit in range(bits):
+            mask = 1 << bit
+            res.append((intval & mask) == mask)
+        return res
+
+
+class MsgTypes(Enum):
+    EmergencyShutdown = 1
+    Emergency_Stop = 2
+    Game_End = 3
+    Current_Position_Robot_1 = 4
+    Current_Position_Robot_2 = 5
+    Current_Position_Enemy_1 = 6
+    Current_Position_Enemy_2 = 7
+    Close_Range_Dedection = 8
+    Goto_Position = 9
+    Drive_Status = 10
 
 
 if __name__ == '__main__':
