@@ -4,6 +4,7 @@ from PyQt4 import QtGui, QtCore
 
 import ethernet
 import datetime
+import can
 
 
 class Table(QtGui.QTableWidget):
@@ -50,6 +51,12 @@ class CanTable(QtGui.QWidget):
         self.table = Table(header)
         autoscroll_box = QtGui.QCheckBox('Autoscroll')
         self.connect(autoscroll_box, QtCore.SIGNAL('stateChanged(int)'), self.table.change_autoscroll)
+        self.colors = {
+            can.MsgTypes.Position_Robot_1: (52, 241, 142),
+            can.MsgTypes.Position_Robot_2: (255, 0, 0),
+            can.MsgTypes.Position_Enemy_1: (255, 0, 0),
+            can.MsgTypes.Position_Enemy_2: (255, 0, 0)
+        }
 
         vbox.addWidget(self.table)
         vbox.addWidget(autoscroll_box)
@@ -58,7 +65,14 @@ class CanTable(QtGui.QWidget):
 
     def add_data(self, data):
         current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
-        self.table.add_row([current_time, str(data[0]), str(data[1])])
+        id = data[0]
+        sender = id & 0b00000000111
+        type = (id & 0b00111111000) >> 3
+        table_sender = str(can.MsgSender(sender).name)
+        table_type = str(can.MsgTypes(type).name)
+        table_msg = str(data[1])
+        table_color = self.colors[can.MsgTypes(type)]
+        self.table.add_row([current_time, table_sender, table_type, table_msg], color=table_color)
 
 
 class EditHost(QtGui.QWidget):
