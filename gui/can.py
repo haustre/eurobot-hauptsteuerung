@@ -26,7 +26,8 @@ class Table(QtGui.QTableWidget):
         for i in range(len(data)):
             newitem = QtGui.QTableWidgetItem(data[i])
             if color is not None:
-                newitem.setBackground(QtGui.QColor(color))
+                red, green, blue = color
+                newitem.setBackground(QtGui.QColor(red, green, blue))
             self.setItem(row_count - 2, i, newitem)
         if row_count > max_row_count:
             self.removeRow(0)
@@ -46,33 +47,44 @@ class Table(QtGui.QTableWidget):
 class CanTable(QtGui.QWidget):
     def __init__(self):
         super().__init__()
-        vbox = QtGui.QVBoxLayout()
+        self.running = False
         header = ['Time', 'Source', 'Type', 'Value']
         self.table = Table(header)
         autoscroll_box = QtGui.QCheckBox('Autoscroll')
+        self.run_button = QtGui.QPushButton('run')
+        self.run_button.setCheckable(True)
         self.connect(autoscroll_box, QtCore.SIGNAL('stateChanged(int)'), self.table.change_autoscroll)
         self.colors = {
-            can.MsgTypes.Position_Robot_1: (52, 241, 142),
+            can.MsgTypes.Position_Robot_1: (255, 200, 255),
             can.MsgTypes.Position_Robot_2: (255, 0, 0),
             can.MsgTypes.Position_Enemy_1: (255, 0, 0),
             can.MsgTypes.Position_Enemy_2: (255, 0, 0)
         }
 
+        hbox = QtGui.QHBoxLayout()
+        hbox.addWidget(autoscroll_box)
+        hbox.addWidget(self.run_button)
+
+        vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.table)
-        vbox.addWidget(autoscroll_box)
+        vbox.addLayout(hbox)
 
         self.setLayout(vbox)
 
+    def test(self):
+        self.running = True
+
     def add_data(self, data):
-        current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
-        id = data[0]
-        sender = id & 0b00000000111
-        type = (id & 0b00111111000) >> 3
-        table_sender = str(can.MsgSender(sender).name)
-        table_type = str(can.MsgTypes(type).name)
-        table_msg = str(data[1])
-        table_color = self.colors[can.MsgTypes(type)]
-        self.table.add_row([current_time, table_sender, table_type, table_msg], color=table_color)
+        if self.run_button.isChecked():
+            current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
+            id = data[0]
+            sender = id & 0b00000000111
+            type = (id & 0b00111111000) >> 3
+            table_sender = str(can.MsgSender(sender).name)
+            table_type = str(can.MsgTypes(type).name)
+            table_msg = str(data[1])
+            table_color = self.colors[can.MsgTypes(type)]
+            self.table.add_row([current_time, table_sender, table_type, table_msg], color=table_color)
 
 
 class EditHost(QtGui.QWidget):

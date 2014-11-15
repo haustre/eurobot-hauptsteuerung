@@ -29,16 +29,17 @@ s.bind((sys.argv[1],))
 
 
 packer_position = struct.Struct('BHHH')
-x = 0
-y = 1
-angle = 0
+x = 10000
+y = 10000
+angle = 18000
 count = 0
 while True:
-    #x += random.randrange(-10, 10)
-    #y += random.randrange(-10, 10)
-    x += 1
-    y += 1
-    angle += 2
+    x += random.randrange(-2, 3)
+    y += random.randrange(-2, 3)
+    angle += random.randrange(-2, 3)
+    #x += 1
+    #y += 1
+    #angle += 2
     try:
         data = packer_position.pack(3, angle, y, x)
         s.send(build_can_frame(0x61F, data))
@@ -47,6 +48,6 @@ while True:
         count += 1
     except socket.error:
         print('Error1 sending CAN frame')
-    time.sleep(1/1)
+    time.sleep(1/1000)
 
 
