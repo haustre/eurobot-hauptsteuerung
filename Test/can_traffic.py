@@ -21,29 +21,32 @@ def dissect_can_frame(frame):
 if len(sys.argv) != 2:
        print('Provide CAN device name (can0, slcan0 etc.)')
        sys.exit(0)
+print(sys.argv[1])
 
 # create a raw socket and bind it to the given CAN interface
 s = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
 s.bind((sys.argv[1],))
 
 
-packer = struct.Struct('ff')
+packer_position = struct.Struct('BHHH')
 x = 0
 y = 1
+angle = 0
 count = 0
 while True:
     #x += random.randrange(-10, 10)
     #y += random.randrange(-10, 10)
     x += 1
     y += 1
+    angle += 2
     try:
-        data = packer.pack(x, y)
-        s.send(build_can_frame(0x600, data))
+        data = packer_position.pack(3, angle, y, x)
+        s.send(build_can_frame(0x61F, data))
         #print(count)
-        print(x, y)
+        print(angle, x, y)
         count += 1
     except socket.error:
         print('Error1 sending CAN frame')
-    time.sleep(1/1000)
+    time.sleep(1/1)
 
 

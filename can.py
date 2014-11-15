@@ -51,7 +51,7 @@ class Can(object):
     def send_connection(self):
         while 1:
             id, msg = self.queue_send.get()
-            self.send_can(id, msg)  # blocking
+            self.send_can(id, msg)
 
     def send(self, id, msg):
         self.queue_send.put_nowait((id, msg))
