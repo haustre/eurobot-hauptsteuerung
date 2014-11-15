@@ -59,29 +59,30 @@ class Can(object):
 
 class _CanPacker(object):
     def __init__(self):
-        self.protocols = {
-            MsgTypes.Current_Position_Robot_1: self.position_protocol,
-            MsgTypes.Current_Position_Robot_2: self.position_protocol,
-            MsgTypes.Current_Position_Enemy_1: self.position_protocol,
-            MsgTypes.Current_Position_Enemy_2: self.position_protocol
+        self.unpacker = {
+            MsgTypes.Current_Position_Robot_1: self.unpack_position_protocol,
+            MsgTypes.Current_Position_Robot_2: self.unpack_position_protocol,
+            MsgTypes.Current_Position_Enemy_1: self.unpack_position_protocol,
+            MsgTypes.Current_Position_Enemy_2: self.unpack_position_protocol
         }
 
     def pack(self, type, data):
-
         priority = 0x3  # Debugg
         sender = 0x0  # Kern
-        id = priority << 9 + type << 3 + sender
+        id = priority << 9 + type.value << 3 + sender
+        protocol = self.unpacker[type]
         #packer.unpack(data)
 
     def unpack(self, id, msg):
         mask = 0b00111111000
         type_nr = id & mask
         msg_type = MsgTypes[type_nr]
-        protocol = self.protocols[msg_type]
+        protocol = self.unpacker[msg_type]
         msg_frame = protocol(msg)
         msg_frame['type'] = msg_type
+        msg_frame['raw'] = msg
 
-    def position_protocol(self, msg):
+    def unpack_position_protocol(self, msg):
         packer = struct.Struct('BHHH')
         data_correct, angle, y_position, x_position = packer.unpack(msg)
         position_is_correct, angle_is_correct = self.decode_booleans(data_correct)
