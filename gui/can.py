@@ -66,7 +66,7 @@ class CanTable(QtGui.QWidget):
         hbox.addWidget(autoscroll_box)
         hbox.addWidget(self.run_button)
 
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtGui.QHBoxLayout()
         vbox.addWidget(self.table)
         vbox.addLayout(hbox)
 
