@@ -43,11 +43,13 @@ while True:
     try:
         data = packer_position.pack(3, angle, y, x)
         s.send(build_can_frame(0x61F, data))
+        data = packer_position.pack(3, angle + 10, y + 100, x + 100)
+        s.send(build_can_frame(0x62F, data))
         #print(count)
         print(angle, x, y)
         count += 1
     except socket.error:
         print('Error1 sending CAN frame')
-    time.sleep(1/1000)
+    time.sleep(1/1)
 
 

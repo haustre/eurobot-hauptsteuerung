@@ -56,7 +56,7 @@ class CanTable(QtGui.QWidget):
         self.run_button.setCheckable(True)
         self.connect(autoscroll_box, QtCore.SIGNAL('stateChanged(int)'), self.table.change_autoscroll)
         self.colors = {
-            can.MsgTypes.Position_Robot_1: (255, 200, 255),
+            can.MsgTypes.Position_Robot_1: (0, 255, 0),
             can.MsgTypes.Position_Robot_2: (255, 0, 0),
             can.MsgTypes.Position_Enemy_1: (255, 0, 0),
             can.MsgTypes.Position_Enemy_2: (255, 0, 0)
