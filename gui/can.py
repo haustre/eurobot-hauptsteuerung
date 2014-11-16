@@ -10,14 +10,12 @@ import can
 class Table(QtGui.QTableWidget):
     def __init__(self, header):
         super().__init__(1, len(header))
-        self.header = header
         self.setHorizontalHeaderLabels(header)
         self.verticalHeader().setVisible(False)
-        self.autoScroll = False
         #self.resizeColumnsToContents()
         #self.resizeRowsToContents()
 
-    def add_row(self, data, color=None):
+    def add_row(self, data, color, autoscroll):
         max_row_count = 10000
         row_count = self.rowCount()
         self.hideRow(row_count)
@@ -32,29 +30,21 @@ class Table(QtGui.QTableWidget):
         if row_count > max_row_count:
             self.removeRow(0)
         self.showColumn(row_count)
-        if self.autoScroll is True:
+        if autoscroll is True:
             slide_bar = self.verticalScrollBar()
             slide_bar.setValue(slide_bar.maximum())
         print(row_count)
 
-    def change_autoscroll(self, value):
-        if value == 2:
-            self.autoScroll = True
-        else:
-            self.autoScroll = False
 
-
-class CanTable(QtGui.QWidget):
+class CanTableControl(QtGui.QWidget):
     def __init__(self):
         super().__init__()
         self.packer = can.CanPacker()
         self.running = False
-        header = ['Time', 'Source', 'Type', 'Value']
-        self.table = Table(header)
-        autoscroll_box = QtGui.QCheckBox('Autoscroll')
+        self.autoscroll_box = QtGui.QCheckBox('Autoscroll')
         self.run_button = QtGui.QPushButton('run')
         self.run_button.setCheckable(True)
-        self.connect(autoscroll_box, QtCore.SIGNAL('stateChanged(int)'), self.table.change_autoscroll)
+        #self.connect(autoscroll_box, QtCore.SIGNAL('stateChanged(int)'), self.table.change_autoscroll)
         self.colors = {
             can.MsgTypes.Position_Robot_1: (0, 255, 0),
             can.MsgTypes.Position_Robot_2: (255, 0, 0),
@@ -63,7 +53,7 @@ class CanTable(QtGui.QWidget):
         }
 
         grid = QtGui.QGridLayout()
-        grid.addWidget(autoscroll_box, 0, 0)
+        grid.addWidget(self.autoscroll_box, 0, 0)
         grid.addWidget(self.run_button, 0, 1)
 
         self.type_chechboxes = []
@@ -77,11 +67,11 @@ class CanTable(QtGui.QWidget):
         vbox.addLayout(grid)
         vbox.addStretch()
 
-        hbox = QtGui.QHBoxLayout()
-        hbox.addWidget(self.table)
-        hbox.addLayout(vbox)
+        #hbox = QtGui.QHBoxLayout()
+        #hbox.addWidget(self.table)
+        #hbox.addLayout(vbox)
 
-        self.setLayout(hbox)
+        self.setLayout(vbox)
 
     def test(self):
         self.running = True
@@ -100,7 +90,10 @@ class CanTable(QtGui.QWidget):
                 del msg_frame['type']
                 table_msg = str(msg_frame)
                 current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
-                self.table.add_row([current_time, table_sender, table_type, table_msg], color=table_color)
+                #self.table.add_row([current_time, table_sender, table_type, table_msg], color=table_color)
+                new_row = [current_time, table_sender, table_type, table_msg]
+
+                self.emit(QtCore.SIGNAL('new_can_Table_Row'), new_row, table_color, self.autoscroll_box.isChecked())
 
 
 class EditHost(QtGui.QWidget):
