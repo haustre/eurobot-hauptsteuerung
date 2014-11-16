@@ -13,6 +13,7 @@ class Can(object):
         self.queue_send = queue.Queue()
         self.queue_debugg = queue.Queue()
         self.can_frame_fmt = "=IB3x8s"
+        self.packer = CanPacker()
         self.socket = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
         can_id, can_mask = 0x600, 0x600
         can_filter = struct.pack("=II", can_id, can_mask)
@@ -24,7 +25,6 @@ class Can(object):
         self.t_send_connection = threading.Thread(target=self.send_connection)
         self.t_send_connection.setDaemon(1)
         self.t_send_connection.start()
-        self.packer = _CanPacker()
 
     def build_can_frame(self, can_id, data):
         can_dlc = len(data)
@@ -59,7 +59,7 @@ class Can(object):
         self.queue_send.put_nowait((id, msg))
 
 
-class _CanPacker(object):
+class CanPacker(object):
     def __init__(self):
         self.unpacker = {
             MsgTypes.Position_Robot_1: self.unpack_position_protocol,
@@ -90,13 +90,14 @@ class _CanPacker(object):
         data = packer.unpack(msg)
         data_correct, angle, y_position, x_position = data
         position_is_correct, angle_is_correct = self.decode_booleans(data_correct, 2)
+        print(msg)
         msg_dict = {
-            'position_is_correct': position_is_correct,
-            'angle_is_correct': angle_is_correct,
+            'position_correct': position_is_correct,
+            'angle_correct': angle_is_correct,
             'angle': angle,
             'y_position': y_position,
             'x_position': x_position,
-            'raw': data
+            'raw': msg.decode('latin-1')
         }
         return msg_dict
 

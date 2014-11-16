@@ -47,6 +47,7 @@ class Table(QtGui.QTableWidget):
 class CanTable(QtGui.QWidget):
     def __init__(self):
         super().__init__()
+        self.packer = can.CanPacker()
         self.running = False
         header = ['Time', 'Source', 'Type', 'Value']
         self.table = Table(header)
@@ -82,8 +83,19 @@ class CanTable(QtGui.QWidget):
             type = (id & 0b00111111000) >> 3
             table_sender = str(can.MsgSender(sender).name)
             table_type = str(can.MsgTypes(type).name)
-            table_msg = str(data[1])
+            #table_msg = str(data[1])
             table_color = self.colors[can.MsgTypes(type)]
+            #table_msg = ""
+            #for i, ii in data[1].items():
+            #    table_msg += i + ": " + ii + "/"
+            msg = data[1].encode('latin-1')
+            print(msg)
+            msg_frame = self.packer.unpack(id, msg)
+            del msg_frame['type']
+            del msg_frame['raw']
+            del msg_frame['id']
+
+            table_msg = str(msg_frame)
             self.table.add_row([current_time, table_sender, table_type, table_msg], color=table_color)
 
 
