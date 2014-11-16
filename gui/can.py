@@ -62,33 +62,45 @@ class CanTable(QtGui.QWidget):
             can.MsgTypes.Position_Enemy_2: (255, 0, 0)
         }
 
+        grid = QtGui.QGridLayout()
+        grid.addWidget(autoscroll_box, 0, 0)
+        grid.addWidget(self.run_button, 0, 1)
+
+        self.type_chechboxes = []
+        for i, type in enumerate(can.MsgTypes):
+            checkbox = QtGui.QCheckBox(type.name)
+            checkbox.setChecked(True)
+            self.type_chechboxes.append(checkbox)
+            grid.addWidget(checkbox, i / 2 + 1, i % 2)
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.addLayout(grid)
+        vbox.addStretch()
+
         hbox = QtGui.QHBoxLayout()
-        hbox.addWidget(autoscroll_box)
-        hbox.addWidget(self.run_button)
+        hbox.addWidget(self.table)
+        hbox.addLayout(vbox)
 
-        vbox = QtGui.QHBoxLayout()
-        vbox.addWidget(self.table)
-        vbox.addLayout(hbox)
-
-        self.setLayout(vbox)
+        self.setLayout(hbox)
 
     def test(self):
         self.running = True
 
     def add_data(self, data):
         if self.run_button.isChecked():
-            current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
             id = data[0]
             sender = id & 0b00000000111
             type = (id & 0b00111111000) >> 3
-            table_sender = str(can.MsgSender(sender).name)
-            table_type = str(can.MsgTypes(type).name)
-            table_color = self.colors[can.MsgTypes(type)]
-            msg = data[1].encode('latin-1')
-            msg_frame = self.packer.unpack(id, msg)
-            del msg_frame['type']
-            table_msg = str(msg_frame)
-            self.table.add_row([current_time, table_sender, table_type, table_msg], color=table_color)
+            if self.type_chechboxes[type].isChecked():
+                table_sender = str(can.MsgSender(sender).name)
+                table_type = str(can.MsgTypes(type).name)
+                table_color = self.colors[can.MsgTypes(type)]
+                msg = data[1].encode('latin-1')
+                msg_frame = self.packer.unpack(id, msg)
+                del msg_frame['type']
+                table_msg = str(msg_frame)
+                current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
+                self.table.add_row([current_time, table_sender, table_type, table_msg], color=table_color)
 
 
 class EditHost(QtGui.QWidget):
