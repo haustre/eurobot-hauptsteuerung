@@ -20,8 +20,8 @@ class Table(QtGui.QTableWidget):
     def add_row(self, data, color=None):
         max_row_count = 10000
         row_count = self.rowCount()
+        self.hideRow(row_count)
         row_count += 1
-        self.hideRow(row_count - 1)
         self.setRowCount(row_count)
         for i in range(len(data)):
             newitem = QtGui.QTableWidgetItem(data[i])
@@ -31,10 +31,10 @@ class Table(QtGui.QTableWidget):
             self.setItem(row_count - 2, i, newitem)
         if row_count > max_row_count:
             self.removeRow(0)
+        self.showColumn(row_count)
         if self.autoScroll is True:
             slide_bar = self.verticalScrollBar()
             slide_bar.setValue(slide_bar.maximum())
-        self.showColumn(row_count)
         print(row_count)
 
     def change_autoscroll(self, value):
@@ -139,7 +139,6 @@ class SendCan(QtGui.QWidget):
         for i in range(2):
             line = QtGui.QLineEdit('123')
             hbox.addWidget(line)
-
 
         grid = QtGui.QGridLayout()
         grid.addWidget(self.msg_type_label, 0, 0)
