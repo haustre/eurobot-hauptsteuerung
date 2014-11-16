@@ -47,8 +47,8 @@ class Can(object):
     def recv_connection(self):
         while 1:
             id, msg = self.recv_can()
-            msg_frame = self.packer.unpack(id, msg)
-            self.queue_debugg.put_nowait(msg_frame)     # Todo:überprüffen ob voll
+            #msg_frame = self.packer.unpack(id, msg)
+            self.queue_debugg.put_nowait((id, msg.decode('latin-1')))     # Todo:überprüffen ob voll
 
     def send_connection(self):
         while 1:
@@ -82,7 +82,6 @@ class CanPacker(object):
         protocol = self.unpacker[msg_type]
         msg_frame = protocol(msg)
         msg_frame['type'] = msg_type
-        msg_frame['id'] = id
         return msg_frame
 
     def unpack_position_protocol(self, msg):
@@ -90,14 +89,12 @@ class CanPacker(object):
         data = packer.unpack(msg)
         data_correct, angle, y_position, x_position = data
         position_is_correct, angle_is_correct = self.decode_booleans(data_correct, 2)
-        print(msg)
         msg_dict = {
             'position_correct': position_is_correct,
             'angle_correct': angle_is_correct,
             'angle': angle,
             'y_position': y_position,
             'x_position': x_position,
-            'raw': msg.decode('latin-1')
         }
         return msg_dict
 

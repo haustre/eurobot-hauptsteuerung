@@ -15,5 +15,5 @@ def main():
     tcp = Server()
     while True:
         can_msg = can_rcv.queue_debugg.get()
-        tcp.write((can_msg['id'], can_msg['raw']))
+        tcp.write(can_msg)
 main()
