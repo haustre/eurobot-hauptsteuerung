@@ -53,6 +53,7 @@ class CanTableControl(QtGui.QWidget):
         }
 
         grid = QtGui.QGridLayout()
+        grid.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
         grid.addWidget(self.autoscroll_box, 0, 0)
         grid.addWidget(self.run_button, 0, 1)
 
@@ -62,16 +63,7 @@ class CanTableControl(QtGui.QWidget):
             checkbox.setChecked(True)
             self.type_chechboxes.append(checkbox)
             grid.addWidget(checkbox, i / 2 + 1, i % 2)
-
-        vbox = QtGui.QVBoxLayout()
-        vbox.addLayout(grid)
-        vbox.addStretch()
-
-        #hbox = QtGui.QHBoxLayout()
-        #hbox.addWidget(self.table)
-        #hbox.addLayout(vbox)
-
-        self.setLayout(vbox)
+        self.setLayout(grid)
 
     def test(self):
         self.running = True
