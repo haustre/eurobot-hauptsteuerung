@@ -5,7 +5,7 @@ import sys
 
 from PyQt4 import QtGui, QtCore
 import gui.can
-from PyQt4 import QtGui
+import gui.field
 import datetime
 
 
@@ -19,6 +19,7 @@ class CanWindow(QtGui.QWidget):
         self.can_table_control = gui.can.CanTableControl()
         self.edit_host = gui.can.EditHost()
         self.send_can = gui.can.SendCan()
+        self.game_field = gui.field.GameField()
         self.init_ui()
 
     def init_ui(self):
@@ -28,6 +29,7 @@ class CanWindow(QtGui.QWidget):
         vbox.addWidget(self.can_table_control)
         vbox.addWidget(self.send_can)
         vbox.addWidget(self.edit_host)
+        vbox.addWidget(self.game_field)
         self.setLayout(vbox)
         self.connect(self.can_table_control, QtCore.SIGNAL('new_can_Table_Row'), self.can_table.add_row)
 
