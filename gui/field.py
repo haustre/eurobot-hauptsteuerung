@@ -18,9 +18,3 @@ class GameField(QtGui.QWidget):
         painter.begin(self)
         painter.drawPixmap(0, 0, widget_width, widget_height, self.pixmap)
         painter.end()
-
-if __name__ == '__main__':
-    app = QtGui.QApplication(sys.argv)
-    can_window = GameField()
-    can_window.show()
-    sys.exit(app.exec_())
