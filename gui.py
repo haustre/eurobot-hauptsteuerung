@@ -24,13 +24,17 @@ class CanWindow(QtGui.QWidget):
 
     def init_ui(self):
         self.edit_host.host_button.clicked.connect(self.connect_host)
-        vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(self.can_table)
-        vbox.addWidget(self.can_table_control)
-        vbox.addWidget(self.send_can)
-        vbox.addWidget(self.edit_host)
-        vbox.addWidget(self.game_field)
-        self.setLayout(vbox)
+        grid = QtGui.QGridLayout()
+        grid.addWidget(CreateGroupBox(self.can_table_control,'Test'))
+        grid.addWidget(CreateGroupBox(self.send_can,'Test'))
+        grid.addWidget(CreateGroupBox(self.edit_host,'Test'))
+        hbox = QtGui.QHBoxLayout()
+        hbox.addWidget(self.game_field)
+        hbox.addLayout(grid)
+        root_vbox = QtGui.QVBoxLayout()
+        root_vbox.addWidget(self.can_table)
+        root_vbox.addLayout(hbox)
+        self.setLayout(root_vbox)
         self.connect(self.can_table_control, QtCore.SIGNAL('new_can_Table_Row'), self.can_table.add_row)
 
     def connect_host(self):
