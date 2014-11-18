@@ -5,7 +5,7 @@ import sys
 
 from PyQt4 import QtGui, QtCore
 import gui.can
-from PyQt4 import QtGui
+import gui.field
 import datetime
 
 
@@ -19,16 +19,24 @@ class CanWindow(QtGui.QWidget):
         self.can_table_control = gui.can.CanTableControl()
         self.edit_host = gui.can.EditHost()
         self.send_can = gui.can.SendCan()
+        self.game_field = gui.field.GameField()
         self.init_ui()
 
     def init_ui(self):
+        self.showMaximized()
         self.edit_host.host_button.clicked.connect(self.connect_host)
         vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(self.can_table)
-        vbox.addWidget(self.can_table_control)
-        vbox.addWidget(self.send_can)
-        vbox.addWidget(self.edit_host)
-        self.setLayout(vbox)
+        vbox.addWidget(CreateGroupBox(self.can_table_control, 'Can Table'))
+        vbox.addWidget(CreateGroupBox(self.send_can, 'send Message'))
+        vbox.addWidget(CreateGroupBox(self.edit_host, 'connect to Host'))
+        vbox.addStretch()
+        hbox = QtGui.QHBoxLayout()
+        hbox.addWidget(self.game_field, 1)
+        hbox.addLayout(vbox)
+        root_vbox = QtGui.QVBoxLayout()
+        root_vbox.addWidget(self.can_table, 1)
+        root_vbox.addLayout(hbox)
+        self.setLayout(root_vbox)
         self.connect(self.can_table_control, QtCore.SIGNAL('new_can_Table_Row'), self.can_table.add_row)
 
     def connect_host(self):
