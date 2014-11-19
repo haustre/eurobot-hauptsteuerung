@@ -40,7 +40,6 @@ class CanWindow(QtGui.QWidget):
         self.connect(self.can_table_control, QtCore.SIGNAL('new_can_Table_Row'), self.can_table.add_row)
 
     def connect_host(self):
-        self.game_field.draw_position()
         if self.connected is False:
             self.connected = True
             self.edit_host.host_button.setEnabled(False)
@@ -49,6 +48,7 @@ class CanWindow(QtGui.QWidget):
             print(host, port)
             thread = gui.can.TcpConnection(host, port)
             self.connect(thread, QtCore.SIGNAL('tcp_data'), self.can_table_control.add_data)
+            self.connect(thread, QtCore.SIGNAL('tcp_data'), self.game_field.SetPoint)
             self.connect(thread, QtCore.SIGNAL('tcp connection lost'), self.lost_connection)
             self.threads.append(thread)
             thread.start()
