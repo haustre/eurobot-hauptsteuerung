@@ -12,6 +12,7 @@ class GameField(QtGui.QWidget):
         self.pixmap = QtGui.QPixmap("./gui/Table.png")
         self.ratio = self.pixmap.height() / self.pixmap.width()
         self.robot1 = (1500, 1000, 50)
+        self.enemy2 = (1500, 1000, 50)
 
     def paintEvent(self, event):
         #widget_height = self.size().height()
@@ -21,10 +22,17 @@ class GameField(QtGui.QWidget):
         painter.begin(self)
         painter.drawPixmap(0, 0, widget_width, widget_height, self.pixmap)
         scale = widget_width / 3000
+
         x, y, diameter = [x * scale for x in self.robot1]
         pen = QtGui.QPen(QtCore.Qt.red, 3, QtCore.Qt.SolidLine)
         painter.setPen(pen)
         painter.drawEllipse(x, y, diameter, diameter)
+
+        x, y, diameter = [x * scale for x in self.enemy2]
+        pen = QtGui.QPen(QtCore.Qt.green, 3, QtCore.Qt.SolidLine)
+        painter.setPen(pen)
+        painter.drawEllipse(x, y, diameter, diameter)
+
         painter.end()
 
     def SetPoint(self, data):
@@ -34,4 +42,9 @@ class GameField(QtGui.QWidget):
             msg = data[1].encode('latin-1')
             msg_frame = self.packer.unpack(id, msg)
             self.robot1 = (msg_frame['x_position'] / 10, msg_frame['y_position'] / 10, 50)
+            self.update()
+        elif can.MsgTypes(type).name == 'Position_Enemy_1':
+            msg = data[1].encode('latin-1')
+            msg_frame = self.packer.unpack(id, msg)
+            self.enemy2 = (msg_frame['x_position'] / 10, msg_frame['y_position'] / 10, 50)
             self.update()

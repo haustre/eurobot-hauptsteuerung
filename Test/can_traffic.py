@@ -29,7 +29,7 @@ s.bind((sys.argv[1],))
 
 
 packer_position = struct.Struct('BHHH')
-x = 15000
+x = 10000
 y = 10000
 angle = 18000
 count = 0
@@ -43,7 +43,7 @@ while True:
     try:
         data = packer_position.pack(3, angle, y, x)
         s.send(build_can_frame(0x61F, data))
-        data = packer_position.pack(3, angle + 10, y + 100, x + 100)
+        data = packer_position.pack(3, angle + 10, x, y + 100)
         s.send(build_can_frame(0x62F, data))
         #print(count)
         print(angle, x, y)
