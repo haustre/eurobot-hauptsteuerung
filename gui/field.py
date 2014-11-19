@@ -18,3 +18,4 @@ class GameField(QtGui.QWidget):
         painter.begin(self)
         painter.drawPixmap(0, 0, widget_width, widget_height, self.pixmap)
         painter.end()
+
