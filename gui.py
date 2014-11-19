@@ -40,6 +40,7 @@ class CanWindow(QtGui.QWidget):
         self.connect(self.can_table_control, QtCore.SIGNAL('new_can_Table_Row'), self.can_table.add_row)
 
     def connect_host(self):
+        self.game_field.draw_position()
         if self.connected is False:
             self.connected = True
             self.edit_host.host_button.setEnabled(False)
