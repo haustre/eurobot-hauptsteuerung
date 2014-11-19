@@ -38,6 +38,7 @@ class CanWindow(QtGui.QWidget):
         root_vbox.addLayout(hbox)
         self.setLayout(root_vbox)
         self.connect(self.can_table_control, QtCore.SIGNAL('new_can_Table_Row'), self.can_table.add_row)
+        self.connect(self.can_table_control, QtCore.SIGNAL('Filter_changed'), self.can_table.filter_types)
 
     def connect_host(self):
         if self.connected is False:
