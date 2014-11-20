@@ -2,6 +2,7 @@ __author__ = 'mw'
 
 from PyQt4 import QtGui, QtCore
 import can
+import math
 import sys
 
 
@@ -11,7 +12,7 @@ class GameField(QtGui.QWidget):
         self.packer = can.CanPacker()
         self.pixmap = QtGui.QPixmap("./gui/Table.png")
         self.ratio = self.pixmap.height() / self.pixmap.width()
-        self.robot1 = (1500, 1000, 50)
+        self.robot1 = (1500, 1000, 50, 0)
         self.enemy2 = (1500, 1000, 50)
 
     def paintEvent(self, event):
@@ -23,10 +24,12 @@ class GameField(QtGui.QWidget):
         painter.drawPixmap(0, 0, widget_width, widget_height, self.pixmap)
         scale = widget_width / 3000
 
-        x, y, diameter = [x * scale for x in self.robot1]
+        x, y, diameter, _ = [x * scale for x in self.robot1]
+        angle = self.robot1[3]
         pen = QtGui.QPen(QtCore.Qt.red, 3, QtCore.Qt.SolidLine)
         painter.setPen(pen)
-        painter.drawEllipse(x, y, diameter, diameter)
+        painter.drawEllipse(x - diameter / 2, y - diameter / 2, diameter, diameter)
+        painter.drawLine(x, y, x + math.sin(angle)*30, y + math.cos(angle)*30)
 
         x, y, diameter = [x * scale for x in self.enemy2]
         pen = QtGui.QPen(QtCore.Qt.green, 3, QtCore.Qt.SolidLine)
@@ -41,7 +44,7 @@ class GameField(QtGui.QWidget):
         if can.MsgTypes(type).name == 'Position_Robot_1':
             msg = data[1].encode('latin-1')
             msg_frame = self.packer.unpack(id, msg)
-            self.robot1 = (msg_frame['x_position'] / 10, msg_frame['y_position'] / 10, 50)
+            self.robot1 = (msg_frame['x_position'] / 10, msg_frame['y_position'] / 10, 50, msg_frame['angle'] / 100)
             self.update()
         elif can.MsgTypes(type).name == 'Position_Enemy_1':
             msg = data[1].encode('latin-1')

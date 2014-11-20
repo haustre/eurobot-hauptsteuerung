@@ -36,7 +36,7 @@ count = 0
 while True:
     x += random.randrange(-30, 30)
     y += random.randrange(-30, 30)
-    angle += random.randrange(-2, 3)
+    angle += 1
     #x += 1
     #y += 1
     #angle += 2
