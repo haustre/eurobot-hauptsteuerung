@@ -71,18 +71,18 @@ class CanTableControl(QtGui.QWidget):
     def add_data(self, data):
         if self.run_button.isChecked():
             id = data[0]
-            sender = id & 0b00000000111
-            type = (id & 0b00111111000) >> 3
-            if self.type_chechboxes[type].isChecked():
-                table_sender = str(can.MsgSender(sender).name)
-                table_type = str(can.MsgTypes(type).name)
-                table_color = self.colors[can.MsgTypes(type)]
+            msg = data[1].encode('latin-1')
+            msg_frame = self.packer.unpack(id, msg)
+            if self.type_chechboxes[msg_frame['type'].value].isChecked():
+                table_sender = str(msg_frame['sender'])
+                table_type = str(msg_frame['type'].name)
+                table_color = self.colors[msg_frame['type']]
                 msg = data[1].encode('latin-1')
                 msg_frame = self.packer.unpack(id, msg)
                 del msg_frame['type']
+                del msg_frame['sender']
                 table_msg = str(msg_frame)
                 current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
-                #self.table.add_row([current_time, table_sender, table_type, table_msg], color=table_color)
                 new_row = [current_time, table_sender, table_type, table_msg]
 
                 self.emit(QtCore.SIGNAL('new_can_Table_Row'), new_row, table_color, self.autoscroll_box.isChecked())
