@@ -11,14 +11,18 @@ class GameField(QtGui.QWidget):
         super().__init__()
         self.packer = can.CanPacker()
         self.pixmap = QtGui.QPixmap("./gui/Table.png")
-        self.ratio = self.pixmap.height() / self.pixmap.width()
+        self.pixmap_ratio = self.pixmap.height() / self.pixmap.width()
         self.robot1 = (1500, 1000, 50, 0)
         self.enemy2 = (1500, 1000, 50)
 
     def paintEvent(self, event):
-        #widget_height = self.size().height()
-        widget_width = self.size().width()
-        widget_height = widget_width * self.ratio
+        frame_ratio = self.size().height() / self.size().width()
+        if frame_ratio > self.pixmap_ratio:
+            widget_width = self.size().width()
+            widget_height = widget_width * self.pixmap_ratio
+        else:
+            widget_height = self.size().height()
+            widget_width = widget_height / self.pixmap_ratio
         painter = QtGui.QPainter()
         painter.begin(self)
         painter.drawPixmap(0, 0, widget_width, widget_height, self.pixmap)
