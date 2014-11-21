@@ -39,7 +39,6 @@ class Table(QtGui.QTableWidget):
 class CanTableControl(QtGui.QWidget):
     def __init__(self):
         super().__init__()
-        self.packer = can.CanPacker()
         self.running = False
         self.autoscroll_box = QtGui.QCheckBox('Autoscroll')
         self.run_button = QtGui.QPushButton('run')
@@ -68,17 +67,12 @@ class CanTableControl(QtGui.QWidget):
     def test(self):
         self.running = True
 
-    def add_data(self, data):
+    def add_data(self, msg_frame):
         if self.run_button.isChecked():
-            id = data[0]
-            msg = data[1].encode('latin-1')
-            msg_frame = self.packer.unpack(id, msg)
             if self.type_chechboxes[msg_frame['type'].value].isChecked():
                 table_sender = str(msg_frame['sender'])
                 table_type = str(msg_frame['type'].name)
                 table_color = self.colors[msg_frame['type']]
-                msg = data[1].encode('latin-1')
-                msg_frame = self.packer.unpack(id, msg)
                 del msg_frame['type']
                 del msg_frame['sender']
                 table_msg = str(msg_frame)
@@ -109,6 +103,7 @@ class EditHost(QtGui.QWidget):
 class TcpConnection(QtCore.QThread):
     def __init__(self, host, port):
         QtCore.QThread.__init__(self)
+        self.packer = can.CanPacker()
         self.host = host
         self.port = port
 
@@ -118,7 +113,10 @@ class TcpConnection(QtCore.QThread):
             data = tcp.read_block()
             if tcp.connected is False:
                 break
-            self.emit(QtCore.SIGNAL('tcp_data'), data)
+            id = data[0]
+            msg = data[1].encode('latin-1')
+            msg_frame = self.packer.unpack(id, msg)
+            self.emit(QtCore.SIGNAL('tcp_data'), msg_frame)
         self.emit(QtCore.SIGNAL('tcp connection lost'))
 
 
