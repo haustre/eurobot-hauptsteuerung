@@ -82,22 +82,19 @@ class CanTableControl(QtGui.QWidget):
             checked.append(checkbox.isChecked())
         self.emit(QtCore.SIGNAL('Filter_changed'), checked)
 
-    def add_data(self, data):
+    def add_data(self, msg_frame):
+        msg_frame_copy = copy.copy(msg_frame)
         if self.run_button.isChecked():
-            id = data[0]
-            sender = id & 0b00000000111
-            type = (id & 0b00111111000) >> 3
-            table_sender = str(can.MsgSender(sender).name)
-            table_type = str(can.MsgTypes(type).name)
-            table_color = self.colors[can.MsgTypes(type)]
-            msg = data[1].encode('latin-1')
-            msg_frame = self.packer.unpack(id, msg)
-            del msg_frame['type']
-            table_msg = str(msg_frame)
+            table_sender = str(msg_frame_copy['sender'])
+            table_type = str(msg_frame_copy['type'].name)
+            table_color = self.colors[msg_frame_copy['type']]
+            visible = self.type_chechboxes[msg_frame_copy['type'].value].isChecked()
+            del msg_frame_copy['type']
+            del msg_frame_copy['sender']
+            table_msg = str(msg_frame_copy)
             current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
             new_row = [current_time, table_sender, table_type, table_msg]
             autoscroll = self.autoscroll_box.isChecked()
-            visible = self.type_chechboxes[type].isChecked()
             self.emit(QtCore.SIGNAL('new_can_Table_Row'), new_row, table_color, autoscroll, visible)
 
 
