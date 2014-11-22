@@ -16,7 +16,7 @@ def build_can_frame(can_id, data):
 
 def dissect_can_frame(frame):
        can_id, can_dlc, data = struct.unpack(can_frame_fmt, frame)
-       return (can_id, can_dlc, data[:can_dlc])
+       return can_id, can_dlc, data[:can_dlc]
 
 if len(sys.argv) != 2:
        print('Provide CAN device name (can0, slcan0 etc.)')

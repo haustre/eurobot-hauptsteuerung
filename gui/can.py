@@ -5,6 +5,7 @@ from PyQt4 import QtGui, QtCore
 import ethernet
 import datetime
 import can
+import copy
 
 
 class Table(QtGui.QTableWidget):
@@ -67,8 +68,8 @@ class CanTableControl(QtGui.QWidget):
         grid.addWidget(self.run_button, 0, 1)
 
         self.type_chechboxes = []
-        for i, type in enumerate(can.MsgTypes):
-            checkbox = QtGui.QCheckBox(type.name)
+        for i, msg_type in enumerate(can.MsgTypes):
+            checkbox = QtGui.QCheckBox(msg_type.name)
             checkbox.setChecked(True)
             checkbox.stateChanged.connect(self.change_typ_filter)
             self.type_chechboxes.append(checkbox)
@@ -131,9 +132,9 @@ class TcpConnection(QtCore.QThread):
             data = tcp.read_block()
             if tcp.connected is False:
                 break
-            id = data[0]
-            msg = data[1].encode('latin-1')
-            msg_frame = self.packer.unpack(id, msg)
+            can_id = data[0]
+            can_msg = data[1].encode('latin-1')
+            msg_frame = self.packer.unpack(can_id, can_msg)
             self.emit(QtCore.SIGNAL('tcp_data'), msg_frame)
         self.emit(QtCore.SIGNAL('tcp connection lost'))
 
