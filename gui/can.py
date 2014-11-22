@@ -5,6 +5,7 @@ from PyQt4 import QtGui, QtCore
 import ethernet
 import datetime
 import can
+import copy
 
 
 class Table(QtGui.QTableWidget):
@@ -57,8 +58,8 @@ class CanTableControl(QtGui.QWidget):
         grid.addWidget(self.run_button, 0, 1)
 
         self.type_chechboxes = []
-        for i, type in enumerate(can.MsgTypes):
-            checkbox = QtGui.QCheckBox(type.name)
+        for i, msg_type in enumerate(can.MsgTypes):
+            checkbox = QtGui.QCheckBox(msg_type.name)
             checkbox.setChecked(True)
             self.type_chechboxes.append(checkbox)
             grid.addWidget(checkbox, i / 2 + 1, i % 2)
@@ -68,14 +69,15 @@ class CanTableControl(QtGui.QWidget):
         self.running = True
 
     def add_data(self, msg_frame):
+        msg_frame_copy = copy.copy(msg_frame)
         if self.run_button.isChecked():
-            if self.type_chechboxes[msg_frame['type'].value].isChecked():
-                table_sender = str(msg_frame['sender'])
-                table_type = str(msg_frame['type'].name)
-                table_color = self.colors[msg_frame['type']]
-                del msg_frame['type']
-                del msg_frame['sender']
-                table_msg = str(msg_frame)
+            if self.type_chechboxes[msg_frame_copy['type'].value].isChecked():
+                table_sender = str(msg_frame_copy['sender'])
+                table_type = str(msg_frame_copy['type'].name)
+                table_color = self.colors[msg_frame_copy['type']]
+                del msg_frame_copy['type']
+                del msg_frame_copy['sender']
+                table_msg = str(msg_frame_copy)
                 current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
                 new_row = [current_time, table_sender, table_type, table_msg]
 

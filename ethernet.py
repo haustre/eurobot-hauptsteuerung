@@ -3,7 +3,6 @@ __author__ = 'mw'
 import socket
 import threading
 import json
-import time
 import queue
 
 
@@ -14,18 +13,18 @@ class _TcpConnection(object):
         self.queues_send = []
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def recv_json(self, s):
+    def _recv_json(self, s):
         data = ''
         size = s.recv(8).decode('UTF-8')
         size = int(size[2:7])
         while len(data) < size:
-            dataTmp = s.recv(size-len(data)).decode('UTF-8')
-            data += dataTmp
-            if dataTmp == '':
+            datatmp = s.recv(size-len(data)).decode('UTF-8')
+            data += datatmp
+            if datatmp == '':
                 raise RuntimeError("socket connection broken")
         return json.loads(data)
 
-    def send_json(self, s, data):
+    def _send_json(self, s, data):
         json_data = json.dumps(data)
         data_len = "L=%05ds" % len(json_data)
         data_send = bytes(data_len + json_data, 'UTF-8')
@@ -48,9 +47,9 @@ class _TcpConnection(object):
                 except queue.Empty:
                     break
             if send:
-                self.send_json(s, send)
+                self._send_json(s, send)
             try:
-                data = self.recv_json(s)
+                data = self._recv_json(s)
             except socket.timeout:
                 continue
             except socket.error:
@@ -94,7 +93,7 @@ class Server(_TcpConnection):
     def __init__(self):
         super().__init__()
         host = ''
-        port = 42233        #Test
+        port = 42233
         print(host, port)
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((host, port))

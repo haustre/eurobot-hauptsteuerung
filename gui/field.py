@@ -3,7 +3,6 @@ __author__ = 'mw'
 from PyQt4 import QtGui, QtCore
 import can
 import math
-import sys
 
 
 class GameField(QtGui.QWidget):
@@ -37,7 +36,7 @@ class GameField(QtGui.QWidget):
 
         painter.end()
 
-    def SetPoint(self, msg_frame):
+    def setpoint(self, msg_frame):
         if msg_frame['type'] == can.MsgTypes.Position_Robot_1:
             self.robot1 = (msg_frame['x_position'] / 10, msg_frame['y_position'] / 10, 50, msg_frame['angle'] / 100)
             self.update()

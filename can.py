@@ -3,7 +3,6 @@ __author__ = 'mw'
 import socket
 import struct
 import threading
-import time
 import queue
 from enum import Enum
 
@@ -11,7 +10,7 @@ from enum import Enum
 class Can(object):
     def __init__(self, interface):
         self.queue_send = queue.Queue()
-        self.queue_debugg = queue.Queue()
+        self.queue_debug = queue.Queue()
         self.can_frame_fmt = "=IB3x8s"
         self.packer = CanPacker()
         self.socket = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
@@ -48,7 +47,7 @@ class Can(object):
         while 1:
             can_id, can_msg = self.recv_can()
             #msg_frame = self.packer.unpack(can_id, can_msg)
-            self.queue_debugg.put_nowait((can_id, can_msg.decode('latin-1')))     # Todo:überprüffen ob voll
+            self.queue_debug.put_nowait((can_id, can_msg.decode('latin-1')))     # Todo:überprüffen ob voll
 
     def send_connection(self):
         while 1:
@@ -68,11 +67,11 @@ class CanPacker(object):
             MsgTypes.Position_Enemy_2: self.unpack_position_protocol
         }
 
-    def pack(self, type, data):
-        priority = 0x3  # Debugg
+    def pack(self, msg_type, data):
+        priority = 0x3  # Debug
         sender = 0x0  # Kern
-        can_id = priority << 9 + type.value << 3 + sender
-        protocol = self.unpacker[type]
+        can_id = priority << 9 + msg_type.value << 3 + sender
+        protocol = self.unpacker[msg_type]
         #packer.unpack(data)
 
     def unpack(self, can_id, can_msg):
@@ -90,7 +89,7 @@ class CanPacker(object):
         packer = struct.Struct('BHHH')
         data = packer.unpack(msg)
         data_correct, angle, y_position, x_position = data
-        position_is_correct, angle_is_correct = self.decode_booleans(data_correct, 2)
+        position_is_correct, angle_is_correct = self._decode_booleans(data_correct, 2)
         msg_dict = {
             'position_correct': position_is_correct,
             'angle_correct': angle_is_correct,
@@ -100,13 +99,13 @@ class CanPacker(object):
         }
         return msg_dict
 
-    def encode_booleans(self, bool_lst):
+    def _encode_booleans(self, bool_lst):
         res = 0
         for i, bval in enumerate(bool_lst):
             res += int(bval) << i
         return res
 
-    def decode_booleans(self, intval, bits):
+    def _decode_booleans(self, intval, bits):
         res = []
         for bit in range(bits):
             mask = 1 << bit
@@ -134,13 +133,5 @@ class MsgSender(Enum):
     Peripherie = 3
     Debugging = 7
 
-if __name__ == '__main__':
-    can_id, can_mask = 0x600, 0x600
-    s = Can(can_id, can_mask, 'vcan0')
-    while True:
-        data = s.receive()
-        if data:
-            print(data)
-        time.sleep(0.01)
 
 
