@@ -15,12 +15,14 @@ class Table(QtGui.QTableWidget):
         #self.resizeColumnsToContents()
         #self.resizeRowsToContents()
 
-    def add_row(self, data, color, autoscroll):
-        max_row_count = 10000
+    def add_row(self, data, color, autoscroll, visible):
+        max_row_count = 20000
         row_count = self.rowCount()
         self.hideRow(row_count)
         row_count += 1
         self.setRowCount(row_count)
+        if visible is False:
+            self.hideRow(row_count-2)
         for i in range(len(data)):
             newitem = QtGui.QTableWidgetItem(data[i])
             if color is not None:
@@ -29,21 +31,29 @@ class Table(QtGui.QTableWidget):
             self.setItem(row_count - 2, i, newitem)
         if row_count > max_row_count:
             self.removeRow(0)
-        self.showColumn(row_count)
         if autoscroll is True:
             slide_bar = self.verticalScrollBar()
             slide_bar.setValue(slide_bar.maximum())
         print(row_count)
 
+    def filter_types(self, types):
+        for row in range(self.rowCount()):
+            self.showRow(row)
+        for type, visible in enumerate(types):
+            if visible is False:
+                search_string = can.MsgTypes(type).name
+                items_to_hide = self.findItems(search_string, QtCore.Qt.MatchExactly)
+                for item in items_to_hide:
+                    self.hideRow(item.row())
+
 
 class CanTableControl(QtGui.QWidget):
     def __init__(self):
         super().__init__()
-        self.running = False
+        self.packer = can.CanPacker()
         self.autoscroll_box = QtGui.QCheckBox('Autoscroll')
         self.run_button = QtGui.QPushButton('run')
         self.run_button.setCheckable(True)
-        #self.connect(autoscroll_box, QtCore.SIGNAL('stateChanged(int)'), self.table.change_autoscroll)
         self.colors = {
             can.MsgTypes.Position_Robot_1: (0, 255, 0),
             can.MsgTypes.Position_Robot_2: (255, 0, 0),
@@ -60,26 +70,34 @@ class CanTableControl(QtGui.QWidget):
         for i, type in enumerate(can.MsgTypes):
             checkbox = QtGui.QCheckBox(type.name)
             checkbox.setChecked(True)
+            checkbox.stateChanged.connect(self.change_typ_filter)
             self.type_chechboxes.append(checkbox)
             grid.addWidget(checkbox, i / 2 + 1, i % 2)
         self.setLayout(grid)
 
-    def test(self):
-        self.running = True
+    def change_typ_filter(self):
+        checked = []
+        for checkbox in self.type_chechboxes:
+            checked.append(checkbox.isChecked())
+        self.emit(QtCore.SIGNAL('Filter_changed'), checked)
 
-    def add_data(self, msg_frame):
+    def add_data(self, data):
         if self.run_button.isChecked():
-            if self.type_chechboxes[msg_frame['type'].value].isChecked():
-                table_sender = str(msg_frame['sender'])
-                table_type = str(msg_frame['type'].name)
-                table_color = self.colors[msg_frame['type']]
-                del msg_frame['type']
-                del msg_frame['sender']
-                table_msg = str(msg_frame)
-                current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
-                new_row = [current_time, table_sender, table_type, table_msg]
-
-                self.emit(QtCore.SIGNAL('new_can_Table_Row'), new_row, table_color, self.autoscroll_box.isChecked())
+            id = data[0]
+            sender = id & 0b00000000111
+            type = (id & 0b00111111000) >> 3
+            table_sender = str(can.MsgSender(sender).name)
+            table_type = str(can.MsgTypes(type).name)
+            table_color = self.colors[can.MsgTypes(type)]
+            msg = data[1].encode('latin-1')
+            msg_frame = self.packer.unpack(id, msg)
+            del msg_frame['type']
+            table_msg = str(msg_frame)
+            current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
+            new_row = [current_time, table_sender, table_type, table_msg]
+            autoscroll = self.autoscroll_box.isChecked()
+            visible = self.type_chechboxes[type].isChecked()
+            self.emit(QtCore.SIGNAL('new_can_Table_Row'), new_row, table_color, autoscroll, visible)
 
 
 class EditHost(QtGui.QWidget):
