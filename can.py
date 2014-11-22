@@ -82,6 +82,8 @@ class CanPacker(object):
         protocol = self.unpacker[msg_type]
         msg_frame = protocol(msg)
         msg_frame['type'] = msg_type
+        sender = id & 0b00000000111
+        msg_frame['sender'] = MsgSender(sender)
         return msg_frame
 
     def unpack_position_protocol(self, msg):

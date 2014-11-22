@@ -9,7 +9,6 @@ import sys
 class GameField(QtGui.QWidget):
     def __init__(self):
         super().__init__()
-        self.packer = can.CanPacker()
         self.pixmap = QtGui.QPixmap("./gui/Table.png")
         self.pixmap_ratio = self.pixmap.height() / self.pixmap.width()
         self.robot1 = (1500, 1000, 50, 0)
@@ -42,16 +41,10 @@ class GameField(QtGui.QWidget):
 
         painter.end()
 
-    def SetPoint(self, data):
-        id = data[0]
-        type = (id & 0b00111111000) >> 3
-        if can.MsgTypes(type).name == 'Position_Robot_1':
-            msg = data[1].encode('latin-1')
-            msg_frame = self.packer.unpack(id, msg)
+    def SetPoint(self, msg_frame):
+        if msg_frame['type'] == can.MsgTypes.Position_Robot_1:
             self.robot1 = (msg_frame['x_position'] / 10, msg_frame['y_position'] / 10, 50, msg_frame['angle'] / 100)
             self.update()
-        elif can.MsgTypes(type).name == 'Position_Enemy_1':
-            msg = data[1].encode('latin-1')
-            msg_frame = self.packer.unpack(id, msg)
+        elif msg_frame['type'] == can.MsgTypes.Position_Enemy_1:
             self.enemy2 = (msg_frame['x_position'] / 10, msg_frame['y_position'] / 10, 50)
             self.update()
