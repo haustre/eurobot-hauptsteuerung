@@ -15,8 +15,8 @@ class Can(object):
         self.can_frame_fmt = "=IB3x8s"
         self.packer = CanPacker()
         self.socket = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
-        can_id, can_mask = 0x600, 0x600
-        can_filter = struct.pack("=II", can_id, can_mask)
+        can_filter, can_mask = 0x600, 0x600
+        can_filter = struct.pack("=II", can_filter, can_mask)
         self.socket.setsockopt(socket.SOL_CAN_RAW, socket.CAN_RAW_FILTER, can_filter)
         self.socket.bind((interface, ))
         self.t_recv_connection = threading.Thread(target=self.recv_connection)
@@ -37,26 +37,26 @@ class Can(object):
 
     def recv_can(self):
         frame, addr = self.socket.recvfrom(16)
-        id, data = self.dissect_can_frame(frame)
-        return id, data
+        can_id, can_msg = self.dissect_can_frame(frame)
+        return can_id, can_msg
 
-    def send_can(self, id, msg):
-        frame = self.build_can_frame(id, msg)
+    def send_can(self, can_id, can_msg):
+        frame = self.build_can_frame(can_id, can_msg)
         self.socket.send(frame)
 
     def recv_connection(self):
         while 1:
-            id, msg = self.recv_can()
-            #msg_frame = self.packer.unpack(id, msg)
-            self.queue_debugg.put_nowait((id, msg.decode('latin-1')))     # Todo:überprüffen ob voll
+            can_id, can_msg = self.recv_can()
+            #msg_frame = self.packer.unpack(can_id, can_msg)
+            self.queue_debugg.put_nowait((can_id, can_msg.decode('latin-1')))     # Todo:überprüffen ob voll
 
     def send_connection(self):
         while 1:
-            id, msg = self.queue_send.get()
-            self.send_can(id, msg)
+            can_id, can_msg = self.queue_send.get()
+            self.send_can(can_id, can_msg)
 
-    def send(self, id, msg):
-        self.queue_send.put_nowait((id, msg))
+    def send(self, can_id, can_msg):
+        self.queue_send.put_nowait((can_id, can_msg))
 
 
 class CanPacker(object):
@@ -71,18 +71,18 @@ class CanPacker(object):
     def pack(self, type, data):
         priority = 0x3  # Debugg
         sender = 0x0  # Kern
-        id = priority << 9 + type.value << 3 + sender
+        can_id = priority << 9 + type.value << 3 + sender
         protocol = self.unpacker[type]
         #packer.unpack(data)
 
-    def unpack(self, id, msg):
+    def unpack(self, can_id, can_msg):
         mask = 0b00111111000
-        type_nr = (id & mask) >> 3
+        type_nr = (can_id & mask) >> 3
         msg_type = MsgTypes(type_nr)
         protocol = self.unpacker[msg_type]
-        msg_frame = protocol(msg)
+        msg_frame = protocol(can_msg)
         msg_frame['type'] = msg_type
-        sender = id & 0b00000000111
+        sender = can_id & 0b00000000111
         msg_frame['sender'] = MsgSender(sender)
         return msg_frame
 

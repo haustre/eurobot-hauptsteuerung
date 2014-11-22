@@ -113,9 +113,9 @@ class TcpConnection(QtCore.QThread):
             data = tcp.read_block()
             if tcp.connected is False:
                 break
-            id = data[0]
-            msg = data[1].encode('latin-1')
-            msg_frame = self.packer.unpack(id, msg)
+            can_id = data[0]
+            can_msg = data[1].encode('latin-1')
+            msg_frame = self.packer.unpack(can_id, can_msg)
             self.emit(QtCore.SIGNAL('tcp_data'), msg_frame)
         self.emit(QtCore.SIGNAL('tcp connection lost'))
 
