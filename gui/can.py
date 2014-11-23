@@ -51,7 +51,6 @@ class Table(QtGui.QTableWidget):
 class CanTableControl(QtGui.QWidget):
     def __init__(self):
         super().__init__()
-        self.packer = can.CanPacker()
         self.autoscroll_box = QtGui.QCheckBox('Autoscroll')
         self.run_button = QtGui.QPushButton('run')
         self.run_button.setCheckable(True)
@@ -119,7 +118,6 @@ class EditHost(QtGui.QWidget):
 class TcpConnection(QtCore.QThread):
     def __init__(self, host, port):
         QtCore.QThread.__init__(self)
-        self.packer = can.CanPacker()
         self.host = host
         self.port = port
 
@@ -131,7 +129,7 @@ class TcpConnection(QtCore.QThread):
                 break
             can_id = data[0]
             can_msg = data[1].encode('latin-1')
-            msg_frame = self.packer.unpack(can_id, can_msg)
+            msg_frame = can.unpack(can_id, can_msg)
             self.emit(QtCore.SIGNAL('tcp_data'), msg_frame)
         self.emit(QtCore.SIGNAL('tcp connection lost'))
 
