@@ -94,9 +94,11 @@ class CanPacker(object):
     #    return msg_frame
 
     def unpack(self, can_id, can_msg):
-        #mask = 0b00111111000
-        #type_nr = (can_id & mask) >> 3
-        #msg_type = MsgTypes(type_nr)
+        type_mask = 0b00111111000
+        type_nr = (can_id & type_mask) >> 3
+        msg_type = MsgTypes(type_nr)
+        sender_mask = 0b00000000111
+        sender = MsgSender(can_id & sender_mask)
         protocol = MsgEncoding.Position_Robot_1.value
         encoding, dictionary = protocol.value
         data = struct.unpack(encoding, can_msg)
@@ -108,6 +110,8 @@ class CanPacker(object):
                     msg_frame[dictionary[i][ii]] = bool_value
             else:
                 msg_frame[dictionary[i]] = line
+        msg_frame['type'] = msg_type
+        msg_frame['sender'] = sender
         return msg_frame
 
     def pack_position_protocol(self, msg_frame):
