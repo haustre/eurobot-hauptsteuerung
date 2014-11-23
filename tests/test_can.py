@@ -8,14 +8,14 @@ __author__ = 'mw'
 class TestCanPacker(TestCase):
 
     def test_encode_booleans(self):
-        bool_list = [True, False, True, False]
+        bool_list = [False, True, False, True]
         correct_result = 5
         self.assertEqual(can.CanPacker.encode_booleans(bool_list), correct_result)
 
     def test_decode_booleans(self):
         value = 5
         number_of_bools = 4
-        correct_result = [True, False, True, False]
+        correct_result = [False, True, False, True]
         self.assertEqual(can.CanPacker.decode_booleans(value, number_of_bools), correct_result)
 
     def test_unpack(self):

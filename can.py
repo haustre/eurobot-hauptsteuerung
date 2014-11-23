@@ -82,20 +82,37 @@ class CanPacker(object):
         can_id = (priority << 9) + (msg_frame['type'].value << 3) + sender
         return can_id, can_msg
 
+    #def unpack(self, can_id, can_msg):
+    #    mask = 0b00111111000
+    #    type_nr = (can_id & mask) >> 3
+    #    msg_type = MsgTypes(type_nr)
+    #    protocol = self.unpacker[msg_type]
+    #    msg_frame = protocol(can_msg)
+    #    msg_frame['type'] = msg_type
+    #    sender = can_id & 0b00000000111
+    #    msg_frame['sender'] = MsgSender(sender)
+    #    return msg_frame
+
     def unpack(self, can_id, can_msg):
-        mask = 0b00111111000
-        type_nr = (can_id & mask) >> 3
-        msg_type = MsgTypes(type_nr)
-        protocol = self.unpacker[msg_type]
-        msg_frame = protocol(can_msg)
-        msg_frame['type'] = msg_type
-        sender = can_id & 0b00000000111
-        msg_frame['sender'] = MsgSender(sender)
+        #mask = 0b00111111000
+        #type_nr = (can_id & mask) >> 3
+        #msg_type = MsgTypes(type_nr)
+        protocol = MsgEncoding.Position_Robot_1.value
+        encoding, dictionary = protocol.value
+        data = struct.unpack(encoding, can_msg)
+        msg_frame = {}
+        for i, line in enumerate(data):
+            if not isinstance(dictionary[i], str):
+                booleans = self.decode_booleans(line, len(dictionary[i]))
+                for ii, bool_value in enumerate(booleans):
+                    msg_frame[dictionary[i][ii]] = bool_value
+            else:
+                msg_frame[dictionary[i]] = line
         return msg_frame
 
     def pack_position_protocol(self, msg_frame):
         packer = struct.Struct('!BHHH')
-        data_correct = self.encode_booleans((msg_frame['position_correct'], msg_frame['angle_correct']))
+        data_correct = self.encode_booleans((msg_frame['angle_correct'], msg_frame['position_correct']))
         can_msg = packer.pack(data_correct, msg_frame['angle'], msg_frame['y_position'], msg_frame['x_position'])
         return can_msg
 
@@ -116,14 +133,14 @@ class CanPacker(object):
     @staticmethod
     def encode_booleans(bool_lst):
         res = 0
-        for i, bval in enumerate(bool_lst):
+        for i, bval in enumerate(reversed(bool_lst)):
             res += int(bval) << i
         return res
 
     @staticmethod
     def decode_booleans(intval, bits):
         res = []
-        for bit in range(bits):
+        for bit in reversed(range(bits)):
             mask = 1 << bit
             res.append((intval & mask) == mask)
         return res
@@ -150,4 +167,13 @@ class MsgSender(Enum):
     Debugging = 7
 
 
+class EncodingTypes(Enum):
+    #position_protocol = ('!BHHH', ('x_position', 'y_position', 'angle', ('position_correct', 'angle_correct')))
+    position_protocol = ('!BHHH', (('angle_correct', 'position_correct'), 'angle', 'y_position', 'x_position'))
 
+
+class MsgEncoding(Enum):
+    Position_Robot_1 = EncodingTypes.position_protocol
+    Position_Robot_2 = EncodingTypes.position_protocol
+    Position_Enemy_1 = EncodingTypes.position_protocol
+    Position_Enemy_2 = EncodingTypes.position_protocol
