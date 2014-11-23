@@ -141,7 +141,6 @@ class SendCan(QtGui.QWidget):
         super().__init__()
         self.msg_type_label = QtGui.QLabel('Message Type:')
         self.msg_label = QtGui.QLabel('Message:')
-        self.msg_line_label = QtGui.QLineEdit('123456')
         self.msg_type_combo = QtGui.QComboBox()
         msg_types = []
         for msg_type in can.MsgTypes:
@@ -150,7 +149,7 @@ class SendCan(QtGui.QWidget):
 
         hbox = QtGui.QGridLayout()
         for i in range(8):
-            line = QtGui.QLineEdit('123')
+            line = QtGui.QLineEdit("Byte: %s" % i)
             hbox.addWidget(line, i / 2 + 1, i % 2)
 
         grid = QtGui.QGridLayout()
