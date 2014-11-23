@@ -75,23 +75,24 @@ class CanPacker(object):
         }
 
     def pack(self, msg_frame):
-        protocol = self.packer[msg_frame['type']]
-        can_msg = protocol(msg_frame)
+        protocol = MsgEncoding.Position_Robot_1.value
+        encoding, dictionary = protocol.value
+        data = []
+        for value in dictionary:
+            if not isinstance(value, str):
+                booleans = []
+                for bool_value in value:
+                    booleans.append(msg_frame[bool_value])
+                bool_nr = self.encode_booleans(booleans)
+                data.append(bool_nr)
+            else:
+                data.append(msg_frame[value])
+        print(data)
+        can_msg = struct.pack(encoding, *data)
         priority = 0x3  # Todo: unterscheiden zwischen debug und normal
         sender = MsgSender.Hauptsteuerung.value
         can_id = (priority << 9) + (msg_frame['type'].value << 3) + sender
         return can_id, can_msg
-
-    #def unpack(self, can_id, can_msg):
-    #    mask = 0b00111111000
-    #    type_nr = (can_id & mask) >> 3
-    #    msg_type = MsgTypes(type_nr)
-    #    protocol = self.unpacker[msg_type]
-    #    msg_frame = protocol(can_msg)
-    #    msg_frame['type'] = msg_type
-    #    sender = can_id & 0b00000000111
-    #    msg_frame['sender'] = MsgSender(sender)
-    #    return msg_frame
 
     def unpack(self, can_id, can_msg):
         type_mask = 0b00111111000
@@ -172,7 +173,6 @@ class MsgSender(Enum):
 
 
 class EncodingTypes(Enum):
-    #position_protocol = ('!BHHH', ('x_position', 'y_position', 'angle', ('position_correct', 'angle_correct')))
     position_protocol = ('!BHHH', (('angle_correct', 'position_correct'), 'angle', 'y_position', 'x_position'))
 
 
