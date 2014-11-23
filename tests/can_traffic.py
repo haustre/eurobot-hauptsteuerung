@@ -28,20 +28,20 @@ s = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
 s.bind((sys.argv[1],))
 
 
-packer_position = struct.Struct('BHHH')
-x = 10000
-y = 10000
-angle = 18000
+packer_position = struct.Struct('!BHHH')
+x = 0
+y = 0
+angle = 0
 count = 0
 while True:
-    x += random.randrange(-30, 30)
-    y += random.randrange(-30, 30)
+    #x += random.randrange(-30, 30)
+    #y += random.randrange(-30, 30)
     angle += 1
-    #x += 1
-    #y += 1
+    x += 1
+    y += 1
     #angle += 2
     try:
-        data = packer_position.pack(3, angle, y, x)
+        data = packer_position.pack(4, angle, y, x)
         s.send(build_can_frame(0x61F, data))
         data = packer_position.pack(3, angle + 10, x, y + 100)
         s.send(build_can_frame(0x62F, data))
