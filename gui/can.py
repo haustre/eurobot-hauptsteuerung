@@ -143,13 +143,15 @@ class SendCan(QtGui.QWidget):
         self.msg_label = QtGui.QLabel('Message:')
         self.msg_line_label = QtGui.QLineEdit('123456')
         self.msg_type_combo = QtGui.QComboBox()
-        msg_types = ["Game_end", "Position", "Close_range_dedection", "Goto_position"]
+        msg_types = []
+        for msg_type in can.MsgTypes:
+            msg_types.append(msg_type.name)
         self.msg_type_combo.addItems(msg_types)
 
-        hbox = QtGui.QHBoxLayout()
-        for i in range(2):
+        hbox = QtGui.QGridLayout()
+        for i in range(8):
             line = QtGui.QLineEdit('123')
-            hbox.addWidget(line)
+            hbox.addWidget(line, i / 2 + 1, i % 2)
 
         grid = QtGui.QGridLayout()
         grid.addWidget(self.msg_type_label, 0, 0)

@@ -14,7 +14,7 @@ class _TcpConnection(object):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     @staticmethod
-    def _recv_json(self, s):
+    def _recv_json(s):
         data = ''
         size = s.recv(8).decode('UTF-8')
         size = int(size[2:7])
@@ -26,7 +26,7 @@ class _TcpConnection(object):
         return json.loads(data)
 
     @staticmethod
-    def _send_json(self, s, data):
+    def _send_json(s, data):
         json_data = json.dumps(data)
         data_len = "L=%05ds" % len(json_data)
         data_send = bytes(data_len + json_data, 'UTF-8')
