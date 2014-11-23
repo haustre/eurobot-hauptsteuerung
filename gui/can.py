@@ -40,9 +40,9 @@ class Table(QtGui.QTableWidget):
     def filter_types(self, types):
         for row in range(self.rowCount()):
             self.showRow(row)
-        for type, visible in enumerate(types):
+        for msg_type, visible in enumerate(types):
             if visible is False:
-                search_string = can.MsgTypes(type).name
+                search_string = can.MsgTypes(msg_type).name
                 items_to_hide = self.findItems(search_string, QtCore.Qt.MatchExactly)
                 for item in items_to_hide:
                     self.hideRow(item.row())

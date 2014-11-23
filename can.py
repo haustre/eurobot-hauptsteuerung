@@ -89,7 +89,7 @@ class CanPacker(object):
         packer = struct.Struct('BHHH')
         data = packer.unpack(msg)
         data_correct, angle, y_position, x_position = data
-        position_is_correct, angle_is_correct = self._decode_booleans(data_correct, 2)
+        position_is_correct, angle_is_correct = self.decode_booleans(data_correct, 2)
         msg_dict = {
             'position_correct': position_is_correct,
             'angle_correct': angle_is_correct,
@@ -99,13 +99,15 @@ class CanPacker(object):
         }
         return msg_dict
 
-    def _encode_booleans(self, bool_lst):
+    @staticmethod
+    def encode_booleans(bool_lst):
         res = 0
         for i, bval in enumerate(bool_lst):
             res += int(bval) << i
         return res
 
-    def _decode_booleans(self, intval, bits):
+    @staticmethod
+    def decode_booleans(intval, bits):
         res = []
         for bit in range(bits):
             mask = 1 << bit

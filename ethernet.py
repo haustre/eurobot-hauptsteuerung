@@ -13,6 +13,7 @@ class _TcpConnection(object):
         self.queues_send = []
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+    @staticmethod
     def _recv_json(self, s):
         data = ''
         size = s.recv(8).decode('UTF-8')
@@ -24,6 +25,7 @@ class _TcpConnection(object):
                 raise RuntimeError("socket connection broken")
         return json.loads(data)
 
+    @staticmethod
     def _send_json(self, s, data):
         json_data = json.dumps(data)
         data_len = "L=%05ds" % len(json_data)
