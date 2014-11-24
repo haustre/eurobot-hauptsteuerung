@@ -78,9 +78,9 @@ class CanTableControl(QtGui.QWidget):
     def add_data(self, msg_frame):
         msg_frame_copy = copy.copy(msg_frame)
         if self.run_button.isChecked():
-            table_sender = str(msg_frame_copy['sender'])
+            table_sender = str(msg_frame_copy['sender'].name)
             table_type = str(msg_frame_copy['type'].name)
-            table_color = can.MsgColors[msg_frame_copy['type']]
+            table_color = can.MsgColors[msg_frame_copy['type'].name].value
             visible = self.type_chechboxes[msg_frame_copy['type'].value].isChecked()
             del msg_frame_copy['type']
             del msg_frame_copy['sender']
