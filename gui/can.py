@@ -53,6 +53,7 @@ class CanTableControl(QtGui.QWidget):
         super().__init__()
         self.autoscroll_box = QtGui.QCheckBox('Autoscroll')
         self.run_button = QtGui.QPushButton('run')
+        self.run_button.clicked.connect(self.test)
         self.run_button.setCheckable(True)
 
         grid = QtGui.QGridLayout()
@@ -68,6 +69,14 @@ class CanTableControl(QtGui.QWidget):
             self.type_chechboxes.append(checkbox)
             grid.addWidget(checkbox, i / 2 + 1, i % 2)
         self.setLayout(grid)
+
+    def test(self):
+        if self.run_button.isChecked():
+            for checkbox in self.type_chechboxes:
+                checkbox.setEnabled(False)
+        else:
+            for checkbox in self.type_chechboxes:
+                checkbox.setEnabled(True)
 
     def change_typ_filter(self):
         checked = []
