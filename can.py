@@ -145,3 +145,16 @@ class MsgEncoding(Enum):
     Position_Robot_2 = EncodingTypes.position_protocol
     Position_Enemy_1 = EncodingTypes.position_protocol
     Position_Enemy_2 = EncodingTypes.position_protocol
+
+
+class MsgColors(Enum):
+    EmergencyShutdown = (0, 0, 255)
+    Emergency_Stop = (0, 0, 255)
+    Game_End = (0, 0, 255)
+    Position_Robot_1 = (0, 255, 0)
+    Position_Robot_2 = (255, 0, 0)
+    Position_Enemy_1 = (255, 0, 0)
+    Position_Enemy_2 = (255, 0, 0)
+    Close_Range_Dedection = (0, 0, 255)
+    Goto_Position = (0, 0, 255)
+    Drive_Status = (0, 0, 255)

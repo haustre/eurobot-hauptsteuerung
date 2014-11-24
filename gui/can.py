@@ -54,12 +54,6 @@ class CanTableControl(QtGui.QWidget):
         self.autoscroll_box = QtGui.QCheckBox('Autoscroll')
         self.run_button = QtGui.QPushButton('run')
         self.run_button.setCheckable(True)
-        self.colors = {
-            can.MsgTypes.Position_Robot_1: (0, 255, 0),
-            can.MsgTypes.Position_Robot_2: (255, 0, 0),
-            can.MsgTypes.Position_Enemy_1: (255, 0, 0),
-            can.MsgTypes.Position_Enemy_2: (255, 0, 0)
-        }
 
         grid = QtGui.QGridLayout()
         grid.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
@@ -86,7 +80,7 @@ class CanTableControl(QtGui.QWidget):
         if self.run_button.isChecked():
             table_sender = str(msg_frame_copy['sender'])
             table_type = str(msg_frame_copy['type'].name)
-            table_color = self.colors[msg_frame_copy['type']]
+            table_color = can.MsgColors[msg_frame_copy['type']]
             visible = self.type_chechboxes[msg_frame_copy['type'].value].isChecked()
             del msg_frame_copy['type']
             del msg_frame_copy['sender']
