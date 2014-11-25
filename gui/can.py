@@ -170,4 +170,9 @@ class SendCan(QtGui.QWidget):
         msg_type = can.MsgTypes(index).value
         encoding, dictionary = can.MsgEncoding[msg_type]
         for i, line in enumerate(self.lines):
-            line.setText(str(dictionary[i]))
+            if i < len(dictionary):
+                line.setText(str(dictionary[i]))
+                line.setEnabled(True)
+            else:
+                line.setEnabled(False)
+                line.setText("Byte: %s" % i)
