@@ -60,10 +60,10 @@ class Can(object):
 def pack(msg_frame):
     encoding, dictionary = MsgEncoding[msg_frame['type'].value]
     data = []
-    for value in dictionary:
+    for value in reversed(dictionary):
         if not isinstance(value, str):
             booleans = []
-            for bool_value in value:
+            for bool_value in reversed(value):
                 booleans.append(msg_frame[bool_value])
             bool_nr = encode_booleans(booleans)
             data.append(bool_nr)
@@ -86,10 +86,10 @@ def unpack(can_id, can_msg):
     encoding, dictionary = MsgEncoding[MsgTypes(type_nr).value]
     data = struct.unpack(encoding, can_msg)
     msg_frame = {}
-    for i, line in enumerate(data):
+    for i, line in enumerate(reversed(data)):
         if not isinstance(dictionary[i], str):
             booleans = decode_booleans(line, len(dictionary[i]))
-            for ii, bool_value in enumerate(booleans):
+            for ii, bool_value in enumerate(reversed(booleans)):
                 msg_frame[dictionary[i][ii]] = bool_value
         else:
             msg_frame[dictionary[i]] = line
@@ -134,7 +134,7 @@ class MsgSender(Enum):
     Debugging = 7
 
 EncodingTypes = {
-    'position_protocol': ('!BHHH', (('angle_correct', 'position_correct'), 'angle', 'y_position', 'x_position'))
+    'position_protocol': ('!BHHH', ('x_position', 'y_position', 'angle', ('position_correct', 'angle_correct')))
 }
 
 MsgEncoding = {
