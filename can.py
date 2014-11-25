@@ -58,7 +58,7 @@ class Can(object):
 
 
 def pack(msg_frame):
-    protocol = MsgEncoding.Position_Robot_1.value
+    protocol = MsgEncoding.Position_Robot_1.value  # Todo: nur ein Test
     encoding, dictionary = protocol.value
     data = []
     for value in dictionary:

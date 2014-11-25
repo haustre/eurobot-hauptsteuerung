@@ -53,7 +53,7 @@ class CanTableControl(QtGui.QWidget):
         super().__init__()
         self.autoscroll_box = QtGui.QCheckBox('Autoscroll')
         self.run_button = QtGui.QPushButton('run')
-        self.run_button.clicked.connect(self.test)
+        self.run_button.clicked.connect(self.run_button_clicked)
         self.run_button.setCheckable(True)
 
         grid = QtGui.QGridLayout()
@@ -70,7 +70,7 @@ class CanTableControl(QtGui.QWidget):
             grid.addWidget(checkbox, i / 2 + 1, i % 2)
         self.setLayout(grid)
 
-    def test(self):
+    def run_button_clicked(self):
         if self.run_button.isChecked():
             for checkbox in self.type_chechboxes:
                 checkbox.setEnabled(False)
@@ -147,12 +147,14 @@ class SendCan(QtGui.QWidget):
         for msg_type in can.MsgTypes:
             msg_types.append(msg_type.name)
         self.msg_type_combo.addItems(msg_types)
+        self.msg_type_combo.currentIndexChanged.connect(self.selection_changed)
 
         hbox = QtGui.QGridLayout()
+        self.lines = []
         for i in range(8):
             line = QtGui.QLineEdit("Byte: %s" % i)
+            self.lines.append(line)
             hbox.addWidget(line, i / 2 + 1, i % 2)
-
         grid = QtGui.QGridLayout()
         grid.addWidget(self.msg_type_label, 0, 0)
         grid.addWidget(self.msg_type_combo, 0, 1)
@@ -162,3 +164,10 @@ class SendCan(QtGui.QWidget):
         vbox.addLayout(hbox)
 
         self.setLayout(vbox)
+
+    def selection_changed(self):
+        msg_type = self.msg_type_combo.currentText()
+        protocol = can.MsgEncoding.Position_Robot_1.value  # Todo: nur ein Test
+        encoding, dictionary = protocol.value
+        for i, line in enumerate(reversed(self.lines)):
+            line.setText(str(dictionary[i]))
