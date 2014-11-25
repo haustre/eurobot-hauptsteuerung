@@ -89,7 +89,6 @@ class CanTableControl(QtGui.QWidget):
         if self.run_button.isChecked():
             table_sender = str(msg_frame_copy['sender'].name)
             table_type = str(msg_frame_copy['type'].name)
-            #table_color = can.MsgColors[msg_frame_copy['type'].name].value
             table_color = can.MsgColors[msg_frame_copy['type'].value]
             visible = self.type_chechboxes[msg_frame_copy['type'].value].isChecked()
             del msg_frame_copy['type']
@@ -167,8 +166,8 @@ class SendCan(QtGui.QWidget):
         self.setLayout(vbox)
 
     def selection_changed(self):
-        msg_type = self.msg_type_combo.currentText()
-        protocol = can.MsgEncoding.Position_Robot_1.value  # Todo: nur ein Test
-        encoding, dictionary = protocol.value
-        for i, line in enumerate(reversed(self.lines)):
+        index = self.msg_type_combo.currentIndex()
+        msg_type = can.MsgTypes(index).value
+        encoding, dictionary = can.MsgEncoding[msg_type]
+        for i, line in enumerate(self.lines):
             line.setText(str(dictionary[i]))

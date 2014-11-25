@@ -133,11 +133,9 @@ class MsgSender(Enum):
     Peripherie = 3
     Debugging = 7
 
-
 EncodingTypes = {
     'position_protocol': ('!BHHH', (('angle_correct', 'position_correct'), 'angle', 'y_position', 'x_position'))
 }
-
 
 MsgEncoding = {
     MsgTypes.Position_Robot_1.value: EncodingTypes['position_protocol'],
