@@ -58,8 +58,7 @@ class Can(object):
 
 
 def pack(msg_frame):
-    protocol = MsgEncoding.Position_Robot_1.value  # Todo: nur ein Test
-    encoding, dictionary = protocol.value
+    encoding, dictionary = MsgEncoding[msg_frame['type'].value]
     data = []
     for value in dictionary:
         if not isinstance(value, str):
@@ -84,8 +83,7 @@ def unpack(can_id, can_msg):
     msg_type = MsgTypes(type_nr)
     sender_mask = 0b00000000111
     sender = MsgSender(can_id & sender_mask)
-    protocol = MsgEncoding.Position_Robot_1.value
-    encoding, dictionary = protocol.value
+    encoding, dictionary = MsgEncoding[MsgTypes(type_nr).value]
     data = struct.unpack(encoding, can_msg)
     msg_frame = {}
     for i, line in enumerate(data):
@@ -136,25 +134,27 @@ class MsgSender(Enum):
     Debugging = 7
 
 
-class EncodingTypes(Enum):
-    position_protocol = ('!BHHH', (('angle_correct', 'position_correct'), 'angle', 'y_position', 'x_position'))
+EncodingTypes = {
+    'position_protocol': ('!BHHH', (('angle_correct', 'position_correct'), 'angle', 'y_position', 'x_position'))
+}
 
 
-class MsgEncoding(Enum):
-    Position_Robot_1 = EncodingTypes.position_protocol
-    Position_Robot_2 = EncodingTypes.position_protocol
-    Position_Enemy_1 = EncodingTypes.position_protocol
-    Position_Enemy_2 = EncodingTypes.position_protocol
+MsgEncoding = {
+    MsgTypes.Position_Robot_1.value: EncodingTypes['position_protocol'],
+    MsgTypes.Position_Robot_2.value: EncodingTypes['position_protocol'],
+    MsgTypes.Position_Enemy_1.value: EncodingTypes['position_protocol'],
+    MsgTypes.Position_Enemy_2.value: EncodingTypes['position_protocol']
+}
 
-
-class MsgColors(Enum):
-    EmergencyShutdown = (0, 0, 255)
-    Emergency_Stop = (0, 0, 255)
-    Game_End = (0, 0, 255)
-    Position_Robot_1 = (0, 255, 0)
-    Position_Robot_2 = (255, 0, 0)
-    Position_Enemy_1 = (255, 0, 0)
-    Position_Enemy_2 = (255, 0, 0)
-    Close_Range_Dedection = (0, 0, 255)
-    Goto_Position = (0, 0, 255)
-    Drive_Status = (0, 0, 255)
+MsgColors = {
+    MsgTypes.EmergencyShutdown.value:      (0, 0, 255),
+    MsgTypes.Emergency_Stop.value:         (0, 0, 255),
+    MsgTypes.Game_End.value:               (0, 0, 255),
+    MsgTypes.Position_Robot_1.value:       (0, 255, 0),
+    MsgTypes.Position_Robot_2.value:       (255, 0, 0),
+    MsgTypes.Position_Enemy_1.value:       (255, 0, 0),
+    MsgTypes.Position_Enemy_2.value:       (255, 0, 0),
+    MsgTypes.Close_Range_Dedection.value:  (0, 0, 255),
+    MsgTypes.Goto_Position.value:          (0, 0, 255),
+    MsgTypes.Drive_Status.value:           (0, 0, 255)
+}

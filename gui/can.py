@@ -89,7 +89,8 @@ class CanTableControl(QtGui.QWidget):
         if self.run_button.isChecked():
             table_sender = str(msg_frame_copy['sender'].name)
             table_type = str(msg_frame_copy['type'].name)
-            table_color = can.MsgColors[msg_frame_copy['type'].name].value
+            #table_color = can.MsgColors[msg_frame_copy['type'].name].value
+            table_color = can.MsgColors[msg_frame_copy['type'].value]
             visible = self.type_chechboxes[msg_frame_copy['type'].value].isChecked()
             del msg_frame_copy['type']
             del msg_frame_copy['sender']
