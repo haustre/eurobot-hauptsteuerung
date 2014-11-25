@@ -6,6 +6,7 @@ import ethernet
 import datetime
 import can
 import copy
+import speak
 
 
 class Table(QtGui.QTableWidget):
@@ -134,6 +135,7 @@ class TcpConnection(QtCore.QThread):
             can_msg = data[1].encode('latin-1')
             msg_frame = can.unpack(can_id, can_msg)
             self.emit(QtCore.SIGNAL('tcp_data'), msg_frame)
+        speak.speak("Connection to Robot lost")
         self.emit(QtCore.SIGNAL('tcp connection lost'))
 
 
