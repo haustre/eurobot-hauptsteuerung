@@ -42,9 +42,9 @@ class TestCanPacker(TestCase):
             'y_position': 1234,
             'x_position': 2345
         }
-        result = can.pack(can_msg)
+        result = can.pack(can_msg, can.MsgSender.Debugging)
         priority = 0x3
-        sender = 0x0
+        sender = 0x7
         msg_type = 0x3
         can_id = (priority << 9) + (msg_type << 3) + sender
         data_correct = (0 << 1) + (1 << 0)

@@ -8,7 +8,8 @@ from enum import Enum
 
 
 class Can(object):
-    def __init__(self, interface):
+    def __init__(self, interface, sender):
+        self.sender = sender
         self.queue_send = queue.Queue()
         self.queue_debug = queue.Queue()
         self.can_frame_fmt = "=IB3x8s"
@@ -53,11 +54,13 @@ class Can(object):
             can_id, can_msg = self.queue_send.get()
             self.send_can(can_id, can_msg)
 
-    def send(self, can_id, can_msg):
+    def send(self, msg_frame):
+        can_id, can_msg = pack(msg_frame, self.sender)
+        frame = self.build_can_frame(can_id, can_msg)
         self.queue_send.put_nowait((can_id, can_msg))
 
 
-def pack(msg_frame):
+def pack(msg_frame, sender):
     encoding, dictionary = MsgEncoding[msg_frame['type'].value]
     data = []
     for value in reversed(dictionary):
@@ -69,10 +72,9 @@ def pack(msg_frame):
             data.append(bool_nr)
         else:
             data.append(msg_frame[value])
-    print(data)
     can_msg = struct.pack(encoding, *data)
     priority = 0x3  # Todo: unterscheiden zwischen debug und normal
-    sender = MsgSender.Hauptsteuerung.value
+    sender = sender.value
     can_id = (priority << 9) + (msg_frame['type'].value << 3) + sender
     return can_id, can_msg
 

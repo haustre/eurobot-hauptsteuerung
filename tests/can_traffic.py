@@ -1,55 +1,45 @@
 __author__ = 'mw'
 
-import socket
-import struct
 import sys
+import can
 import time
-import random
-
-# CAN frame packing/unpacking (see `struct can_frame` in <linux/can.h>)
-can_frame_fmt = "=IB3x8s"
-
-def build_can_frame(can_id, data):
-       can_dlc = len(data)
-       data = data.ljust(8, b'\x00')
-       return struct.pack(can_frame_fmt, can_id, can_dlc, data)
-
-def dissect_can_frame(frame):
-       can_id, can_dlc, data = struct.unpack(can_frame_fmt, frame)
-       return can_id, can_dlc, data[:can_dlc]
-
-if len(sys.argv) != 2:
-       print('Provide CAN device name (can0, slcan0 etc.)')
-       sys.exit(0)
-print(sys.argv[1])
-
-# create a raw socket and bind it to the given CAN interface
-s = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
-s.bind((sys.argv[1],))
 
 
-packer_position = struct.Struct('!BHHH')
-x = 0
-y = 0
-angle = 0
-count = 0
-while True:
-    #x += random.randrange(-30, 30)
-    #y += random.randrange(-30, 30)
-    angle += 1
-    x += 1
-    y += 1
-    #angle += 2
-    try:
-        data = packer_position.pack(4, angle, y, x)
-        s.send(build_can_frame(0x61F, data))
-        data = packer_position.pack(3, angle + 10, x, y + 100)
-        s.send(build_can_frame(0x62F, data))
-        #print(count)
-        print(angle, x, y)
-        count += 1
-    except socket.error:
-        print('Error1 sending CAN frame')
-    time.sleep(1/100)
+def main():
+    if len(sys.argv) != 2:
+            print('Provide CAN device name (can0, vcan0 etc.)')
+            sys.exit(0)
+    can_connection = can.Can(sys.argv[1], can.MsgSender.Debugging)
+
+    x = 0
+    y = 0
+    angle = 0
+    while True:
+        angle += 1
+        x += 1
+        y += 1
+        can_msg = {
+            'type': can.MsgTypes.Position_Robot_1,
+            'position_correct': True,
+            'angle_correct': False,
+            'angle': angle,
+            'y_position': y,
+            'x_position': x
+        }
+        can_connection.send(can_msg)
+
+        can_msg = {
+            'type': can.MsgTypes.Position_Enemy_1,
+            'position_correct': False,
+            'angle_correct': True,
+            'angle': angle + 100,
+            'y_position': y + 100,
+            'x_position': x + 100
+        }
+        can_connection.send(can_msg)
+
+        time.sleep(1/100)
+
+main()
 
 
