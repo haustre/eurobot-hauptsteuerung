@@ -4,6 +4,7 @@ import sys
 from PyQt4 import QtGui, QtCore
 import gui.can
 import gui.field
+import speak
 
 
 class CanWindow(QtGui.QWidget):
@@ -39,6 +40,7 @@ class CanWindow(QtGui.QWidget):
 
     def connect_host(self):
         if self.connected is False:
+            speak.speak("connect to Robot")
             self.connected = True
             self.edit_host.host_button.setEnabled(False)
             host = self.edit_host.host_line.text()
