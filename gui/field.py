@@ -10,10 +10,10 @@ class GameField(QtGui.QWidget):
         super().__init__()
         self.table_pixmap = QtGui.QPixmap("./gui/Table.png")
         self.robot1_pixmap = QtGui.QPixmap("./gui/Robot1.png")
-        self.robot2_pixmap = QtGui.QPixmap("./gui/Robot2.png")
+        self.enemy2_pixmap = QtGui.QPixmap("./gui/Robot2.png")
         self.pixmap_ratio = self.table_pixmap.height() / self.table_pixmap.width()
         self.robot1 = (1500, 1000, 300, 0)
-        self.enemy2 = (1500, 1000, 300)
+        self.enemy2 = (1500, 1000, 300, 0)
 
     def paintEvent(self, event):
         frame_ratio = self.size().height() / self.size().width()
@@ -31,23 +31,26 @@ class GameField(QtGui.QWidget):
 
         x, y, diameter, _ = [x * scale for x in self.robot1]
         angle = self.robot1[3]
-        #pixmap = self.robot1_pixmap.transformed(QtGui.QTransform().rotate(angle))
-        #painter.drawPixmap(x, y, diameter, diameter, pixmap)
         pixmap = self.robot1_pixmap.scaled(diameter, diameter, QtCore.Qt.KeepAspectRatio)
         pixmap = pixmap.transformed(QtGui.QTransform().rotate(angle))
         pixmap_width = pixmap.size().width()
         pixmap_height = pixmap.size().height()
         painter.drawPixmap(x - pixmap_width/2, y - pixmap_height/2, pixmap)
 
-        x, y, diameter = [x * scale for x in self.enemy2]
-        painter.drawPixmap(x, y, diameter, diameter, self.robot2_pixmap)
+        x, y, diameter, _ = [x * scale for x in self.enemy2]
+        angle = self.enemy2[3]
+        pixmap = self.enemy2_pixmap.scaled(diameter, diameter, QtCore.Qt.KeepAspectRatio)
+        pixmap = pixmap.transformed(QtGui.QTransform().rotate(angle))
+        pixmap_width = pixmap.size().width()
+        pixmap_height = pixmap.size().height()
+        painter.drawPixmap(x - pixmap_width/2, y - pixmap_height/2, pixmap)
 
         painter.end()
 
     def setpoint(self, msg_frame):
         if msg_frame['type'] == can.MsgTypes.Position_Robot_1:
-            self.robot1 = (msg_frame['x_position'] / 10, msg_frame['y_position'] / 10, 300, msg_frame['angle'])
+            self.robot1 = (msg_frame['x_position'], msg_frame['y_position'], 300, msg_frame['angle'])
             self.update()
         elif msg_frame['type'] == can.MsgTypes.Position_Enemy_1:
-            self.enemy2 = (msg_frame['x_position'] / 10, msg_frame['y_position'] / 10, 300)
+            self.enemy2 = (msg_frame['x_position'], msg_frame['y_position'], 300, msg_frame['angle'])
             self.update()
