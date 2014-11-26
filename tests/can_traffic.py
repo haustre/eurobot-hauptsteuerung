@@ -32,12 +32,12 @@ def main():
             'type': can.MsgTypes.Position_Enemy_1,
             'position_correct': False,
             'angle_correct': True,
-            'angle': angle + 100,
-            'y_position': y + 100,
-            'x_position': x + 100
+            'angle': angle + 1000,
+            'y_position': y + 1000,
+            'x_position': x + 1000
         }
         can_connection.send(can_msg)
-
+        print(angle)
         time.sleep(1/100)
 
 main()

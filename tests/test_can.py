@@ -29,7 +29,7 @@ class TestCanPacker(TestCase):
         msg_frame = can.unpack(can_id, can_msg)
         correct_result = (False, True, 234, 1234, 2345, can.MsgTypes.Position_Robot_1, can.MsgSender.Hauptsteuerung)
         result = msg_frame['angle_correct'], msg_frame['position_correct'], msg_frame['angle'],\
-                 msg_frame['y_position'], msg_frame['x_position'], msg_frame['type'], msg_frame['sender']
+        msg_frame['y_position'], msg_frame['x_position'], msg_frame['type'], msg_frame['sender']
         self.assertEqual(correct_result, result)
         pass
 
