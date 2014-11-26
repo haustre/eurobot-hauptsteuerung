@@ -25,13 +25,19 @@ class GameField(QtGui.QWidget):
             widget_width = widget_height / self.pixmap_ratio
         painter = QtGui.QPainter()
         painter.begin(self)
+        painter.setRenderHint(QtGui.QPainter.Antialiasing)  # Todo: check if necessary
         painter.drawPixmap(0, 0, widget_width, widget_height, self.table_pixmap)
         scale = widget_width / 3000
 
         x, y, diameter, _ = [x * scale for x in self.robot1]
         angle = self.robot1[3]
-        pixmap = self.robot1_pixmap.transformed(QtGui.QTransform().rotate(angle))
-        painter.drawPixmap(x, y, diameter, diameter, pixmap)
+        #pixmap = self.robot1_pixmap.transformed(QtGui.QTransform().rotate(angle))
+        #painter.drawPixmap(x, y, diameter, diameter, pixmap)
+        pixmap = self.robot1_pixmap.scaled(diameter, diameter, QtCore.Qt.KeepAspectRatio)
+        pixmap = pixmap.transformed(QtGui.QTransform().rotate(angle))
+        pixmap_width = pixmap.size().width()
+        pixmap_height = pixmap.size().height()
+        painter.drawPixmap(x - pixmap_width/2, y - pixmap_height/2, pixmap)
 
         x, y, diameter = [x * scale for x in self.enemy2]
         painter.drawPixmap(x, y, diameter, diameter, self.robot2_pixmap)
