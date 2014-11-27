@@ -15,9 +15,9 @@ def main():
     y = 0
     angle = 0
     while True:
-        angle += 1
-        x += 1
-        y += 1
+        angle += 10
+        x += 5
+        y += 5
         can_msg = {
             'type': can.MsgTypes.Position_Robot_1,
             'position_correct': True,

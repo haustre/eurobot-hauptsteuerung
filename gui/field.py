@@ -10,10 +10,10 @@ class GameField(QtGui.QWidget):
         super().__init__()
         self.table_pixmap = QtGui.QPixmap("./gui/Table.png")
         self.robot1_pixmap = QtGui.QPixmap("./gui/Robot1.png")
-        self.enemy2_pixmap = QtGui.QPixmap("./gui/Robot2.png")
+        self.enemy1_pixmap = QtGui.QPixmap("./gui/Robot2.png")
         self.pixmap_ratio = self.table_pixmap.height() / self.table_pixmap.width()
-        self.robot1 = (1500, 1000, 300, 0)
-        self.enemy2 = (1500, 1000, 300, 0)
+        self.robot1 = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.robot1_pixmap}
+        self.enemy1 = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.enemy1_pixmap}
 
     def paintEvent(self, event):
         frame_ratio = self.size().height() / self.size().width()
@@ -28,29 +28,30 @@ class GameField(QtGui.QWidget):
         painter.setRenderHint(QtGui.QPainter.Antialiasing)  # Todo: check if necessary
         painter.drawPixmap(0, 0, widget_width, widget_height, self.table_pixmap)
         scale = widget_width / 3000
-
-        x, y, diameter, _ = [x * scale for x in self.robot1]
-        angle = self.robot1[3]
-        pixmap = self.robot1_pixmap.scaled(diameter, diameter, QtCore.Qt.KeepAspectRatio)
-        pixmap = pixmap.transformed(QtGui.QTransform().rotate(angle))
-        pixmap_width = pixmap.size().width()
-        pixmap_height = pixmap.size().height()
-        painter.drawPixmap(x - pixmap_width/2, y - pixmap_height/2, pixmap)
-
-        x, y, diameter, _ = [x * scale for x in self.enemy2]
-        angle = self.enemy2[3]
-        pixmap = self.enemy2_pixmap.scaled(diameter, diameter, QtCore.Qt.KeepAspectRatio)
-        pixmap = pixmap.transformed(QtGui.QTransform().rotate(angle))
-        pixmap_width = pixmap.size().width()
-        pixmap_height = pixmap.size().height()
-        painter.drawPixmap(x - pixmap_width/2, y - pixmap_height/2, pixmap)
+        self.draw_robot(painter, self.robot1, scale)
+        self.draw_robot(painter, self.enemy1, scale)
 
         painter.end()
 
+    def draw_robot(self, painter, robot, scale):
+        x = robot['x_position'] * scale
+        y = robot['y_position'] * scale
+        diameter = robot['diameter'] * scale
+        pixmap = robot['pixmap']
+        pixmap = pixmap.scaled(diameter, diameter, QtCore.Qt.KeepAspectRatio)
+        pixmap = pixmap.transformed(QtGui.QTransform().rotate(robot['angle']))
+        pixmap_width = pixmap.size().width()
+        pixmap_height = pixmap.size().height()
+        painter.drawPixmap(x - pixmap_width/2, y - pixmap_height/2, pixmap)
+
     def setpoint(self, msg_frame):
         if msg_frame['type'] == can.MsgTypes.Position_Robot_1:
-            self.robot1 = (msg_frame['x_position'], msg_frame['y_position'], 300, msg_frame['angle'])
-            self.update()
+            self.robot1['x_position'] = msg_frame['x_position'] / 10
+            self.robot1['y_position'] = msg_frame['y_position'] / 10
+            self.robot1['angle'] = msg_frame['angle'] / 100
+
         elif msg_frame['type'] == can.MsgTypes.Position_Enemy_1:
-            self.enemy2 = (msg_frame['x_position'], msg_frame['y_position'], 300, msg_frame['angle'])
-            self.update()
+            self.enemy1['x_position'] = msg_frame['x_position'] / 10
+            self.enemy1['y_position'] = msg_frame['y_position'] / 10
+            self.enemy1['angle'] = msg_frame['angle'] / 100
+        self.update()
