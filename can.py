@@ -136,7 +136,7 @@ class MsgSender(Enum):
     Debugging = 7
 
 EncodingTypes = {
-    'position_protocol': ('!BHHH', ('x_position', 'y_position', 'angle', ('position_correct', 'angle_correct')))
+    'position_protocol': ('!BHHH', ('x_position', 'y_position', 'angle', ('position_correct', 'angle_correct'))),
 }
 
 MsgEncoding = {
