@@ -14,4 +14,6 @@ def main():
     while True:
         can_msg = can_rcv.queue_debug.get()
         tcp.write(can_msg)
-main()
+
+if __name__ == "__main__":
+    main()

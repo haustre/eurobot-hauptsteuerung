@@ -40,6 +40,7 @@ def main():
         print(angle)
         time.sleep(1/100)
 
-main()
+if __name__ == "__main__":
+    main()
 
 

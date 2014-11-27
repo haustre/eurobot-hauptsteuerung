@@ -78,4 +78,5 @@ def main(args):
     can_window.show()
     sys.exit(app.exec_())
 
-main(sys.argv)
+if __name__ == "__main__":
+    main(sys.argv)
