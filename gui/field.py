@@ -37,12 +37,12 @@ class GameField(QtGui.QWidget):
         x = robot['x_position'] * scale
         y = robot['y_position'] * scale
         diameter = robot['diameter'] * scale
-        pixmap = robot['pixmap']
-        pixmap = pixmap.scaled(diameter, diameter, QtCore.Qt.KeepAspectRatio)
-        pixmap = pixmap.transformed(QtGui.QTransform().rotate(robot['angle']))
-        pixmap_width = pixmap.size().width()
-        pixmap_height = pixmap.size().height()
-        painter.drawPixmap(x - pixmap_width/2, y - pixmap_height/2, pixmap)
+        raw_pixmap = robot['pixmap']
+        scaled_pixmap = raw_pixmap.scaled(diameter, diameter, QtCore.Qt.KeepAspectRatio)
+        rotated_pixmap = scaled_pixmap.transformed(QtGui.QTransform().rotate(robot['angle']))
+        pixmap_width = rotated_pixmap.size().width()
+        pixmap_height = rotated_pixmap.size().height()
+        painter.drawPixmap(x - pixmap_width/2, y - pixmap_height/2, rotated_pixmap)
 
     def setpoint(self, msg_frame):
         if msg_frame['type'] == can.MsgTypes.Position_Robot_1:
