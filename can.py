@@ -150,10 +150,10 @@ EncodingTypes = {
 }
 
 MsgEncoding = {
-    MsgTypes.Position_Robot_1.value: EncodingTypes['position_protocol'],
-    MsgTypes.Position_Robot_2.value: EncodingTypes['position_protocol'],
-    MsgTypes.Position_Enemy_1.value: EncodingTypes['position_protocol'],
-    MsgTypes.Position_Enemy_2.value: EncodingTypes['position_protocol']
+    MsgTypes.Position_Robot_1.value: EncodingTypes['position'],
+    MsgTypes.Position_Robot_2.value: EncodingTypes['position'],
+    MsgTypes.Position_Enemy_1.value: EncodingTypes['position'],
+    MsgTypes.Position_Enemy_2.value: EncodingTypes['position']
 }
 
 MsgColors = {
