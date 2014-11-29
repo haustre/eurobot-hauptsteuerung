@@ -150,20 +150,23 @@ class SendCan(QtGui.QWidget):
             msg_types.append(msg_type.name)
         self.msg_type_combo.addItems(msg_types)
         self.msg_type_combo.currentIndexChanged.connect(self.selection_changed)
+        self.send_button = QtGui.QPushButton('send')
 
-        hbox = QtGui.QGridLayout()
+        grid = QtGui.QGridLayout()
+        grid.addWidget(self.msg_type_label, 0, 0)
+        grid.addWidget(self.msg_type_combo, 0, 1)
+        grid.addWidget(self.send_button, 1, 1)
+
+        grid2 = QtGui.QGridLayout()
         self.lines = []
         for i in range(8):
             line = QtGui.QLineEdit("Byte: %s" % i)
             self.lines.append(line)
-            hbox.addWidget(line, i / 2 + 1, i % 2)
-        grid = QtGui.QGridLayout()
-        grid.addWidget(self.msg_type_label, 0, 0)
-        grid.addWidget(self.msg_type_combo, 0, 1)
+            grid2.addWidget(line, i / 2 + 1, i % 2)
 
         vbox = QtGui.QVBoxLayout()
         vbox.addLayout(grid)
-        vbox.addLayout(hbox)
+        vbox.addLayout(grid2)
 
         self.setLayout(vbox)
 
