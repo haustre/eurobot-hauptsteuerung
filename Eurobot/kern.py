@@ -2,7 +2,7 @@ __author__ = 'mw'
 
 import sys
 
-import can
+from Eurobot import can
 from Eurobot.ethernet import Server
 
 
