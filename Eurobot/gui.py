@@ -1,10 +1,11 @@
+from Eurobot import speak
+
 __author__ = 'mw'
 
 import sys
 from PyQt4 import QtGui, QtCore
-import gui.can
-import gui.field
-import speak
+import Eurobot.gui.field
+import Eurobot.gui.communication
 
 
 class CanWindow(QtGui.QWidget):
@@ -13,11 +14,11 @@ class CanWindow(QtGui.QWidget):
         self.threads = []
         self.connected = False
         header = ['Time', 'Source', 'Type', 'Value']
-        self.can_table = gui.can.Table(header)
-        self.can_table_control = gui.can.CanTableControl()
-        self.edit_host = gui.can.EditHost()
-        self.send_can = gui.can.SendCan()
-        self.game_field = gui.field.GameField()
+        self.can_table = Eurobot.gui.communication.Table(header)
+        self.can_table_control = Eurobot.gui.communication.CanTableControl()
+        self.edit_host = Eurobot.gui.communication.EditHost()
+        self.send_can = Eurobot.gui.communication.SendCan()
+        self.game_field = Eurobot.gui.field.GameField()
         self.init_ui()
 
     def init_ui(self):
@@ -46,7 +47,7 @@ class CanWindow(QtGui.QWidget):
             host = self.edit_host.host_line.text()
             port = self.edit_host.port_line.text()
             print(host, port)
-            thread = gui.can.TcpConnection(host, port)
+            thread = Eurobot.gui.communication.TcpConnection(host, port)
             self.connect(thread, QtCore.SIGNAL('tcp_data'), self.can_table_control.add_data)
             self.connect(thread, QtCore.SIGNAL('tcp_data'), self.game_field.setpoint)
             self.connect(thread, QtCore.SIGNAL('tcp connection lost'), self.lost_connection)

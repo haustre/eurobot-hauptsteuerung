@@ -1,6 +1,8 @@
 from unittest import TestCase
-import can
 import struct
+
+from Eurobot import can
+
 
 __author__ = 'mw'
 

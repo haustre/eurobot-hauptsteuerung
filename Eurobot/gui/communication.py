@@ -1,12 +1,11 @@
+from Eurobot import ethernet, can, speak
+
 __author__ = 'mw'
 
 from PyQt4 import QtGui, QtCore
 
-import ethernet
 import datetime
-import can
 import copy
-import speak
 
 
 class Table(QtGui.QTableWidget):

@@ -1,8 +1,9 @@
 __author__ = 'mw'
 
-import can
-from ethernet import Server
 import sys
+
+import can
+from Eurobot.ethernet import Server
 
 
 def main():

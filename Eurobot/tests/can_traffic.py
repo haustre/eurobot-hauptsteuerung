@@ -1,7 +1,8 @@
+from Eurobot import can
+
 __author__ = 'mw'
 
 import sys
-import can
 import time
 
 

@@ -1,8 +1,8 @@
+from Eurobot import can
+
 __author__ = 'mw'
 
 from PyQt4 import QtGui, QtCore
-import can
-import math
 
 
 class GameField(QtGui.QWidget):
