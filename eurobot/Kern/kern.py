@@ -1,9 +1,10 @@
+from eurobot.libraries import can
+
 __author__ = 'mw'
 
 import sys
 
-from Eurobot import can
-from Eurobot.ethernet import Server
+from eurobot.libraries.ethernet import Server
 
 
 def main():

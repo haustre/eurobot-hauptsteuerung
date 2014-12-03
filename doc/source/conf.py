@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # . documentation build configuration file, created by
-# sphinx-quickstart on Tue Dec  2 00:13:52 2014.
+# sphinx-quickstart on Wed Dec  3 00:49:32 2014.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -32,7 +32,6 @@ import os
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
-    'sphinxcontrib.napoleon',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

@@ -1,4 +1,4 @@
-from Eurobot import can
+from eurobot.libraries import can
 
 __author__ = 'mw'
 

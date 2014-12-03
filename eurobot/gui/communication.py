@@ -1,4 +1,4 @@
-from Eurobot import ethernet, can, speak
+from eurobot.libraries import can, ethernet, speak
 
 __author__ = 'mw'
 

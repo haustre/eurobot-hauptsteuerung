@@ -1,21 +1,21 @@
-Eurobot.tests package
+eurobot.tests package
 =====================
 
 Submodules
 ----------
 
-Eurobot.tests.can_traffic module
+eurobot.tests.can_traffic module
 --------------------------------
 
-.. automodule:: Eurobot.tests.can_traffic
+.. automodule:: eurobot.tests.can_traffic
     :members:
     :undoc-members:
     :show-inheritance:
 
-Eurobot.tests.test_can module
+eurobot.tests.test_can module
 -----------------------------
 
-.. automodule:: Eurobot.tests.test_can
+.. automodule:: eurobot.tests.test_can
     :members:
     :undoc-members:
     :show-inheritance:
@@ -24,7 +24,7 @@ Eurobot.tests.test_can module
 Module contents
 ---------------
 
-.. automodule:: Eurobot.tests
+.. automodule:: eurobot.tests
     :members:
     :undoc-members:
     :show-inheritance:
