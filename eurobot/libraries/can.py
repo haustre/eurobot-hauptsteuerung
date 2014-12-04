@@ -14,30 +14,15 @@ class Can(object):
     The incoming messages are decoded and put into multiple receive buffers.
     Additionally all raw messages are put in the debug buffer.
 
-    Here a short example how to use the Can class:
-    First you have to create a new object:
-
-    >>> can_connection = Can("can0", MsgSender.Debugging)
-
-    To send a message you have to put it in a dictionary:
-
-    >>> can_msg = {
-            'type': can.MsgTypes.Position_Robot_1,
-            'position_correct': True,
-            'angle_correct': False,
-            'angle': angle,
-            'y_position': y,
-            'x_position': x
-        }
-    >>> can_connection.send(can_msg)
-
-    The received messages are taken from the buffer like this:
-
-    >>> can_msg = can_connection.queue_position_Robot_1.get()
-
-
     """
     def __init__(self, interface, sender):
+        """
+
+        :param interface: hardware Interface used to send
+        :type interface: str
+        :param sender: id of the Sender (defines the sender part in the CAN id)
+        :type sender: MsgSender
+        """
         self.sender = sender
         self.queue_send = queue.Queue()
         self.queue_debug = queue.Queue()  # Todo: Add all buffers
@@ -73,16 +58,14 @@ class Can(object):
         self.socket.send(frame)
 
     def _recv_connection(self):
+        """ Never ending loop for receiving CAN messages"""
         while 1:
             can_id, can_msg = self._recv_can()
             #msg_frame = can.unpack(can_id, can_msg)
             self.queue_debug.put_nowait((can_id, can_msg.decode('latin-1')))     # Todo: Check if full
 
     def _send_connection(self):
-        """ never ending loop for sending CAN messages
-
-        :return: None
-        """
+        """ Never ending loop for sending CAN messages. """
         while 1:
             can_id, can_msg = self.queue_send.get()
             self._send_can(can_id, can_msg)
