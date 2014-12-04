@@ -39,7 +39,18 @@ class Can(object):
         self.t_send_connection.setDaemon(1)
         self.t_send_connection.start()
 
+    def send(self, msg_frame):
+        can_id, can_msg = pack(msg_frame, self.sender)
+        frame = self._build_can_frame(can_id, can_msg)
+        self.queue_send.put_nowait((can_id, can_msg))
+
     def _build_can_frame(self, can_id, data):
+        """ builds CAN frame
+
+        :param can_id:
+        :param data:
+        :return:
+        """
         can_dlc = len(data)
         data = data.ljust(8, b'\x00')
         return struct.pack(self.can_frame_fmt, can_id, can_dlc, data)
@@ -49,7 +60,7 @@ class Can(object):
         return can_id, data[:can_dlc]
 
     def _recv_connection(self):
-        """ Never ending loop for receiving CAN messages"""
+        """ Never ending loop for receiving CAN messages """
         while 1:
             frame, addr = self.socket.recvfrom(16)
             can_id, can_msg = self._dissect_can_frame(frame)
@@ -63,11 +74,6 @@ class Can(object):
             can_id, can_msg = self.queue_send.get()
             frame = self._build_can_frame(can_id, can_msg)
             self.socket.send(frame)
-
-    def send(self, msg_frame):
-        can_id, can_msg = pack(msg_frame, self.sender)
-        frame = self._build_can_frame(can_id, can_msg)
-        self.queue_send.put_nowait((can_id, can_msg))
 
 
 def pack(msg_frame, sender):

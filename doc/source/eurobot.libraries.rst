@@ -28,13 +28,17 @@ Example
 
     >>> can_msg = can_connection.queue_position_Robot_1.get()
 
-
+Description
+^^^^^^^^^^^
 
 .. automodule:: eurobot.libraries.can
     :members:
     :undoc-members:
     :private-members:
     :show-inheritance:
+    :exclude-members: MsgSender, MsgTypes
+
+.. todo:: document MsgSender, MsgTypes
 
 
 eurobot.libraries.ethernet module
