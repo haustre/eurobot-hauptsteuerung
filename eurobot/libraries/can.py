@@ -8,6 +8,26 @@ from enum import Enum
 
 
 class Can(object):
+    """ This Class allows to send and receive CAN messages
+
+    It starts 2 new threads. One for receiving and one for sending.
+    The incoming messages are put in multiple receive buffers. Additionally all messages are put in the debug buffer.
+
+    Example for sending:
+
+    >>> can_connection = Can("can0", MsgSender.Debugging)
+    >>> can_msg = {
+            'type': can.MsgTypes.Position_Robot_1,
+            'position_correct': True,
+            'angle_correct': False,
+            'angle': angle,
+            'y_position': y,
+            'x_position': x
+        }
+    >>> can_connection.send(can_msg)
+
+
+    """
     def __init__(self, interface, sender):
         self.sender = sender
         self.queue_send = queue.Queue()
@@ -61,6 +81,14 @@ class Can(object):
 
 
 def pack(msg_frame, sender):
+    """ Packs dictionary containing the CAN message to the format of the bus
+
+    :param msg_frame: contains Data to send
+    :type msg_frame: dict
+    :param sender: defines sender in CAN Id
+    :type sender: libraries.can.MsgSender
+    :return: can_id, can_msg
+    """
     encoding, dictionary = MsgEncoding[msg_frame['type'].value]
     data = []
     for value in reversed(dictionary):
@@ -80,6 +108,12 @@ def pack(msg_frame, sender):
 
 
 def unpack(can_id, can_msg):
+    """ Converts raw Can message to a dictionary
+
+    :param can_id:
+    :param can_msg:
+    :return: msg_frame
+    """
     type_mask = 0b00111111000
     type_nr = (can_id & type_mask) >> 3
     msg_type = MsgTypes(type_nr)

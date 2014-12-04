@@ -6,8 +6,8 @@ Subpackages
 
 .. toctree::
 
-    eurobot.Kern
     eurobot.gui
+    eurobot.kern
     eurobot.libraries
     eurobot.tests
 

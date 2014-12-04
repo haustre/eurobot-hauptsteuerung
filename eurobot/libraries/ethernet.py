@@ -91,7 +91,7 @@ class _TcpConnection(object):
 
 
 class Server(_TcpConnection):
-
+    """ Tcp Server"""
     def __init__(self):
         super().__init__()
         host = ''
@@ -100,6 +100,7 @@ class Server(_TcpConnection):
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((host, port))
         self.s.listen(3)
+        # creats new thread that waits for incomming new connections
         self.t_connection = threading.Thread(target=self.wait_connections, args=[self.s])
         self.t_connection.setDaemon(1)
         self.t_connection.start()

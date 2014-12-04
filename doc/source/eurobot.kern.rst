@@ -1,13 +1,13 @@
-eurobot.Kern package
+eurobot.kern package
 ====================
 
 Submodules
 ----------
 
-eurobot.Kern.kern module
+eurobot.kern.kern module
 ------------------------
 
-.. automodule:: eurobot.Kern.kern
+.. automodule:: eurobot.kern.kern
     :members:
     :undoc-members:
     :show-inheritance:
@@ -16,7 +16,7 @@ eurobot.Kern.kern module
 Module contents
 ---------------
 
-.. automodule:: eurobot.Kern
+.. automodule:: eurobot.kern
     :members:
     :undoc-members:
     :show-inheritance:

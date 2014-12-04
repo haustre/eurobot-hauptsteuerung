@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # . documentation build configuration file, created by
-# sphinx-quickstart on Wed Dec  3 00:49:32 2014.
+# sphinx-quickstart on Wed Dec  3 01:15:02 2014.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -47,8 +47,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = '.'
-copyright = '2014, Author'
+project = 'Eurobot 2015'
+copyright = '2015, Author'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
