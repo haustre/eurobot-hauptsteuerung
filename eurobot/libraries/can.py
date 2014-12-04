@@ -47,45 +47,49 @@ class Can(object):
         can_filter = struct.pack("=II", can_filter, can_mask)
         self.socket.setsockopt(socket.SOL_CAN_RAW, socket.CAN_RAW_FILTER, can_filter)
         self.socket.bind((interface, ))
-        self.t_recv_connection = threading.Thread(target=self.recv_connection)
+        self.t_recv_connection = threading.Thread(target=self._recv_connection)
         self.t_recv_connection.setDaemon(1)
         self.t_recv_connection.start()
-        self.t_send_connection = threading.Thread(target=self.send_connection)
+        self.t_send_connection = threading.Thread(target=self._send_connection)
         self.t_send_connection.setDaemon(1)
         self.t_send_connection.start()
 
-    def build_can_frame(self, can_id, data):
+    def _build_can_frame(self, can_id, data):
         can_dlc = len(data)
         data = data.ljust(8, b'\x00')
         return struct.pack(self.can_frame_fmt, can_id, can_dlc, data)
 
-    def dissect_can_frame(self, frame):
+    def _dissect_can_frame(self, frame):
         can_id, can_dlc, data = struct.unpack(self.can_frame_fmt, frame)
         return can_id, data[:can_dlc]
 
-    def recv_can(self):
+    def _recv_can(self):
         frame, addr = self.socket.recvfrom(16)
-        can_id, can_msg = self.dissect_can_frame(frame)
+        can_id, can_msg = self._dissect_can_frame(frame)
         return can_id, can_msg
 
-    def send_can(self, can_id, can_msg):
-        frame = self.build_can_frame(can_id, can_msg)
+    def _send_can(self, can_id, can_msg):
+        frame = self._build_can_frame(can_id, can_msg)
         self.socket.send(frame)
 
-    def recv_connection(self):
+    def _recv_connection(self):
         while 1:
-            can_id, can_msg = self.recv_can()
+            can_id, can_msg = self._recv_can()
             #msg_frame = can.unpack(can_id, can_msg)
             self.queue_debug.put_nowait((can_id, can_msg.decode('latin-1')))     # Todo: Check if full
 
-    def send_connection(self):
+    def _send_connection(self):
+        """ never ending loop for sending CAN messages
+
+        :return: None
+        """
         while 1:
             can_id, can_msg = self.queue_send.get()
-            self.send_can(can_id, can_msg)
+            self._send_can(can_id, can_msg)
 
     def send(self, msg_frame):
         can_id, can_msg = pack(msg_frame, self.sender)
-        frame = self.build_can_frame(can_id, can_msg)
+        frame = self._build_can_frame(can_id, can_msg)
         self.queue_send.put_nowait((can_id, can_msg))
 
 

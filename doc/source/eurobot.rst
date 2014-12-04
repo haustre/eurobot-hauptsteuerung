@@ -1,6 +1,9 @@
 eurobot package
 ===============
 
+.. figure::  images/Kern_1.svg
+   :align:   center
+
 Subpackages
 -----------
 

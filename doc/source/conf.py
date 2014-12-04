@@ -337,3 +337,4 @@ epub_exclude_files = ['search.html']
 #epub_use_index = True
 
 todo_include_todos = True
+#autodoc_default_flags = ['members', 'private-members']
