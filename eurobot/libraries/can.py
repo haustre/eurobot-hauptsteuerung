@@ -48,19 +48,12 @@ class Can(object):
         can_id, can_dlc, data = struct.unpack(self.can_frame_fmt, frame)
         return can_id, data[:can_dlc]
 
-    def _recv_can(self):
-        frame, addr = self.socket.recvfrom(16)
-        can_id, can_msg = self._dissect_can_frame(frame)
-        return can_id, can_msg
-
-    def _send_can(self, can_id, can_msg):
-        frame = self._build_can_frame(can_id, can_msg)
-        self.socket.send(frame)
-
     def _recv_connection(self):
         """ Never ending loop for receiving CAN messages"""
         while 1:
-            can_id, can_msg = self._recv_can()
+            frame, addr = self.socket.recvfrom(16)
+            can_id, can_msg = self._dissect_can_frame(frame)
+
             #msg_frame = can.unpack(can_id, can_msg)
             self.queue_debug.put_nowait((can_id, can_msg.decode('latin-1')))     # Todo: Check if full
 
@@ -68,7 +61,8 @@ class Can(object):
         """ Never ending loop for sending CAN messages. """
         while 1:
             can_id, can_msg = self.queue_send.get()
-            self._send_can(can_id, can_msg)
+            frame = self._build_can_frame(can_id, can_msg)
+            self.socket.send(frame)
 
     def send(self, msg_frame):
         can_id, can_msg = pack(msg_frame, self.sender)
