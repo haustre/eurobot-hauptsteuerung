@@ -13,8 +13,11 @@ Contents:
 
    eurobot
 
-.. todolist::
 
+Todolist
+========
+
+.. todolist::
 
 Indices and tables
 ==================

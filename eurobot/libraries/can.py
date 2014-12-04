@@ -40,6 +40,11 @@ class Can(object):
         self.t_send_connection.start()
 
     def send(self, msg_frame):
+        """ Packs a CAN-dictionary to a CAN-frame encodes it and puts it in the send queue
+
+        :param msg_frame: CAN-dictionary
+        :return: None
+        """
         can_id, can_msg = pack(msg_frame, self.sender)
         frame = self._build_can_frame(can_id, can_msg)
         self.queue_send.put_nowait((can_id, can_msg))
@@ -49,13 +54,18 @@ class Can(object):
 
         :param can_id:
         :param data:
-        :return:
+        :return: can_frame
         """
         can_dlc = len(data)
         data = data.ljust(8, b'\x00')
         return struct.pack(self.can_frame_fmt, can_id, can_dlc, data)
 
     def _dissect_can_frame(self, frame):
+        """ reads CAN frame
+
+        :param frame:
+        :return: can_id, can_msg
+        """
         can_id, can_dlc, data = struct.unpack(self.can_frame_fmt, frame)
         return can_id, data[:can_dlc]
 
@@ -131,6 +141,11 @@ def unpack(can_id, can_msg):
 
 
 def encode_booleans(bool_lst):
+    """ encodes a list of up to 8 booleans to a int
+
+    :param bool_lst: list of booleans
+    :rtype: int
+    """
     res = 0
     for i, bval in enumerate(reversed(bool_lst)):
         res += int(bval) << i
@@ -138,6 +153,12 @@ def encode_booleans(bool_lst):
 
 
 def decode_booleans(intval, bits):
+    """ decodes an int to a list of booleans
+
+    :param intval:
+    :param bits:
+    :return:
+    """
     res = []
     for bit in reversed(range(bits)):
         mask = 1 << bit
