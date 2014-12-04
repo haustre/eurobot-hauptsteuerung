@@ -1,6 +1,14 @@
 kern package
 ============
 
+Structure
+---------
+
+.. figure::  images/kern_threads_1.svg
+   :align:   center
+
+   Processes on Robot
+
 Submodules
 ----------
 
