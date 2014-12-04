@@ -1,21 +1,21 @@
-.. . documentation master file, created by
-   sphinx-quickstart on Wed Dec  3 01:15:02 2014.
+.. eurobot documentation master file, created by
+   sphinx-quickstart on Thu Dec  4 20:22:09 2014.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Eurobot 2015 documentation!
-======================================
+Welcome to eurobot's documentation!
+===================================
 
 Contents:
 
 .. toctree::
    :maxdepth: 4
 
+   gui
+   kern
+   libraries
+   tests
 
-Todolist
-========
-
-.. todolist::
 
 Indices and tables
 ==================

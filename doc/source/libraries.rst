@@ -1,29 +1,29 @@
-eurobot.gui package
-===================
+libraries package
+=================
 
 Submodules
 ----------
 
-eurobot.gui.communication module
---------------------------------
+libraries.can module
+--------------------
 
-.. automodule:: eurobot.gui.communication
+.. automodule:: libraries.can
     :members:
     :undoc-members:
     :show-inheritance:
 
-eurobot.gui.field module
-------------------------
+libraries.ethernet module
+-------------------------
 
-.. automodule:: eurobot.gui.field
+.. automodule:: libraries.ethernet
     :members:
     :undoc-members:
     :show-inheritance:
 
-eurobot.gui.gui module
+libraries.speak module
 ----------------------
 
-.. automodule:: eurobot.gui.gui
+.. automodule:: libraries.speak
     :members:
     :undoc-members:
     :show-inheritance:
@@ -32,7 +32,7 @@ eurobot.gui.gui module
 Module contents
 ---------------
 
-.. automodule:: eurobot.gui
+.. automodule:: libraries
     :members:
     :undoc-members:
     :show-inheritance:
