@@ -1,6 +1,11 @@
 eurobot.kern package
 ====================
 
+.. figure::  images/Kern_1.svg
+   :align:   center
+
+   Processes on Robot
+
 Submodules
 ----------
 
