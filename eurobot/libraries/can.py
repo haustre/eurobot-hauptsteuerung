@@ -11,11 +11,16 @@ class Can(object):
     """ This Class allows to send and receive CAN messages
 
     It starts 2 new threads. One for receiving and one for sending.
-    The incoming messages are put in multiple receive buffers. Additionally all messages are put in the debug buffer.
+    The incoming messages are decoded and put into multiple receive buffers.
+    Additionally all raw messages are put in the debug buffer.
 
-    Example for sending:
+    Here a short example how to use the Can class:
+    First you have to create a new object:
 
     >>> can_connection = Can("can0", MsgSender.Debugging)
+
+    To send a message you have to put it in a dictionary:
+
     >>> can_msg = {
             'type': can.MsgTypes.Position_Robot_1,
             'position_correct': True,
@@ -26,12 +31,16 @@ class Can(object):
         }
     >>> can_connection.send(can_msg)
 
+    The received messages are taken from the buffer like this:
+
+    >>> can_msg = can_connection.queue_position_Robot_1.get()
+
 
     """
     def __init__(self, interface, sender):
         self.sender = sender
         self.queue_send = queue.Queue()
-        self.queue_debug = queue.Queue()
+        self.queue_debug = queue.Queue()  # Todo: Add all buffers
         self.can_frame_fmt = "=IB3x8s"
         self.socket = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
         can_filter, can_mask = 0x600, 0x600
@@ -67,7 +76,7 @@ class Can(object):
         while 1:
             can_id, can_msg = self.recv_can()
             #msg_frame = can.unpack(can_id, can_msg)
-            self.queue_debug.put_nowait((can_id, can_msg.decode('latin-1')))     # Todo:überprüffen ob voll
+            self.queue_debug.put_nowait((can_id, can_msg.decode('latin-1')))     # Todo: Check if full
 
     def send_connection(self):
         while 1:
