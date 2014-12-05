@@ -7,6 +7,7 @@ import queue
 
 
 class _TcpConnection(object):
+    """ parent class for Server and Client """
     def __init__(self):
         self.queue_size = 1000
         self.queue_receive = queue.Queue(self.queue_size)
@@ -15,6 +16,11 @@ class _TcpConnection(object):
 
     @staticmethod
     def _recv_json(s):
+        """ receives a json message from the tcp socket
+
+        :param s: tcp socket for receiving
+        :return: None
+        """
         data = ''
         size = s.recv(8).decode('UTF-8')
         size = int(size[2:7])
@@ -27,6 +33,12 @@ class _TcpConnection(object):
 
     @staticmethod
     def _send_json(s, data):
+        """ sends a json message over the tcp socket
+
+        :param s: tcp socket for sending
+        :param data: data to send
+        :return: None
+        """
         json_data = json.dumps(data)
         data_len = "L=%05ds" % len(json_data)
         data_send = bytes(data_len + json_data, 'UTF-8')
@@ -34,7 +46,14 @@ class _TcpConnection(object):
         while sent < len(data_send):
             sent += s.send(data_send[sent:])
 
-    def connection(self, s):
+    def _connection(self, s):
+        """ creates an endless loop for sending and receiving tcp data
+
+        This method is called every time a new computer connects.
+
+        :param s: tcp socket for the connection
+        :return: None
+        """
         queue_send = queue.Queue(self.queue_size)
         connection_nr = len(self.queues_send)
         self.queues_send.append(queue_send)
@@ -70,6 +89,12 @@ class _TcpConnection(object):
         self.queues_send.pop(connection_nr)
 
     def read_no_block(self):
+        """ This method is used to read one json message
+
+        This method does returns None if no data is available.
+
+        :return: json message or None
+        """
         data = []
         while 1:
             try:
@@ -80,9 +105,20 @@ class _TcpConnection(object):
         return data
 
     def read_block(self):
+        """ This method is used to read one json message
+
+        This method does wait until new data is available
+
+        :return: json message
+        """
         return self.queue_receive.get()
 
     def write(self, data):
+        """ This method writes to the send buffer
+
+        :param data: data to send
+        :return: None
+        """
         for send_queue in self.queues_send:
             try:
                 send_queue.put_nowait(data)
@@ -91,26 +127,36 @@ class _TcpConnection(object):
 
 
 class Server(_TcpConnection):
-    """ Tcp Server"""
+    """ Tcp server opens a Port for incoming connections."""
     def __init__(self):
         super().__init__()
         host = ''
-        port = 42233
+        port = 42233  # Port opened for incoming connections
         print(host, port)
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((host, port))
         self.s.listen(3)
-        # creats new thread that waits for incomming new connections
+        # creates new thread that waits for incoming new connections
         self.t_connection = threading.Thread(target=self.wait_connections, args=[self.s])
         self.t_connection.setDaemon(1)
         self.t_connection.start()
 
-    def connection(self, s):
+    def _connection(self, s):
+        """ Overrides method: :py:func:`libraries.ethernet._TcpConnection._connection`
+
+        :param s: tcp socket for the connection
+        :return: None
+        """
         peer = s.getpeername()
         print("Got connection from ", peer)
-        super().connection(s)
+        super()._connection(s)
 
     def wait_connections(self, s):
+        """ Endless loop waiting for new connections.
+
+        :param s: tcp socket for the connection
+        :return: None
+        """
         clients = []
         while 1:
             print("Waiting for Connections")
@@ -123,14 +169,21 @@ class Server(_TcpConnection):
                     sock.close()
                 break
             clients.append(clientsock)
-            t = threading.Thread(target=self.connection, args=[clientsock])
+            t = threading.Thread(target=self._connection, args=[clientsock])
             t.setDaemon(1)
             t.start()
 
 
 class Client(_TcpConnection):
-
+    """ Tcp client connects to the server on the given hostname and port """
     def __init__(self, host, port):
+        """ Creates new thread for the connection
+
+        :param host: Host name of the server you want to connect to.
+        :type host: str
+        :param port: Port number of the server you want to connect to.
+        :type: int
+        """
         super().__init__()
         self.connected = False
         try:
@@ -139,11 +192,16 @@ class Client(_TcpConnection):
         except socket.gaierror:
             print("Name or service not known")
         else:
-            t = threading.Thread(target=self.connection, args=[self.s])
+            t = threading.Thread(target=self._connection, args=[self.s])
             t.setDaemon(1)
             t.start()
 
-    def connection(self, s):
-        super().connection(s)
+    def _connection(self, s):
+        """ Overrides method: :py:func:`libraries.ethernet._TcpConnection._connection`
+
+        :param s: tcp socket for the connection
+        :return: None
+        """
+        super()._connection(s)
         self.connected = False
         self.queue_receive.put_nowait("Connection lost")

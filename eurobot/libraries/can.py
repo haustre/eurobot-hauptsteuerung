@@ -45,7 +45,7 @@ class Can(object):
         :param msg_frame: CAN-dictionary
         :return: None
         """
-        can_id, can_msg = pack(msg_frame, self.sender)
+        can_id, can_msg = _pack(msg_frame, self.sender)
         frame = self._build_can_frame(can_id, can_msg)
         self.queue_send.put_nowait((can_id, can_msg))
 
@@ -86,7 +86,7 @@ class Can(object):
             self.socket.send(frame)
 
 
-def pack(msg_frame, sender):
+def _pack(msg_frame, sender):
     """ Packs dictionary containing the CAN message to the format of the bus
 
     :param msg_frame: contains Data to send
@@ -102,7 +102,7 @@ def pack(msg_frame, sender):
             booleans = []
             for bool_value in reversed(value):
                 booleans.append(msg_frame[bool_value])
-            bool_nr = encode_booleans(booleans)
+            bool_nr = _encode_booleans(booleans)
             data.append(bool_nr)
         else:
             data.append(msg_frame[value])
@@ -113,7 +113,7 @@ def pack(msg_frame, sender):
     return can_id, can_msg
 
 
-def unpack(can_id, can_msg):
+def _unpack(can_id, can_msg):
     """ Converts raw Can message to a dictionary
 
     :param can_id:
@@ -130,7 +130,7 @@ def unpack(can_id, can_msg):
     msg_frame = {}
     for i, line in enumerate(reversed(data)):
         if not isinstance(dictionary[i], str):
-            booleans = decode_booleans(line, len(dictionary[i]))
+            booleans = _decode_booleans(line, len(dictionary[i]))
             for ii, bool_value in enumerate(reversed(booleans)):
                 msg_frame[dictionary[i][ii]] = bool_value
         else:
@@ -140,7 +140,7 @@ def unpack(can_id, can_msg):
     return msg_frame
 
 
-def encode_booleans(bool_lst):
+def _encode_booleans(bool_lst):
     """ encodes a list of up to 8 booleans to a int
 
     :param bool_lst: list of booleans
@@ -152,21 +152,24 @@ def encode_booleans(bool_lst):
     return res
 
 
-def decode_booleans(intval, bits):
+def _decode_booleans(value, bits):
     """ decodes an int to a list of booleans
 
-    :param intval:
-    :param bits:
-    :return:
+    :param value: value to decode
+    :type value: int
+    :param bits: number of booleans to decode
+    :type bits: int
+    :return: list of booleans
     """
     res = []
     for bit in reversed(range(bits)):
         mask = 1 << bit
-        res.append((intval & mask) == mask)
+        res.append((value & mask) == mask)
     return res
 
 
 class MsgTypes(Enum):
+    """ This enum contains the names of all possible CAN message types """
     EmergencyShutdown = 0
     Emergency_Stop = 1
     Game_End = 2
@@ -180,12 +183,14 @@ class MsgTypes(Enum):
 
 
 class MsgSender(Enum):
+    """ This enum contains the names of all possible id's in the CAN header """
     Hauptsteuerung = 0
     Navigation = 1
     Antrieb = 2
     Peripherie = 3
     Debugging = 7
 
+# list of all CAN message protocols
 EncodingTypes = {
     'game_end': ('!B', ('time_to_game_end')),
     'position': ('!BHHH', ('x_position', 'y_position', 'angle', ('position_correct', 'angle_correct'))),
@@ -200,13 +205,15 @@ EncodingTypes = {
 
 }
 
-MsgEncoding = {
+# the list contains which message type is encoded with which protocol
+MsgEncoding = {  # Todo: finish the List
     MsgTypes.Position_Robot_1.value: EncodingTypes['position'],
     MsgTypes.Position_Robot_2.value: EncodingTypes['position'],
     MsgTypes.Position_Enemy_1.value: EncodingTypes['position'],
     MsgTypes.Position_Enemy_2.value: EncodingTypes['position']
 }
 
+# Colors used in can table
 MsgColors = {
     MsgTypes.EmergencyShutdown.value:      (0, 0, 255),
     MsgTypes.Emergency_Stop.value:         (0, 0, 255),

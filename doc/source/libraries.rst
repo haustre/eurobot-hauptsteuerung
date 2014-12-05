@@ -38,6 +38,9 @@ Description
     :members:
     :undoc-members:
     :show-inheritance:
+    :exclude-members: MsgSender, MsgTypes
+
+.. todo:: document MsgSender, MsgTypes
 
 libraries.ethernet module
 -------------------------

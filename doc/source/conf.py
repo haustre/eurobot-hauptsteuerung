@@ -32,6 +32,7 @@ sys.path.insert(0, os.path.abspath('../../eurobot'))
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
+    'sphinx.ext.todo',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -47,8 +48,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'eurobot'
-copyright = '2014, Author'
+project = 'Eurobot 2015'
+copyright = '2015, Würsch Marcel'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -330,3 +331,6 @@ epub_exclude_files = ['search.html']
 
 # If false, no index is generated.
 #epub_use_index = True
+
+todo_include_todos = True
+autodoc_default_flags = ['members', 'private-members']

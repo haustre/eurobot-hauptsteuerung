@@ -16,6 +16,10 @@ Contents:
    libraries
    tests
 
+Todolist
+========
+
+.. todolist::
 
 Indices and tables
 ==================

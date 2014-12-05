@@ -8,7 +8,7 @@ from eurobot.libraries.ethernet import Server
 
 
 def main():
-    """ Main Programm running on Robot"""
+    """ Main programm running on Robot"""
     if len(sys.argv) != 2:
         print('Provide CAN device name (can0, vcan0 etc.)')
         sys.exit(0)

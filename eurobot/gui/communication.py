@@ -132,7 +132,7 @@ class TcpConnection(QtCore.QThread):
                 break
             can_id = data[0]
             can_msg = data[1].encode('latin-1')
-            msg_frame = can.unpack(can_id, can_msg)
+            msg_frame = can._unpack(can_id, can_msg)
             self.emit(QtCore.SIGNAL('tcp_data'), msg_frame)
         speak.speak("Connection to Robot lost")
         self.emit(QtCore.SIGNAL('tcp connection lost'))
