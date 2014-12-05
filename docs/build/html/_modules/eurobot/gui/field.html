@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>eurobot.gui.field &mdash; Eurobot 2015  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Eurobot 2015  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Eurobot 2015  documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for eurobot.gui.field</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">eurobot.libraries</span> <span class="kn">import</span> <span class="n">can</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;mw&#39;</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+
+<div class="viewcode-block" id="GameField"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.field.GameField">[docs]</a><span class="k">class</span> <span class="nc">GameField</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table_pixmap</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="s">&quot;./gui/Table.png&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">robot1_pixmap</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="s">&quot;./gui/Robot1.png&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enemy1_pixmap</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="s">&quot;./gui/Robot2.png&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_pixmap</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_pixmap</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">robot1</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;x_position&#39;</span><span class="p">:</span> <span class="mi">1500</span><span class="p">,</span> <span class="s">&#39;y_position&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span> <span class="s">&#39;diameter&#39;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="s">&#39;angle&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;pixmap&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot1_pixmap</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enemy1</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;x_position&#39;</span><span class="p">:</span> <span class="mi">1500</span><span class="p">,</span> <span class="s">&#39;y_position&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span> <span class="s">&#39;diameter&#39;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="s">&#39;angle&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;pixmap&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">enemy1_pixmap</span><span class="p">}</span>
+
+<div class="viewcode-block" id="GameField.paintEvent"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.field.GameField.paintEvent">[docs]</a>    <span class="k">def</span> <span class="nf">paintEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">frame_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">frame_ratio</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_ratio</span><span class="p">:</span>
+            <span class="n">widget_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+            <span class="n">widget_height</span> <span class="o">=</span> <span class="n">widget_width</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_ratio</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">widget_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+            <span class="n">widget_width</span> <span class="o">=</span> <span class="n">widget_height</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_ratio</span>
+        <span class="n">painter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">()</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">begin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="o">.</span><span class="n">Antialiasing</span><span class="p">)</span>  <span class="c"># Todo: check if necessary</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">drawPixmap</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">widget_width</span><span class="p">,</span> <span class="n">widget_height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_pixmap</span><span class="p">)</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">widget_width</span> <span class="o">/</span> <span class="mi">3000</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_robot</span><span class="p">(</span><span class="n">painter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot1</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_robot</span><span class="p">(</span><span class="n">painter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">enemy1</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+
+        <span class="n">painter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="GameField.draw_robot"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.field.GameField.draw_robot">[docs]</a>    <span class="k">def</span> <span class="nf">draw_robot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">robot</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">robot</span><span class="p">[</span><span class="s">&#39;x_position&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">robot</span><span class="p">[</span><span class="s">&#39;y_position&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale</span>
+        <span class="n">diameter</span> <span class="o">=</span> <span class="n">robot</span><span class="p">[</span><span class="s">&#39;diameter&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale</span>
+        <span class="n">raw_pixmap</span> <span class="o">=</span> <span class="n">robot</span><span class="p">[</span><span class="s">&#39;pixmap&#39;</span><span class="p">]</span>
+        <span class="n">scaled_pixmap</span> <span class="o">=</span> <span class="n">raw_pixmap</span><span class="o">.</span><span class="n">scaled</span><span class="p">(</span><span class="n">diameter</span><span class="p">,</span> <span class="n">diameter</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">KeepAspectRatio</span><span class="p">)</span>
+        <span class="n">rotated_pixmap</span> <span class="o">=</span> <span class="n">scaled_pixmap</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTransform</span><span class="p">()</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">robot</span><span class="p">[</span><span class="s">&#39;angle&#39;</span><span class="p">]))</span>
+        <span class="n">pixmap_width</span> <span class="o">=</span> <span class="n">rotated_pixmap</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+        <span class="n">pixmap_height</span> <span class="o">=</span> <span class="n">rotated_pixmap</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">drawPixmap</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">pixmap_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="n">pixmap_height</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">rotated_pixmap</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GameField.setpoint"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.field.GameField.setpoint">[docs]</a>    <span class="k">def</span> <span class="nf">setpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg_frame</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">msg_frame</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">can</span><span class="o">.</span><span class="n">MsgTypes</span><span class="o">.</span><span class="n">Position_Robot_1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">robot1</span><span class="p">[</span><span class="s">&#39;x_position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">msg_frame</span><span class="p">[</span><span class="s">&#39;x_position&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">10</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">robot1</span><span class="p">[</span><span class="s">&#39;y_position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">msg_frame</span><span class="p">[</span><span class="s">&#39;y_position&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">10</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">robot1</span><span class="p">[</span><span class="s">&#39;angle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">msg_frame</span><span class="p">[</span><span class="s">&#39;angle&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">100</span>
+
+        <span class="k">elif</span> <span class="n">msg_frame</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">can</span><span class="o">.</span><span class="n">MsgTypes</span><span class="o">.</span><span class="n">Position_Enemy_1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enemy1</span><span class="p">[</span><span class="s">&#39;x_position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">msg_frame</span><span class="p">[</span><span class="s">&#39;x_position&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">10</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enemy1</span><span class="p">[</span><span class="s">&#39;y_position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">msg_frame</span><span class="p">[</span><span class="s">&#39;y_position&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">10</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enemy1</span><span class="p">[</span><span class="s">&#39;angle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">msg_frame</span><span class="p">[</span><span class="s">&#39;angle&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">100</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Eurobot 2015  documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

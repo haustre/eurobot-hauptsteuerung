@@ -1,0 +1,274 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>eurobot.gui.communication &mdash; Eurobot 2015  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Eurobot 2015  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Eurobot 2015  documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for eurobot.gui.communication</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">eurobot.libraries</span> <span class="kn">import</span> <span class="n">can</span><span class="p">,</span> <span class="n">ethernet</span><span class="p">,</span> <span class="n">speak</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;mw&#39;</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+
+<div class="viewcode-block" id="Table"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.communication.Table">[docs]</a><span class="k">class</span> <span class="nc">Table</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setHorizontalHeaderLabels</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verticalHeader</span><span class="p">()</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="c">#self.resizeColumnsToContents()</span>
+        <span class="c">#self.resizeRowsToContents()</span>
+
+<div class="viewcode-block" id="Table.add_row"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.communication.Table.add_row">[docs]</a>    <span class="k">def</span> <span class="nf">add_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">autoscroll</span><span class="p">,</span> <span class="n">visible</span><span class="p">):</span>
+        <span class="n">max_row_count</span> <span class="o">=</span> <span class="mi">20000</span>
+        <span class="n">row_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hideRow</span><span class="p">(</span><span class="n">row_count</span><span class="p">)</span>
+        <span class="n">row_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setRowCount</span><span class="p">(</span><span class="n">row_count</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">visible</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hideRow</span><span class="p">(</span><span class="n">row_count</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+            <span class="n">newitem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">red</span><span class="p">,</span> <span class="n">green</span><span class="p">,</span> <span class="n">blue</span> <span class="o">=</span> <span class="n">color</span>
+                <span class="n">newitem</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">red</span><span class="p">,</span> <span class="n">green</span><span class="p">,</span> <span class="n">blue</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">row_count</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">newitem</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">row_count</span> <span class="o">&gt;</span> <span class="n">max_row_count</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">removeRow</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">autoscroll</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">slide_bar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verticalScrollBar</span><span class="p">()</span>
+            <span class="n">slide_bar</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">slide_bar</span><span class="o">.</span><span class="n">maximum</span><span class="p">())</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">row_count</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Table.filter_types"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.communication.Table.filter_types">[docs]</a>    <span class="k">def</span> <span class="nf">filter_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">types</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">showRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">msg_type</span><span class="p">,</span> <span class="n">visible</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">types</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">visible</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+                <span class="n">search_string</span> <span class="o">=</span> <span class="n">can</span><span class="o">.</span><span class="n">MsgTypes</span><span class="p">(</span><span class="n">msg_type</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">items_to_hide</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findItems</span><span class="p">(</span><span class="n">search_string</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MatchExactly</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items_to_hide</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">hideRow</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">row</span><span class="p">())</span>
+
+</div></div>
+<div class="viewcode-block" id="CanTableControl"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.communication.CanTableControl">[docs]</a><span class="k">class</span> <span class="nc">CanTableControl</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoscroll_box</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="s">&#39;Autoscroll&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_button</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="s">&#39;run&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_button_clicked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_button</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">setSizeConstraint</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QLayout</span><span class="o">.</span><span class="n">SetMinAndMaxSize</span><span class="p">)</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autoscroll_box</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_button</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_chechboxes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">msg_type</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">can</span><span class="o">.</span><span class="n">MsgTypes</span><span class="p">):</span>
+            <span class="n">checkbox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="n">msg_type</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">checkbox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">checkbox</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">change_typ_filter</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type_chechboxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">checkbox</span><span class="p">)</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">checkbox</span><span class="p">,</span> <span class="n">i</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CanTableControl.run_button_clicked"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.communication.CanTableControl.run_button_clicked">[docs]</a>    <span class="k">def</span> <span class="nf">run_button_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_button</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">checkbox</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_chechboxes</span><span class="p">:</span>
+                <span class="n">checkbox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">checkbox</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_chechboxes</span><span class="p">:</span>
+                <span class="n">checkbox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CanTableControl.change_typ_filter"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.communication.CanTableControl.change_typ_filter">[docs]</a>    <span class="k">def</span> <span class="nf">change_typ_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">checked</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">checkbox</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_chechboxes</span><span class="p">:</span>
+            <span class="n">checked</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">checkbox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;Filter_changed&#39;</span><span class="p">),</span> <span class="n">checked</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CanTableControl.add_data"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.communication.CanTableControl.add_data">[docs]</a>    <span class="k">def</span> <span class="nf">add_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg_frame</span><span class="p">):</span>
+        <span class="n">msg_frame_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">msg_frame</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_button</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+            <span class="n">table_sender</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">msg_frame_copy</span><span class="p">[</span><span class="s">&#39;sender&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">table_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">msg_frame_copy</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">table_color</span> <span class="o">=</span> <span class="n">can</span><span class="o">.</span><span class="n">MsgColors</span><span class="p">[</span><span class="n">msg_frame_copy</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
+            <span class="n">visible</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_chechboxes</span><span class="p">[</span><span class="n">msg_frame_copy</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">]</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+            <span class="k">del</span> <span class="n">msg_frame_copy</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">msg_frame_copy</span><span class="p">[</span><span class="s">&#39;sender&#39;</span><span class="p">]</span>
+            <span class="n">table_msg</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">msg_frame_copy</span><span class="p">)</span>
+            <span class="n">current_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;%M:%S.</span><span class="si">%f</span><span class="s">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">new_row</span> <span class="o">=</span> <span class="p">[</span><span class="n">current_time</span><span class="p">,</span> <span class="n">table_sender</span><span class="p">,</span> <span class="n">table_type</span><span class="p">,</span> <span class="n">table_msg</span><span class="p">]</span>
+            <span class="n">autoscroll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoscroll_box</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;new_can_Table_Row&#39;</span><span class="p">),</span> <span class="n">new_row</span><span class="p">,</span> <span class="n">table_color</span><span class="p">,</span> <span class="n">autoscroll</span><span class="p">,</span> <span class="n">visible</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="EditHost"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.communication.EditHost">[docs]</a><span class="k">class</span> <span class="nc">EditHost</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="n">host_label</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&#39;Host:&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">host_line</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">(</span><span class="s">&#39;localhost&#39;</span><span class="p">)</span>
+        <span class="n">port_label</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&#39;Port:&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_line</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">(</span><span class="s">&#39;42233&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">host_button</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="s">&#39;Connect&#39;</span><span class="p">)</span>
+
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">host_label</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host_line</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">port_label</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">port_line</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host_button</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="TcpConnection"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.communication.TcpConnection">[docs]</a><span class="k">class</span> <span class="nc">TcpConnection</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="n">host</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
+
+<div class="viewcode-block" id="TcpConnection.run"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.communication.TcpConnection.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">tcp</span> <span class="o">=</span> <span class="n">ethernet</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">read_block</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">tcp</span><span class="o">.</span><span class="n">connected</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">can_id</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">can_msg</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;latin-1&#39;</span><span class="p">)</span>
+            <span class="n">msg_frame</span> <span class="o">=</span> <span class="n">can</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">can_id</span><span class="p">,</span> <span class="n">can_msg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;tcp_data&#39;</span><span class="p">),</span> <span class="n">msg_frame</span><span class="p">)</span>
+        <span class="n">speak</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s">&quot;Connection to Robot lost&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;tcp connection lost&#39;</span><span class="p">))</span>
+
+</div></div>
+<div class="viewcode-block" id="SendCan"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.communication.SendCan">[docs]</a><span class="k">class</span> <span class="nc">SendCan</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg_type_label</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&#39;Message Type:&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg_label</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&#39;Message:&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg_type_combo</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="p">()</span>
+        <span class="n">msg_types</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">msg_type</span> <span class="ow">in</span> <span class="n">can</span><span class="o">.</span><span class="n">MsgTypes</span><span class="p">:</span>
+            <span class="n">msg_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg_type</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg_type_combo</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">msg_types</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg_type_combo</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selection_changed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_button</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="s">&#39;send&#39;</span><span class="p">)</span>
+
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg_type_label</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg_type_combo</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">send_button</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">grid2</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">(</span><span class="s">&quot;Byte: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="n">grid2</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">i</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">vbox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">grid2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">vbox</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SendCan.selection_changed"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.communication.SendCan.selection_changed">[docs]</a>    <span class="k">def</span> <span class="nf">selection_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg_type_combo</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+        <span class="n">msg_type</span> <span class="o">=</span> <span class="n">can</span><span class="o">.</span><span class="n">MsgTypes</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">encoding</span><span class="p">,</span> <span class="n">dictionary</span> <span class="o">=</span> <span class="n">can</span><span class="o">.</span><span class="n">MsgEncoding</span><span class="p">[</span><span class="n">msg_type</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">dictionary</span><span class="p">):</span>
+                <span class="n">line</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dictionary</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                <span class="n">line</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">line</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+                <span class="n">line</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Byte: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Eurobot 2015  documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

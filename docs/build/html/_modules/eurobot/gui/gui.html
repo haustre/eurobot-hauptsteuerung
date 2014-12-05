@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>eurobot.gui.gui &mdash; Eurobot 2015  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Eurobot 2015  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Eurobot 2015  documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for eurobot.gui.gui</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">eurobot.libraries</span> <span class="kn">import</span> <span class="n">speak</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;mw&#39;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">eurobot.gui.field</span>
+<span class="kn">import</span> <span class="nn">eurobot.gui.communication</span>
+
+
+<div class="viewcode-block" id="CanWindow"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.gui.CanWindow">[docs]</a><span class="k">class</span> <span class="nc">CanWindow</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Time&#39;</span><span class="p">,</span> <span class="s">&#39;Source&#39;</span><span class="p">,</span> <span class="s">&#39;Type&#39;</span><span class="p">,</span> <span class="s">&#39;Value&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">can_table</span> <span class="o">=</span> <span class="n">eurobot</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">communication</span><span class="o">.</span><span class="n">Table</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">can_table_control</span> <span class="o">=</span> <span class="n">eurobot</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">communication</span><span class="o">.</span><span class="n">CanTableControl</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edit_host</span> <span class="o">=</span> <span class="n">eurobot</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">communication</span><span class="o">.</span><span class="n">EditHost</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_can</span> <span class="o">=</span> <span class="n">eurobot</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">communication</span><span class="o">.</span><span class="n">SendCan</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">game_field</span> <span class="o">=</span> <span class="n">eurobot</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">GameField</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_ui</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CanWindow.init_ui"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.gui.CanWindow.init_ui">[docs]</a>    <span class="k">def</span> <span class="nf">init_ui</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showMaximized</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edit_host</span><span class="o">.</span><span class="n">host_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connect_host</span><span class="p">)</span>
+        <span class="n">vbox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">CreateGroupBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">can_table_control</span><span class="p">,</span> <span class="s">&#39;Can Table&#39;</span><span class="p">))</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">CreateGroupBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">send_can</span><span class="p">,</span> <span class="s">&#39;send Message&#39;</span><span class="p">))</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">CreateGroupBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edit_host</span><span class="p">,</span> <span class="s">&#39;connect to Host&#39;</span><span class="p">))</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
+        <span class="n">hbox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="n">hbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">game_field</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">hbox</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">vbox</span><span class="p">)</span>
+        <span class="n">root_vbox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">root_vbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">can_table</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">root_vbox</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">hbox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">root_vbox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">can_table_control</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;new_can_Table_Row&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_table</span><span class="o">.</span><span class="n">add_row</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">can_table_control</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;Filter_changed&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_table</span><span class="o">.</span><span class="n">filter_types</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CanWindow.connect_host"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.gui.CanWindow.connect_host">[docs]</a>    <span class="k">def</span> <span class="nf">connect_host</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">speak</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s">&quot;connect to Robot&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">edit_host</span><span class="o">.</span><span class="n">host_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit_host</span><span class="o">.</span><span class="n">host_line</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit_host</span><span class="o">.</span><span class="n">port_line</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+            <span class="n">thread</span> <span class="o">=</span> <span class="n">eurobot</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">communication</span><span class="o">.</span><span class="n">TcpConnection</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">thread</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;tcp_data&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_table_control</span><span class="o">.</span><span class="n">add_data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">thread</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;tcp_data&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">game_field</span><span class="o">.</span><span class="n">setpoint</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">thread</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;tcp connection lost&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">lost_connection</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thread</span><span class="p">)</span>
+            <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Already connected&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CanWindow.lost_connection"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.gui.CanWindow.lost_connection">[docs]</a>    <span class="k">def</span> <span class="nf">lost_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edit_host</span><span class="o">.</span><span class="n">host_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="CreateGroupBox"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.gui.CreateGroupBox">[docs]</a><span class="k">class</span> <span class="nc">CreateGroupBox</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGroupBox</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="n">box1</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">box1</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="n">groupbox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGroupBox</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">groupbox</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">box1</span><span class="p">)</span>
+        <span class="n">box2</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">box2</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">groupbox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">box2</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../eurobot.gui.html#eurobot.gui.gui.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">can_window</span> <span class="o">=</span> <span class="n">CanWindow</span><span class="p">()</span>
+    <span class="n">can_window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Eurobot 2015  documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

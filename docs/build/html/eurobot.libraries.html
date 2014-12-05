@@ -1,0 +1,313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>eurobot.libraries package &mdash; Eurobot 2015  documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Eurobot 2015  documentation" href="index.html" />
+    <link rel="up" title="eurobot package" href="eurobot.html" />
+    <link rel="next" title="eurobot.tests package" href="eurobot.tests.html" />
+    <link rel="prev" title="eurobot.kern package" href="eurobot.kern.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="eurobot.tests.html" title="eurobot.tests package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="eurobot.kern.html" title="eurobot.kern package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Eurobot 2015  documentation</a> &raquo;</li>
+          <li><a href="eurobot.html" accesskey="U">eurobot package</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">eurobot.libraries package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-eurobot.libraries.can">eurobot.libraries.can module</a></li>
+<li><a class="reference internal" href="#module-eurobot.libraries.ethernet">eurobot.libraries.ethernet module</a></li>
+<li><a class="reference internal" href="#module-eurobot.libraries.speak">eurobot.libraries.speak module</a></li>
+<li><a class="reference internal" href="#module-eurobot.libraries">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="eurobot.kern.html"
+                        title="previous chapter">eurobot.kern package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="eurobot.tests.html"
+                        title="next chapter">eurobot.tests package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/eurobot.libraries.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="eurobot-libraries-package">
+<h1>eurobot.libraries package<a class="headerlink" href="#eurobot-libraries-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-eurobot.libraries.can">
+<span id="eurobot-libraries-can-module"></span><h2>eurobot.libraries.can module<a class="headerlink" href="#module-eurobot.libraries.can" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="eurobot.libraries.can.Can">
+<em class="property">class </em><tt class="descclassname">eurobot.libraries.can.</tt><tt class="descname">Can</tt><big>(</big><em>interface</em>, <em>sender</em><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/can.html#Can"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.can.Can" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<p>This Class allows to send and receive CAN messages</p>
+<p>It starts 2 new threads. One for receiving and one for sending.
+The incoming messages are put in multiple receive buffers. Additionally all messages are put in the debug buffer.</p>
+<p>Example for sending:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">can_connection</span> <span class="o">=</span> <span class="n">Can</span><span class="p">(</span><span class="s">&quot;can0&quot;</span><span class="p">,</span> <span class="n">MsgSender</span><span class="o">.</span><span class="n">Debugging</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">can_msg</span> <span class="o">=</span> <span class="p">{</span>
+<span class="go">        &#39;type&#39;: can.MsgTypes.Position_Robot_1,</span>
+<span class="go">        &#39;position_correct&#39;: True,</span>
+<span class="go">        &#39;angle_correct&#39;: False,</span>
+<span class="go">        &#39;angle&#39;: angle,</span>
+<span class="go">        &#39;y_position&#39;: y,</span>
+<span class="go">        &#39;x_position&#39;: x</span>
+<span class="go">    }</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">can_connection</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">can_msg</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="eurobot.libraries.can.Can.build_can_frame">
+<tt class="descname">build_can_frame</tt><big>(</big><em>can_id</em>, <em>data</em><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/can.html#Can.build_can_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.can.Can.build_can_frame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="eurobot.libraries.can.Can.dissect_can_frame">
+<tt class="descname">dissect_can_frame</tt><big>(</big><em>frame</em><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/can.html#Can.dissect_can_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.can.Can.dissect_can_frame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="eurobot.libraries.can.Can.recv_can">
+<tt class="descname">recv_can</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/can.html#Can.recv_can"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.can.Can.recv_can" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="eurobot.libraries.can.Can.recv_connection">
+<tt class="descname">recv_connection</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/can.html#Can.recv_connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.can.Can.recv_connection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="eurobot.libraries.can.Can.send">
+<tt class="descname">send</tt><big>(</big><em>msg_frame</em><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/can.html#Can.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.can.Can.send" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="eurobot.libraries.can.Can.send_can">
+<tt class="descname">send_can</tt><big>(</big><em>can_id</em>, <em>can_msg</em><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/can.html#Can.send_can"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.can.Can.send_can" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="eurobot.libraries.can.Can.send_connection">
+<tt class="descname">send_connection</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/can.html#Can.send_connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.can.Can.send_connection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="eurobot.libraries.can.MsgSender">
+<em class="property">class </em><tt class="descclassname">eurobot.libraries.can.</tt><tt class="descname">MsgSender</tt><a class="reference internal" href="_modules/eurobot/libraries/can.html#MsgSender"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.can.MsgSender" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">enum.Enum</span></tt></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="eurobot.libraries.can.MsgTypes">
+<em class="property">class </em><tt class="descclassname">eurobot.libraries.can.</tt><tt class="descname">MsgTypes</tt><a class="reference internal" href="_modules/eurobot/libraries/can.html#MsgTypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.can.MsgTypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">enum.Enum</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eurobot.libraries.can.decode_booleans">
+<tt class="descclassname">eurobot.libraries.can.</tt><tt class="descname">decode_booleans</tt><big>(</big><em>intval</em>, <em>bits</em><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/can.html#decode_booleans"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.can.decode_booleans" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eurobot.libraries.can.encode_booleans">
+<tt class="descclassname">eurobot.libraries.can.</tt><tt class="descname">encode_booleans</tt><big>(</big><em>bool_lst</em><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/can.html#encode_booleans"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.can.encode_booleans" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eurobot.libraries.can.pack">
+<tt class="descclassname">eurobot.libraries.can.</tt><tt class="descname">pack</tt><big>(</big><em>msg_frame</em>, <em>sender</em><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/can.html#pack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.can.pack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Packs dictionary containing the CAN message to the format of the bus</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>msg_frame</strong> (<em>dict</em>) &#8211; contains Data to send</li>
+<li><strong>sender</strong> (<em>libraries.can.MsgSender</em>) &#8211; defines sender in CAN Id</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">can_id, can_msg</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="eurobot.libraries.can.unpack">
+<tt class="descclassname">eurobot.libraries.can.</tt><tt class="descname">unpack</tt><big>(</big><em>can_id</em>, <em>can_msg</em><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/can.html#unpack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.can.unpack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts raw Can message to a dictionary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>can_id</strong> &#8211; </li>
+<li><strong>can_msg</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">msg_frame</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-eurobot.libraries.ethernet">
+<span id="eurobot-libraries-ethernet-module"></span><h2>eurobot.libraries.ethernet module<a class="headerlink" href="#module-eurobot.libraries.ethernet" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="eurobot.libraries.ethernet.Client">
+<em class="property">class </em><tt class="descclassname">eurobot.libraries.ethernet.</tt><tt class="descname">Client</tt><big>(</big><em>host</em>, <em>port</em><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/ethernet.html#Client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.ethernet.Client" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">eurobot.libraries.ethernet._TcpConnection</span></tt></p>
+<dl class="method">
+<dt id="eurobot.libraries.ethernet.Client.connection">
+<tt class="descname">connection</tt><big>(</big><em>s</em><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/ethernet.html#Client.connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.ethernet.Client.connection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="eurobot.libraries.ethernet.Server">
+<em class="property">class </em><tt class="descclassname">eurobot.libraries.ethernet.</tt><tt class="descname">Server</tt><a class="reference internal" href="_modules/eurobot/libraries/ethernet.html#Server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.ethernet.Server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">eurobot.libraries.ethernet._TcpConnection</span></tt></p>
+<p>Tcp Server</p>
+<dl class="method">
+<dt id="eurobot.libraries.ethernet.Server.connection">
+<tt class="descname">connection</tt><big>(</big><em>s</em><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/ethernet.html#Server.connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.ethernet.Server.connection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="eurobot.libraries.ethernet.Server.wait_connections">
+<tt class="descname">wait_connections</tt><big>(</big><em>s</em><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/ethernet.html#Server.wait_connections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.ethernet.Server.wait_connections" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-eurobot.libraries.speak">
+<span id="eurobot-libraries-speak-module"></span><h2>eurobot.libraries.speak module<a class="headerlink" href="#module-eurobot.libraries.speak" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="eurobot.libraries.speak.speak">
+<tt class="descclassname">eurobot.libraries.speak.</tt><tt class="descname">speak</tt><big>(</big><em>text</em><big>)</big><a class="reference internal" href="_modules/eurobot/libraries/speak.html#speak"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eurobot.libraries.speak.speak" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives a given String out over Loudspeaker.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Needs &#8220;espeak&#8221; to be installed.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> (<em>str</em>) &#8211; String to give out</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-eurobot.libraries">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-eurobot.libraries" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="eurobot.tests.html" title="eurobot.tests package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="eurobot.kern.html" title="eurobot.kern package"
+             >previous</a> |</li>
+        <li><a href="index.html">Eurobot 2015  documentation</a> &raquo;</li>
+          <li><a href="eurobot.html" >eurobot package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
