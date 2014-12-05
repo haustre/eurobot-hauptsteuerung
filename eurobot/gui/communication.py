@@ -9,7 +9,12 @@ import copy
 
 
 class Table(QtGui.QTableWidget):
+    """ Draws a table and allows to add new rows and filter them. """
     def __init__(self, header):
+        """
+
+        :param header: header displayed on the top of the table
+        """
         super().__init__(1, len(header))
         self.setHorizontalHeaderLabels(header)
         self.verticalHeader().setVisible(False)
@@ -17,6 +22,17 @@ class Table(QtGui.QTableWidget):
         #self.resizeRowsToContents()
 
     def add_row(self, data, color, autoscroll, visible):
+        """ Adds a new row to the table.
+
+        :param data: data for the new row
+        :param color: color of the new row
+        :type color: can.MsgColors
+        :param autoscroll: defines if the table should scroll to the end.
+        :type autoscroll: bool
+        :param visible: defines if the new row is visible or hidden
+        :type visible: bool
+        :return:
+        """
         max_row_count = 20000
         row_count = self.rowCount()
         self.hideRow(row_count)
@@ -38,6 +54,12 @@ class Table(QtGui.QTableWidget):
         print(row_count)
 
     def filter_types(self, types):
+        """ Applies a filter to the list and hides unwanted rows
+
+        :param types: defines which types should be visible
+        :type types: bool[]
+        :return: None
+        """
         for row in range(self.rowCount()):
             self.showRow(row)
         for msg_type, visible in enumerate(types):
@@ -49,6 +71,7 @@ class Table(QtGui.QTableWidget):
 
 
 class CanTableControl(QtGui.QWidget):
+    """ Controls what will be be shown in the CAN table """
     def __init__(self):
         super().__init__()
         self.autoscroll_box = QtGui.QCheckBox('Autoscroll')
@@ -71,6 +94,10 @@ class CanTableControl(QtGui.QWidget):
         self.setLayout(grid)
 
     def run_button_clicked(self):
+        """ Hides all filter options if new messages are received.
+
+        This is necessary because if the table is filtered while new rows are added the computer will be overloaded.
+        """
         if self.run_button.isChecked():
             for checkbox in self.type_chechboxes:
                 checkbox.setEnabled(False)
@@ -79,12 +106,18 @@ class CanTableControl(QtGui.QWidget):
                 checkbox.setEnabled(True)
 
     def change_typ_filter(self):
+        """ Runs a new filter on the table if the filter rules changed """
         checked = []
         for checkbox in self.type_chechboxes:
             checked.append(checkbox.isChecked())
         self.emit(QtCore.SIGNAL('Filter_changed'), checked)
 
     def add_data(self, msg_frame):
+        """ Puts a new CAN frame in the table
+
+        :param msg_frame: new CAN frame
+        :return: None
+        """
         msg_frame_copy = copy.copy(msg_frame)
         if self.run_button.isChecked():
             table_sender = str(msg_frame_copy['sender'].name)
@@ -101,6 +134,7 @@ class CanTableControl(QtGui.QWidget):
 
 
 class EditHost(QtGui.QWidget):
+    """ This widget is used to configure the connection to the robot """
     def __init__(self):
         super().__init__()
         host_label = QtGui.QLabel('Host:')
@@ -119,12 +153,14 @@ class EditHost(QtGui.QWidget):
 
 
 class TcpConnection(QtCore.QThread):
+    """ This thread receives and sends tcp data """
     def __init__(self, host, port):
         QtCore.QThread.__init__(self)
         self.host = host
         self.port = port
 
     def run(self):
+        """ This endless loop is waiting for new data """
         tcp = ethernet.Client(self.host, int(self.port))
         while True:
             data = tcp.read_block()
@@ -139,6 +175,7 @@ class TcpConnection(QtCore.QThread):
 
 
 class SendCan(QtGui.QWidget):
+    """ This widget allows to send CAN messages from the robot """
     def __init__(self):
         super().__init__()
         self.msg_type_label = QtGui.QLabel('Message Type:')
@@ -170,6 +207,7 @@ class SendCan(QtGui.QWidget):
         self.setLayout(vbox)
 
     def selection_changed(self):
+        """ This method updates the text in the fields """
         index = self.msg_type_combo.currentIndex()
         msg_type = can.MsgTypes(index).value
         encoding, dictionary = can.MsgEncoding[msg_type]
