@@ -1,6 +1,9 @@
 tests package
 =============
 
+This package contains different `unittests <https://docs.python.org/3/library/unittest.html>`_ for our code.
+
+
 Submodules
 ----------
 

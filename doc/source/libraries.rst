@@ -31,6 +31,13 @@ Example
 
     >>> can_msg = can_connection.queue_position_Robot_1.get()
 
+.. note::
+    There are 2 different ways to get the next value from a buffer:
+    
+    * buffer.get()  This method waits for new data. The program is blocked.
+    * buffer.get_nowait()   This method returns None if there is no data available.
+
+
 Description
 ^^^^^^^^^^^
 
