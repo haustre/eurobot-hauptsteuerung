@@ -7,6 +7,7 @@ import time
 
 
 def main():
+    """ This module generates CAN test traffic. """
     if len(sys.argv) != 2:
             print('Provide CAN device name (can0, vcan0 etc.)')
             sys.exit(0)

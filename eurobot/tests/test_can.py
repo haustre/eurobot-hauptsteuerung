@@ -8,7 +8,7 @@ __author__ = 'mw'
 
 
 class TestCanPacker(TestCase):
-
+    """ Unittest for CAN packer """
     def test_encode_booleans(self):
         bool_list = [False, True, False, True]
         correct_result = 5
