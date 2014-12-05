@@ -174,7 +174,7 @@ class TcpConnection(QtCore.QThread):
         self.emit(QtCore.SIGNAL('tcp connection lost'))
 
 
-class SendCan(QtGui.QWidget):
+class SendCan(QtGui.QWidget):  # Todo: compete class
     """ This widget allows to send CAN messages from the robot """
     def __init__(self):
         super().__init__()

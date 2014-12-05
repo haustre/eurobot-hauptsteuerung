@@ -177,7 +177,7 @@ class Server(_TcpConnection):
 class Client(_TcpConnection):
     """ Tcp client connects to the server on the given hostname and port """
     def __init__(self, host, port):
-        """ Creates new thread for the connection
+        """ Creates new thread for each new connection.
 
         :param host: Host name of the server you want to connect to.
         :type host: str

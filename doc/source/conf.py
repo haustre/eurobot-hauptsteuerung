@@ -334,3 +334,4 @@ epub_exclude_files = ['search.html']
 
 todo_include_todos = True
 autodoc_default_flags = ['members', 'private-members']
+autoclass_content = 'both'
