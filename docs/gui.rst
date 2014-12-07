@@ -4,6 +4,12 @@ gui package
 This packet contains a GUI program for controlling and debugging the robot. The GUI is written with
 `pyqt4 <http://pyqt.sourceforge.net/Docs/PyQt4/introduction.html>`_.
 
+.. figure::  images/gui1.png
+   :width: 600px
+   :align:   center
+
+   Screenshot
+
 The GUI has the following functions:
 
 * Connection to the robot over ethernet. ( :py:class:`gui.communication.EditHost`,
