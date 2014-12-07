@@ -3,14 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to eurobot's documentation!
-===================================
+Welcome to the Eurobot 2015 documentation!
+==========================================
 
 Contents:
 
 .. toctree::
    :maxdepth: 4
 
+   introduction
    gui
    kern
    libraries

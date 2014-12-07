@@ -9,6 +9,7 @@ import eurobot.gui.communication
 
 
 class CanWindow(QtGui.QWidget):
+    """ This is the main Widget of the gui """
     def __init__(self):
         super().__init__()
         self.threads = []
@@ -22,6 +23,7 @@ class CanWindow(QtGui.QWidget):
         self.init_ui()
 
     def init_ui(self):
+        """ Initialize different parts of the gui. """
         self.showMaximized()
         self.edit_host.host_button.clicked.connect(self.connect_host)
         vbox = QtGui.QVBoxLayout()
@@ -40,6 +42,10 @@ class CanWindow(QtGui.QWidget):
         self.connect(self.can_table_control, QtCore.SIGNAL('Filter_changed'), self.can_table.filter_types)
 
     def connect_host(self):
+        """ This method creates a new tcp connection to the robot.
+
+        It is called every time the connect button is pushed.
+        """
         if self.connected is False:
             speak.speak("connect to Robot")
             self.connected = True
@@ -57,12 +63,21 @@ class CanWindow(QtGui.QWidget):
             print("Already connected")
 
     def lost_connection(self):
+        """ This method is called if the tcp connection is lost. """
         self.connected = False
         self.edit_host.host_button.setEnabled(True)
 
 
 class CreateGroupBox(QtGui.QGroupBox):
     def __init__(self, widget, text):
+        """
+
+        :param widget: This widget gets packed in the GroupBox
+        :type widget: QtGui.QWidget
+        :param text: This is the name of the GroupBox
+        :type text: str
+        :rtype: QtGui.QGroupBox
+        """
         super().__init__()
         box1 = QtGui.QVBoxLayout()
         box1.addWidget(widget)
@@ -74,6 +89,7 @@ class CreateGroupBox(QtGui.QGroupBox):
 
 
 def main(args):
+    """ The main function starts the gui """
     app = QtGui.QApplication(args)
     can_window = CanWindow()
     can_window.show()
