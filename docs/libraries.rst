@@ -3,6 +3,11 @@ libraries package
 
 This module contains classes used to control hardware. It is used on the robot and on the computer.
 
+* :py:class:`libraries.ethernet` allows the communication between the robot and the computer over tcp.
+* :py:class:`libraries.can` is used to send CAN messages and it contains information over the messages
+  that are used to display them on the computer.
+* :py:class:`libraries.speak` allows to give out a text over loudspeaker on both the robot and the computer.
+
 Submodules
 ==========
 
