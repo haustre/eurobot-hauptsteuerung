@@ -1,10 +1,10 @@
 libraries package
-=================
+#################
 
 This module contains classes used to control hardware. It is used on the robot and on the computer.
 
 Submodules
-----------
+==========
 
 libraries.can module
 --------------------
@@ -96,15 +96,6 @@ libraries.speak module
 ----------------------
 
 .. automodule:: libraries.speak
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: libraries
     :members:
     :undoc-members:
     :show-inheritance:

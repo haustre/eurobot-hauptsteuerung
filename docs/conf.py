@@ -335,3 +335,19 @@ epub_exclude_files = ['search.html']
 todo_include_todos = True
 autodoc_default_flags = ['members', 'private-members']
 autoclass_content = 'both'
+
+##Read the docs
+#import sphinx_rtd_theme
+#html_theme = "sphinx_rtd_theme"
+#html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+
+## Alabaster
+#import alabaster
+#html_theme_path = [alabaster.get_path()]
+#extensions = ['alabaster']
+#html_theme = 'alabaster'
+#html_sidebars = {
+#   '**': [
+#       'about.html', 'navigation.html', 'searchbox.html', 'donate.html',
+#   ]
+#}
