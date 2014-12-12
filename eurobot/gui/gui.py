@@ -6,6 +6,7 @@ import sys
 from PyQt4 import QtGui, QtCore
 import eurobot.gui.field
 import eurobot.gui.communication
+import eurobot.gui.remote_control
 
 
 class CanWindow(QtGui.QWidget):
@@ -20,6 +21,7 @@ class CanWindow(QtGui.QWidget):
         self.edit_host = eurobot.gui.communication.EditHost()
         self.send_can = eurobot.gui.communication.SendCan()
         self.game_field = eurobot.gui.field.GameField()
+        self.remote_control = eurobot.gui.remote_control.RemoteControl()
         self.init_ui()
 
     def init_ui(self):
@@ -28,6 +30,7 @@ class CanWindow(QtGui.QWidget):
         self.edit_host.host_button.clicked.connect(self.connect_host)
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(CreateGroupBox(self.can_table_control, 'Can Table'))
+        vbox.addWidget(CreateGroupBox(self.remote_control, 'Remote Control'))
         vbox.addWidget(CreateGroupBox(self.send_can, 'send Message'))
         vbox.addWidget(CreateGroupBox(self.edit_host, 'connect to Host'))
         vbox.addStretch()
@@ -40,6 +43,10 @@ class CanWindow(QtGui.QWidget):
         self.setLayout(root_vbox)
         self.connect(self.can_table_control, QtCore.SIGNAL('new_can_Table_Row'), self.can_table.add_row)
         self.connect(self.can_table_control, QtCore.SIGNAL('Filter_changed'), self.can_table.filter_types)
+
+    def keyPressEvent(self, event):
+        if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_A and event.isAutoRepeat() is False:
+            print("Test")
 
     def connect_host(self):
         """ This method creates a new tcp connection to the robot.
