@@ -18,7 +18,7 @@ class Can(object):
     def __init__(self, interface, sender):
         """
 
-        :param interface: hardware Interface used to send
+        :param interface: hardware interface used to send
         :type interface: str
         :param sender: id of the Sender (defines the sender part in the CAN id)
         :type sender: MsgSender

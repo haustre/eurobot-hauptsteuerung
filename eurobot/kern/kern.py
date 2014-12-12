@@ -15,7 +15,7 @@ def main():
     can_rcv = can.Can(sys.argv[1], can.MsgSender.Hauptsteuerung)
     tcp = Server()
     while True:
-        can_msg = can_rcv.queue_debug.get()
+        can_msg = can_rcv.queue_debug.get()  # Todo: log Data to memory
         tcp.write(can_msg)
 
 if __name__ == "__main__":
