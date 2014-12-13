@@ -75,26 +75,24 @@ class RemoteControlWindow(QtGui.QDialog):
             time.sleep(0.2)
 
     def keyPressEvent(self, event):
-        if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_W and event.isAutoRepeat() is False:
-            self.speed_motor_1 = self.speed
-            self.speed_motor_2 = self.speed
-        if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_S and event.isAutoRepeat() is False:
-            self.speed_motor_1 = -self.speed
-            self.speed_motor_2 = -self.speed
-        if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_A and event.isAutoRepeat() is False:
-            self.speed_motor_1 = -self.speed
-            self.speed_motor_2 = self.speed
-        if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_D and event.isAutoRepeat() is False:
-            self.speed_motor_1 = self.speed
-            self.speed_motor_2 = -self.speed
+        if type(event) == QtGui.QKeyEvent and event.isAutoRepeat() is False:
+            if event.key() == QtCore.Qt.Key_W:
+                self.speed_motor_1 = self.speed
+                self.speed_motor_2 = self.speed
+            if event.key() == QtCore.Qt.Key_S:
+                self.speed_motor_1 = -self.speed
+                self.speed_motor_2 = -self.speed
+            if event.key() == QtCore.Qt.Key_A:
+                self.speed_motor_1 = -self.speed
+                self.speed_motor_2 = self.speed
+            if event.key() == QtCore.Qt.Key_D:
+                self.speed_motor_1 = self.speed
+                self.speed_motor_2 = -self.speed
 
     def keyReleaseEvent(self, event):
         if event.isAutoRepeat() is False:
             self.speed_motor_1 = 0
             self.speed_motor_2 = 0
-
-    def close(self):
-        self.done(True)
 
     @staticmethod
     def show(parent=None):
