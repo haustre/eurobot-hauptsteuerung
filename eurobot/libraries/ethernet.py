@@ -96,14 +96,11 @@ class _TcpConnection(object):
 
         :return: json message or None
         """
-        data = []
-        while 1:
-            try:
-                line = self.queue_receive.get_nowait()
-            except queue.Empty:
-                break
-            data.append(line)
-        return data
+        try:
+            line = self.queue_receive.get_nowait()
+        except queue.Empty:
+            return None
+        return line
 
     def read_block(self):
         """ This method is used to read one json message

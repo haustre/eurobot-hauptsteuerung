@@ -113,7 +113,7 @@ def _pack(msg_frame, sender):
     return can_id, can_msg
 
 
-def _unpack(can_id, can_msg):
+def unpack(can_id, can_msg):
     """ Converts raw Can message to a dictionary
 
     :param can_id:
