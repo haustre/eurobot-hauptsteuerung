@@ -44,10 +44,6 @@ class CanWindow(QtGui.QWidget):
         self.connect(self.can_table_control, QtCore.SIGNAL('new_can_Table_Row'), self.can_table.add_row)
         self.connect(self.can_table_control, QtCore.SIGNAL('Filter_changed'), self.can_table.filter_types)
 
-    def keyPressEvent(self, event):
-        if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_A and event.isAutoRepeat() is False:
-            print("Test")
-
     def connect_host(self):
         """ This method creates a new tcp connection to the robot.
 
