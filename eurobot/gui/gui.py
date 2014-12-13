@@ -60,6 +60,7 @@ class CanWindow(QtGui.QWidget):
             self.connect(thread, QtCore.SIGNAL('tcp_data'), self.can_table_control.add_data)
             self.connect(thread, QtCore.SIGNAL('tcp_data'), self.game_field.setpoint)
             self.connect(thread, QtCore.SIGNAL('tcp connection lost'), self.lost_connection)
+            self.connect(self.remote_control.control_window, QtCore.SIGNAL('send_tcp'), thread.send)
             self.threads.append(thread)
             thread.start()
         else:

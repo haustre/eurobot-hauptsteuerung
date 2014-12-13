@@ -178,6 +178,7 @@ class TcpConnection(QtCore.QThread):
         self.emit(QtCore.SIGNAL('tcp connection lost'))
 
     def send(self, data):
+        print("Hallo")
         self.tcp.write(data)
 
 

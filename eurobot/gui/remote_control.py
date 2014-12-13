@@ -11,6 +11,7 @@ class RemoteControl(QtGui.QWidget):
         self.speed_motor_1 = 0
         self.speed_motor_2 = 0
         self.activate_button = QtGui.QPushButton('Activate Remote Control')
+        self.control_window = RemoteControlWindow(self)
         self.init_ui()
 
     def init_ui(self):
@@ -20,7 +21,7 @@ class RemoteControl(QtGui.QWidget):
         self.setLayout(vbox1)
 
     def activate_button_clicked(self):
-        RemoteControlWindow.show()
+        self.control_window.exec_()
 
     def focusOutEvent(self, event):
         self.speed_motor_1 = 0
@@ -72,6 +73,7 @@ class RemoteControlWindow(QtGui.QDialog):
                 self.speed_motor_2 = 0
             else:
                 print("Motor 1: %d, Motor 2: %d" % (self.speed_motor_1, self.speed_motor_2))
+                self.emit(QtCore.SIGNAL('send_tcp'), self.speed_motor_1)
             time.sleep(0.2)
 
     def keyPressEvent(self, event):
@@ -93,8 +95,3 @@ class RemoteControlWindow(QtGui.QDialog):
         if event.isAutoRepeat() is False:
             self.speed_motor_1 = 0
             self.speed_motor_2 = 0
-
-    @staticmethod
-    def show(parent=None):
-        dialog = RemoteControlWindow(parent)
-        dialog.exec_()
