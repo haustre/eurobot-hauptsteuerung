@@ -11,8 +11,6 @@ class RemoteControl(QtGui.QWidget):
         self.speed_motor_1 = 0
         self.speed_motor_2 = 0
         self.activate_button = QtGui.QPushButton('Activate Remote Control')
-        self.t_control_loop = threading.Thread(target=self.control_loop)
-        self.t_control_loop.setDaemon(1)
         self.init_ui()
 
     def init_ui(self):
@@ -22,29 +20,7 @@ class RemoteControl(QtGui.QWidget):
         self.setLayout(vbox1)
 
     def activate_button_clicked(self):
-        RemoteControlWindow()
-        if self.t_control_loop.is_alive() is False:
-            self.t_control_loop.start()
-        if self.control_active is False:
-            self.activate_button.setText("STOP")
-            self.control_active = True
-        else:
-            self.activate_button.setText("Activate Remote Control")
-            self.control_active = False
-
-    def control_loop(self):
-        while 1:
-            if self.control_active:
-                print(self.speed_motor_1)
-            time.sleep(0.2)
-
-    def keyPressEvent(self, event):
-        if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_A and event.isAutoRepeat() is False:
-            self.speed_motor_1 = 10
-
-    def keyReleaseEvent(self, event):
-        if event.isAutoRepeat() is False:
-            self.speed_motor_1 = 0
+        RemoteControlWindow.show()
 
     def focusOutEvent(self, event):
         self.speed_motor_1 = 0
@@ -53,26 +29,74 @@ class RemoteControl(QtGui.QWidget):
 class RemoteControlWindow(QtGui.QDialog):
     def __init__(self, parent=None):
         super(RemoteControlWindow, self).__init__(parent)
+        self.speed = 0
+        self.speed_motor_1 = 0
+        self.speed_motor_2 = 0
+        self.drive_button = QtGui.QPushButton('Drive')
+        self.close_button = QtGui.QPushButton('Close')
+        self.speed_label = QtGui.QLabel('Speed: 0 mm/s')
+        self.speed_slider = QtGui.QSlider(QtCore.Qt.Horizontal, self, )
         self.t_control_loop = threading.Thread(target=self.control_loop)
         self.t_control_loop.setDaemon(1)
         self.t_control_loop.start()
-        self.close_button = QtGui.QPushButton('Close')
-        #self.init_ui()
+
+        self.init_ui()
 
     def init_ui(self):
-        text_label = QtGui.QLabel('You now have control')
-        layout = QtGui.QVBoxLayout()
-        layout.addWidget(self.close_button)
-        layout.addWidget(text_label)
+        text = "Please drive carefully!!\n" \
+            " (W) forward\n" \
+            " (S) backwards\n" \
+            " (A) left\n" \
+            " (D) right\n" \
+            "press and hold Drive"
+        text_label = QtGui.QLabel(text)
+        self.close_button.clicked.connect(self.close)
+        self.speed_slider.valueChanged[int].connect(self.slider_change)
+        vbox1 = QtGui.QVBoxLayout()
+        vbox1.addWidget(text_label)
+        vbox1.addWidget(self.speed_slider)
+        vbox1.addWidget(self.speed_label)
+        vbox1.addWidget(self.drive_button)
+        vbox1.addWidget(self.close_button)
+        self.setLayout(vbox1)
 
-        self.buttons = QtGui.QDialogButtonBox(
-            QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel,
-            QtCore.Qt.Horizontal, self)
-        layout.addWidget(self.buttons)
-
-        #self.setLayout(vbox1)
+    def slider_change(self, slider_value):
+        slider_value = (slider_value + 1) / 100 * 1000
+        self.speed = slider_value
+        self.speed_label.setText("Speed: %d mm/s" % self.speed)
 
     def control_loop(self):
-        while 1:
-            print("hallo")
+        while True:
+            if self.drive_button.isDown() is False:
+                self.speed_motor_1 = 0
+                self.speed_motor_2 = 0
+            else:
+                print("Motor 1: %d, Motor 2: %d" % (self.speed_motor_1, self.speed_motor_2))
             time.sleep(0.2)
+
+    def keyPressEvent(self, event):
+        if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_W and event.isAutoRepeat() is False:
+            self.speed_motor_1 = self.speed
+            self.speed_motor_2 = self.speed
+        if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_S and event.isAutoRepeat() is False:
+            self.speed_motor_1 = -self.speed
+            self.speed_motor_2 = -self.speed
+        if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_A and event.isAutoRepeat() is False:
+            self.speed_motor_1 = -self.speed
+            self.speed_motor_2 = self.speed
+        if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_D and event.isAutoRepeat() is False:
+            self.speed_motor_1 = self.speed
+            self.speed_motor_2 = -self.speed
+
+    def keyReleaseEvent(self, event):
+        if event.isAutoRepeat() is False:
+            self.speed_motor_1 = 0
+            self.speed_motor_2 = 0
+
+    def close(self):
+        self.done(True)
+
+    @staticmethod
+    def show(parent=None):
+        dialog = RemoteControlWindow(parent)
+        dialog.exec_()
