@@ -192,16 +192,26 @@ class MsgSender(Enum):
 
 # list of all CAN message protocols
 EncodingTypes = {
-    'game_end': ('!B', ('time_to_game_end')),
-    'position': ('!BHHH', ('x_position', 'y_position', 'angle', ('position_correct', 'angle_correct'))),
-    'close_range_dedection': ('!BBHHH', ('distance_front_left', 'distance_front_middle', 'distance_front_right',
-                                        ('front_left_correct', 'front_middle_correct', 'front_right_correct', ),
-                                        ('sensor1', 'sensor2', 'sensor3', 'sensor4'))),
-    'goto_position': ('!HHHH', ('x_position', 'y_position', 'angle', 'speed')),
-    'drive_status': ('!BB', (('status'), 'time_to_destination')),
-    'task_command': ('!BB', ('task_nr', ('start_task', 'stop_task', 'get_status'))),
-    'task_status': ('!BBB', ('task_nr', ('task_ready', 'task_running', 'task_finished'), 'collected_pieces')),
-    'peripherie': ('!B', (('emergency_stop', 'key_is_removed')))
+    'game_end':
+        ('!B', ('time_to_game_end')),
+    'position':
+        ('!BHHH', ('x_position', 'y_position', 'angle', ('position_correct', 'angle_correct'))),
+    'close_range_dedection':
+        ('!BBHHH', ('distance_front_left', 'distance_front_middle', 'distance_front_right',
+                    ('front_left_correct', 'front_middle_correct', 'front_right_correct', ),
+                    ('sensor1', 'sensor2', 'sensor3', 'sensor4'))),
+    'goto_position':
+        ('!HHHH', ('x_position', 'y_position', 'angle', 'speed')),
+    'drive_status':
+        ('!BB', (('status'), 'time_to_destination')),
+    'task_command':
+        ('!BB', ('task_nr', ('start_task', 'stop_task', 'get_status'))),
+    'task_status':
+        ('!BBB', ('task_nr', ('task_ready', 'task_running', 'task_finished'), 'collected_pieces')),
+    'peripherie':
+        ('!B', (('emergency_stop', 'key_is_removed'))),
+    'debug_drive':
+        ('!HH', ('speed_left', 'speed_right'))
 
 }
 
