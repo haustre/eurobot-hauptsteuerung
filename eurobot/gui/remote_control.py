@@ -1,7 +1,9 @@
 __author__ = 'mw'
 
 from PyQt4 import QtGui, QtCore
-import threading, time
+import threading
+import time
+import eurobot.libraries.speak
 
 
 class RemoteControl(QtGui.QWidget):
@@ -21,10 +23,8 @@ class RemoteControl(QtGui.QWidget):
         self.setLayout(vbox1)
 
     def activate_button_clicked(self):
+        eurobot.libraries.speak.speak("Pleas drive carefully")
         self.control_window.exec_()
-
-    def focusOutEvent(self, event):
-        self.speed_motor_1 = 0
 
 
 class RemoteControlWindow(QtGui.QDialog):
