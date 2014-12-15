@@ -95,7 +95,7 @@ def _pack(msg_frame, sender):
     :type sender: libraries.can.MsgSender
     :return: can_id, can_msg
     """
-    encoding, dictionary = MsgEncoding[msg_frame['type'].value]
+    encoding, dictionary = MsgEncoding[msg_frame['type']]
     data = []
     for value in reversed(dictionary):
         if not isinstance(value, str):
@@ -109,7 +109,7 @@ def _pack(msg_frame, sender):
     can_msg = struct.pack(encoding, *data)
     priority = 0x3  # Todo: unterscheiden zwischen debug und normal
     sender = sender.value
-    can_id = (priority << 9) + (msg_frame['type'].value << 3) + sender
+    can_id = (priority << 9) + (msg_frame['type'] << 3) + sender
     return can_id, can_msg
 
 
@@ -212,7 +212,7 @@ EncodingTypes = {
     'peripherie':
         ('!B', (('emergency_stop', 'key_is_removed'))),
     'debug_drive':
-        ('!HH', ('speed_left', 'speed_right'))
+        ('!hh', ('speed_left', 'speed_right'))
 
 }
 
@@ -221,7 +221,8 @@ MsgEncoding = {  # Todo: finish the List
     MsgTypes.Position_Robot_1.value: EncodingTypes['position'],
     MsgTypes.Position_Robot_2.value: EncodingTypes['position'],
     MsgTypes.Position_Enemy_1.value: EncodingTypes['position'],
-    MsgTypes.Position_Enemy_2.value: EncodingTypes['position']
+    MsgTypes.Position_Enemy_2.value: EncodingTypes['position'],
+    MsgTypes.Debug_Drive.value: EncodingTypes['debug_drive']
 }
 
 # Colors used in can table

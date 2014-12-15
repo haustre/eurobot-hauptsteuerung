@@ -76,8 +76,8 @@ class RemoteControlWindow(QtGui.QDialog):
                 print("Motor 1: %d, Motor 2: %d" % (self.speed_motor_left, self.speed_motor_right))
                 can_msg = {
                     'type': can.MsgTypes.Debug_Drive.value,
-                    'speed_left': self.speed_motor_left,
-                    'speed_right': self.speed_motor_right
+                    'speed_left': int(self.speed_motor_left),
+                    'speed_right': int(self.speed_motor_right)
                 }
                 self.emit(QtCore.SIGNAL('send_can_over_tcp'), can_msg)
             time.sleep(0.2)

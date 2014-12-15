@@ -1,6 +1,7 @@
 __author__ = 'mw'
 
 import threading
+import queue
 from eurobot.libraries import can
 from eurobot.libraries.ethernet import Server
 
@@ -14,6 +15,14 @@ class LaptopCommunication():
         self.debug_loop.start()
 
     def run(self):
-        while True:
-            can_msg = self.can_socket.queue_debug.get()  # Todo: log Data to memory
-            self.tcp_socket.write(can_msg)
+        while True:  # Todo: log Data to memory
+            # send new can messages to laptop
+            try:
+                can_msg = self.can_socket.queue_debug.get_nowait()
+                self.tcp_socket.write(can_msg)
+            except queue.Empty:
+                pass
+            # get messages from laptop
+            tcp_data = self.tcp_socket.read_no_block()
+            if tcp_data is not None:
+                self.can_socket.send(tcp_data)
