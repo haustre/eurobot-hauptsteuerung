@@ -4,6 +4,7 @@ from PyQt4 import QtGui, QtCore
 import threading
 import time
 from eurobot.libraries import speak
+from eurobot.libraries import can
 
 
 class RemoteControl(QtGui.QWidget):
@@ -31,8 +32,8 @@ class RemoteControlWindow(QtGui.QDialog):
     def __init__(self, parent=None):
         super(RemoteControlWindow, self).__init__(parent)
         self.speed = 0
-        self.speed_motor_1 = 0
-        self.speed_motor_2 = 0
+        self.speed_motor_left = 0
+        self.speed_motor_right = 0
         self.drive_button = QtGui.QPushButton('Drive')
         self.close_button = QtGui.QPushButton('Close')
         self.speed_label = QtGui.QLabel('Speed: 0 mm/s')
@@ -69,29 +70,34 @@ class RemoteControlWindow(QtGui.QDialog):
     def control_loop(self):
         while True:
             if self.drive_button.isDown() is False:
-                self.speed_motor_1 = 0
-                self.speed_motor_2 = 0
+                self.speed_motor_left = 0
+                self.speed_motor_right = 0
             else:
-                print("Motor 1: %d, Motor 2: %d" % (self.speed_motor_1, self.speed_motor_2))
-                self.emit(QtCore.SIGNAL('send_tcp'), self.speed_motor_1)
+                print("Motor 1: %d, Motor 2: %d" % (self.speed_motor_left, self.speed_motor_right))
+                can_msg = {
+                    'type': can.MsgTypes.Debug_Drive.value,
+                    'speed_left': self.speed_motor_left,
+                    'speed_right': self.speed_motor_right
+                }
+                self.emit(QtCore.SIGNAL('send_can_over_tcp'), can_msg)
             time.sleep(0.2)
 
     def keyPressEvent(self, event):
         if type(event) == QtGui.QKeyEvent and event.isAutoRepeat() is False:
             if event.key() == QtCore.Qt.Key_W:
-                self.speed_motor_1 = self.speed
-                self.speed_motor_2 = self.speed
+                self.speed_motor_left = self.speed
+                self.speed_motor_right = self.speed
             if event.key() == QtCore.Qt.Key_S:
-                self.speed_motor_1 = -self.speed
-                self.speed_motor_2 = -self.speed
+                self.speed_motor_left = -self.speed
+                self.speed_motor_right = -self.speed
             if event.key() == QtCore.Qt.Key_A:
-                self.speed_motor_1 = -self.speed
-                self.speed_motor_2 = self.speed
+                self.speed_motor_left = -self.speed
+                self.speed_motor_right = self.speed
             if event.key() == QtCore.Qt.Key_D:
-                self.speed_motor_1 = self.speed
-                self.speed_motor_2 = -self.speed
+                self.speed_motor_left = self.speed
+                self.speed_motor_right = -self.speed
 
     def keyReleaseEvent(self, event):
         if event.isAutoRepeat() is False:
-            self.speed_motor_1 = 0
-            self.speed_motor_2 = 0
+            self.speed_motor_left = 0
+            self.speed_motor_right = 0
