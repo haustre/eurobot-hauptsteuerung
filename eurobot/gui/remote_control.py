@@ -3,7 +3,7 @@ __author__ = 'mw'
 from PyQt4 import QtGui, QtCore
 import threading
 import time
-import eurobot.libraries.speak
+from eurobot.libraries import speak
 
 
 class RemoteControl(QtGui.QWidget):
@@ -23,7 +23,7 @@ class RemoteControl(QtGui.QWidget):
         self.setLayout(vbox1)
 
     def activate_button_clicked(self):
-        eurobot.libraries.speak.speak("Pleas drive carefully")
+        speak.speak("Pleas drive carefully")
         self.control_window.exec_()
 
 

@@ -1,5 +1,3 @@
-from eurobot.libraries import speak
-
 __author__ = 'mw'
 
 import sys
@@ -7,6 +5,7 @@ from PyQt4 import QtGui, QtCore
 import eurobot.gui.field
 import eurobot.gui.communication
 import eurobot.gui.remote_control
+from eurobot.libraries import speak
 
 
 class CanWindow(QtGui.QWidget):
