@@ -4,7 +4,7 @@ import sys
 from PyQt4 import QtGui, QtCore
 import eurobot.gui.field
 import eurobot.gui.communication
-import eurobot.gui.remote_control
+from eurobot.gui.remote_control import RemoteControlWindow
 from eurobot.libraries import speak
 
 
@@ -18,18 +18,21 @@ class CanWindow(QtGui.QWidget):
         self.can_table = eurobot.gui.communication.Table(header)
         self.can_table_control = eurobot.gui.communication.CanTableControl()
         self.edit_host = eurobot.gui.communication.EditHost()
+        self.remote_control_button = QtGui.QPushButton('Activate Remote Control')
         self.send_can = eurobot.gui.communication.SendCan()
         self.game_field = eurobot.gui.field.GameField()
-        self.remote_control = eurobot.gui.remote_control.RemoteControl()
+        self.remote_control_window = RemoteControlWindow(self)
         self.init_ui()
 
     def init_ui(self):
         """ Initialize different parts of the gui. """
         self.showMaximized()
         self.edit_host.host_button.clicked.connect(self.connect_host)
+        self.remote_control_button.clicked.connect(self.activate_remote_control)
+        self.remote_control_button.setEnabled(False)
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(CreateGroupBox(self.can_table_control, 'Can Table'))
-        vbox.addWidget(CreateGroupBox(self.remote_control, 'Remote Control'))
+        vbox.addWidget(CreateGroupBox(self.remote_control_button, 'Remote Control'))
         vbox.addWidget(CreateGroupBox(self.send_can, 'send Message'))
         vbox.addWidget(CreateGroupBox(self.edit_host, 'connect to Host'))
         vbox.addStretch()
@@ -49,9 +52,9 @@ class CanWindow(QtGui.QWidget):
         It is called every time the connect button is pushed.
         """
         if self.connected is False:
-            speak.speak("connect to Robot")
             self.connected = True
             self.edit_host.host_button.setEnabled(False)
+            self.remote_control_button.setEnabled(True)
             host = self.edit_host.host_line.text()
             port = self.edit_host.port_line.text()
             print(host, port)
@@ -59,7 +62,7 @@ class CanWindow(QtGui.QWidget):
             self.connect(thread, QtCore.SIGNAL('tcp_data'), self.can_table_control.add_data)
             self.connect(thread, QtCore.SIGNAL('tcp_data'), self.game_field.setpoint)
             self.connect(thread, QtCore.SIGNAL('tcp connection lost'), self.lost_connection)
-            self.connect(self.remote_control.control_window, QtCore.SIGNAL('send_can_over_tcp'), thread.send)
+            self.connect(self.remote_control_window, QtCore.SIGNAL('send_can_over_tcp'), thread.send)
             self.threads.append(thread)
             thread.start()
         else:
@@ -69,6 +72,11 @@ class CanWindow(QtGui.QWidget):
         """ This method is called if the tcp connection is lost. """
         self.connected = False
         self.edit_host.host_button.setEnabled(True)
+        self.remote_control_button.setEnabled(False)
+
+    def activate_remote_control(self):
+        speak.speak("Pleas drive carefully")
+        self.remote_control_window.exec_()
 
 
 class CreateGroupBox(QtGui.QGroupBox):

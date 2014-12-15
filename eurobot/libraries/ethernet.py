@@ -186,7 +186,7 @@ class Client(_TcpConnection):
         try:
             self.s.connect((host, port))
             self.connected = True
-        except socket.gaierror:
+        except:  # TODO: add specific exception
             print("Name or service not known")
         else:
             t = threading.Thread(target=self._connection, args=[self.s])
