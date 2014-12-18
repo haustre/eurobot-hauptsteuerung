@@ -180,7 +180,7 @@ class MsgTypes(Enum):
     Close_Range_Dedection = 7
     Goto_Position = 8
     Drive_Status = 9
-    Debug_Drive = 10
+    Debug_Drive = 20
 
 
 class MsgSender(Enum):

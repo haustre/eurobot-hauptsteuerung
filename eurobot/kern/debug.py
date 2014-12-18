@@ -2,6 +2,7 @@ __author__ = 'mw'
 
 import threading
 import queue
+import time
 from eurobot.libraries import can
 from eurobot.libraries.ethernet import Server
 
@@ -26,3 +27,4 @@ class LaptopCommunication():
             tcp_data = self.tcp_socket.read_no_block()
             if tcp_data is not None:
                 self.can_socket.send(tcp_data)
+            time.sleep(0.01)  # TODO: remove
