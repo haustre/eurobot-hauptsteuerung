@@ -58,7 +58,7 @@ class RemoteControlWindow(QtGui.QDialog):
                     'speed_right': int(self.speed_motor_right)
                 }
                 self.emit(QtCore.SIGNAL('send_can_over_tcp'), can_msg)
-            time.sleep(0.2)
+            time.sleep(0.09)
 
     def keyPressEvent(self, event):
         if type(event) == QtGui.QKeyEvent and event.isAutoRepeat() is False:
