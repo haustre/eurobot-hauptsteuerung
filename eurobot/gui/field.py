@@ -1,5 +1,6 @@
 __author__ = 'mw'
 
+import os
 from eurobot.libraries import can
 from PyQt4 import QtGui, QtCore
 
@@ -8,9 +9,9 @@ class GameField(QtGui.QWidget):
     """ This class draws the Position of the Robots on a map. """
     def __init__(self):
         super().__init__()
-        self.table_pixmap = QtGui.QPixmap("./gui/Table.png")
-        self.robot1_pixmap = QtGui.QPixmap("./gui/Robot1.png")
-        self.enemy1_pixmap = QtGui.QPixmap("./gui/Robot2.png")
+        self.table_pixmap = QtGui.QPixmap(os.path.join(os.path.dirname(__file__), 'Table.png'))
+        self.robot1_pixmap = QtGui.QPixmap(os.path.join(os.path.dirname(__file__), 'Robot1.png'))
+        self.enemy1_pixmap = QtGui.QPixmap(os.path.join(os.path.dirname(__file__), 'Robot2.png'))
         self.pixmap_ratio = self.table_pixmap.height() / self.table_pixmap.width()
         self.robot1 = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.robot1_pixmap}
         self.enemy1 = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.enemy1_pixmap}
