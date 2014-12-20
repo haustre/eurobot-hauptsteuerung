@@ -3,7 +3,7 @@ __author__ = 'mw'
 import subprocess
 
 
-def speak(text):
+def speak(text):  # TODO: check if espeak is installed
     """ Gives a given String out over Loudspeaker.
 
     .. note::

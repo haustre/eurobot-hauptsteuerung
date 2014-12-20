@@ -16,11 +16,4 @@ Structure
 Submodules
 ==========
 
-kern.kern module
-----------------
-
-.. automodule:: kern.kern
-    :members:
-    :undoc-members:
-    :show-inheritance:
 

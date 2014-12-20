@@ -37,7 +37,7 @@ class TestCanPacker(TestCase):
 
     def test_pack(self):
         can_msg = {
-            'type': can.MsgTypes.Position_Robot_1,
+            'type': can.MsgTypes.Position_Robot_1.value,
             'position_correct': True,
             'angle_correct': False,
             'angle': 234,
