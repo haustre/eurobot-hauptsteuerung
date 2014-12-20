@@ -21,7 +21,7 @@ def main():
         x += 5
         y += 5
         can_msg = {
-            'type': can.MsgTypes.Position_Robot_1,
+            'type': can.MsgTypes.Position_Robot_1.value,
             'position_correct': True,
             'angle_correct': False,
             'angle': angle,
@@ -31,13 +31,14 @@ def main():
         can_connection.send(can_msg)
 
         can_msg = {
-            'type': can.MsgTypes.Position_Enemy_1,
+            'type': can.MsgTypes.Position_Enemy_1.value,
             'position_correct': False,
             'angle_correct': True,
             'angle': angle + 100,
             'y_position': y + 100,
             'x_position': x + 100
         }
+        print(can_msg)
         can_connection.send(can_msg)
         print(angle)
         time.sleep(1/100)

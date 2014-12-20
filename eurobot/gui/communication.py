@@ -6,6 +6,7 @@ from PyQt4 import QtGui, QtCore
 
 import datetime
 import copy
+import time
 
 
 class Table(QtGui.QTableWidget):
@@ -158,20 +159,30 @@ class TcpConnection(QtCore.QThread):
         QtCore.QThread.__init__(self)
         self.host = host
         self.port = port
+        self.tcp = ethernet.Client(self.host, int(self.port))
 
     def run(self):
         """ This endless loop is waiting for new data """
-        tcp = ethernet.Client(self.host, int(self.port))
-        while True:
-            data = tcp.read_block()
-            if tcp.connected is False:
-                break
-            can_id = data[0]
-            can_msg = data[1].encode('latin-1')
-            msg_frame = can._unpack(can_id, can_msg)
-            self.emit(QtCore.SIGNAL('tcp_data'), msg_frame)
-        speak.speak("Connection to Robot lost")
+        if self.tcp.connected:
+            speak.speak("connect to Robot")
+            while True:
+                data = self.tcp.read_no_block()
+                if self.tcp.connected is False:
+                    break
+                if data is not None:
+                    can_id = data[0]
+                    can_msg = data[1].encode('latin-1')
+                    msg_frame = can.unpack(can_id, can_msg)
+                    self.emit(QtCore.SIGNAL('tcp_data'), msg_frame)
+                else:
+                    time.sleep(0.01)
+            speak.speak("Connection to Robot lost")
+        else:
+            speak.speak("connection failed")
         self.emit(QtCore.SIGNAL('tcp connection lost'))
+
+    def send(self, data):
+        self.tcp.write(data)
 
 
 class SendCan(QtGui.QWidget):  # Todo: compete class

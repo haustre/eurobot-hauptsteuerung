@@ -1,7 +1,6 @@
-from eurobot.libraries import can
-
 __author__ = 'mw'
 
+from eurobot.libraries import can
 from PyQt4 import QtGui, QtCore
 
 

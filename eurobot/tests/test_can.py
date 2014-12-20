@@ -28,7 +28,7 @@ class TestCanPacker(TestCase):
         data_correct = (0 << 1) + (1 << 0)
         packer_format = '!BHHH'
         can_msg = struct.pack(packer_format, data_correct, 234, 1234, 2345)
-        msg_frame = can._unpack(can_id, can_msg)
+        msg_frame = can.unpack(can_id, can_msg)
         correct_result = (False, True, 234, 1234, 2345, can.MsgTypes.Position_Robot_1, can.MsgSender.Hauptsteuerung)
         result = msg_frame['angle_correct'], msg_frame['position_correct'], msg_frame['angle'],\
         msg_frame['y_position'], msg_frame['x_position'], msg_frame['type'], msg_frame['sender']

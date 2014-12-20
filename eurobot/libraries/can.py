@@ -18,7 +18,7 @@ class Can(object):
     def __init__(self, interface, sender):
         """
 
-        :param interface: hardware Interface used to send
+        :param interface: hardware interface used to send
         :type interface: str
         :param sender: id of the Sender (defines the sender part in the CAN id)
         :type sender: MsgSender
@@ -95,7 +95,7 @@ def _pack(msg_frame, sender):
     :type sender: libraries.can.MsgSender
     :return: can_id, can_msg
     """
-    encoding, dictionary = MsgEncoding[msg_frame['type'].value]
+    encoding, dictionary = MsgEncoding[msg_frame['type']]
     data = []
     for value in reversed(dictionary):
         if not isinstance(value, str):
@@ -109,11 +109,11 @@ def _pack(msg_frame, sender):
     can_msg = struct.pack(encoding, *data)
     priority = 0x3  # Todo: unterscheiden zwischen debug und normal
     sender = sender.value
-    can_id = (priority << 9) + (msg_frame['type'].value << 3) + sender
+    can_id = (priority << 9) + (msg_frame['type'] << 3) + sender
     return can_id, can_msg
 
 
-def _unpack(can_id, can_msg):
+def unpack(can_id, can_msg):
     """ Converts raw Can message to a dictionary
 
     :param can_id:
@@ -180,6 +180,7 @@ class MsgTypes(Enum):
     Close_Range_Dedection = 7
     Goto_Position = 8
     Drive_Status = 9
+    Debug_Drive = 20
 
 
 class MsgSender(Enum):
@@ -192,16 +193,26 @@ class MsgSender(Enum):
 
 # list of all CAN message protocols
 EncodingTypes = {
-    'game_end': ('!B', ('time_to_game_end')),
-    'position': ('!BHHH', ('x_position', 'y_position', 'angle', ('position_correct', 'angle_correct'))),
-    'close_range_dedection': ('!BBHHH', ('distance_front_left', 'distance_front_middle', 'distance_front_right',
-                                        ('front_left_correct', 'front_middle_correct', 'front_right_correct', ),
-                                        ('sensor1', 'sensor2', 'sensor3', 'sensor4'))),
-    'goto_position': ('!HHHH', ('x_position', 'y_position', 'angle', 'speed')),
-    'drive_status': ('!BB', (('status'), 'time_to_destination')),
-    'task_command': ('!BB', ('task_nr', ('start_task', 'stop_task', 'get_status'))),
-    'task_status': ('!BBB', ('task_nr', ('task_ready', 'task_running', 'task_finished'), 'collected_pieces')),
-    'peripherie': ('!B', (('emergency_stop', 'key_is_removed')))
+    'game_end':
+        ('!B', ('time_to_game_end')),
+    'position':
+        ('!BHHH', ('x_position', 'y_position', 'angle', ('position_correct', 'angle_correct'))),
+    'close_range_dedection':
+        ('!BBHHH', ('distance_front_left', 'distance_front_middle', 'distance_front_right',
+                    ('front_left_correct', 'front_middle_correct', 'front_right_correct', ),
+                    ('sensor1', 'sensor2', 'sensor3', 'sensor4'))),
+    'goto_position':
+        ('!HHHH', ('x_position', 'y_position', 'angle', 'speed')),
+    'drive_status':
+        ('!BB', (('status'), 'time_to_destination')),
+    'task_command':
+        ('!BB', ('task_nr', ('start_task', 'stop_task', 'get_status'))),
+    'task_status':
+        ('!BBB', ('task_nr', ('task_ready', 'task_running', 'task_finished'), 'collected_pieces')),
+    'peripherie':
+        ('!B', (('emergency_stop', 'key_is_removed'))),
+    'debug_drive':
+        ('!hh', ('speed_left', 'speed_right'))
 
 }
 
@@ -210,7 +221,8 @@ MsgEncoding = {  # Todo: finish the List
     MsgTypes.Position_Robot_1.value: EncodingTypes['position'],
     MsgTypes.Position_Robot_2.value: EncodingTypes['position'],
     MsgTypes.Position_Enemy_1.value: EncodingTypes['position'],
-    MsgTypes.Position_Enemy_2.value: EncodingTypes['position']
+    MsgTypes.Position_Enemy_2.value: EncodingTypes['position'],
+    MsgTypes.Debug_Drive.value: EncodingTypes['debug_drive']
 }
 
 # Colors used in can table

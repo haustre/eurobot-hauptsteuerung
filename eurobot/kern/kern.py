@@ -1,10 +1,9 @@
-from eurobot.libraries import can
-
 __author__ = 'mw'
 
 import sys
-
-from eurobot.libraries.ethernet import Server
+import time
+from eurobot.libraries import can
+from eurobot.kern import debug
 
 
 def main():
@@ -12,11 +11,10 @@ def main():
     if len(sys.argv) != 2:
         print('Provide CAN device name (can0, vcan0 etc.)')
         sys.exit(0)
-    can_rcv = can.Can(sys.argv[1], can.MsgSender.Hauptsteuerung)
-    tcp = Server()
+    can_socket = can.Can(sys.argv[1], can.MsgSender.Hauptsteuerung)
+    debugger = debug.LaptopCommunication(can_socket)
     while True:
-        can_msg = can_rcv.queue_debug.get()
-        tcp.write(can_msg)
+        time.sleep(1)
 
 if __name__ == "__main__":
     main()
