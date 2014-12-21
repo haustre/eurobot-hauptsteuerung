@@ -33,7 +33,7 @@ class CanWindow(QtGui.QWidget):
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(CreateGroupBox(self.can_table_control, 'Can Table'))
         vbox.addWidget(CreateGroupBox(self.remote_control_button, 'Remote Control'))
-        vbox.addWidget(CreateGroupBox(self.send_can, 'send Message'))
+        #vbox.addWidget(CreateGroupBox(self.send_can, 'send Message'))
         vbox.addWidget(CreateGroupBox(self.edit_host, 'connect to Host'))
         vbox.addStretch()
         hbox = QtGui.QHBoxLayout()
