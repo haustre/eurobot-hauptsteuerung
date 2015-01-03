@@ -1,15 +1,14 @@
-from eurobot.libraries import can, ethernet, speak
-
 __author__ = 'mw'
 
-from PyQt4 import QtGui, QtCore
-
+from eurobot.libraries import can, ethernet, speak
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
 import datetime
 import copy
 import time
 
 
-class Table(QtGui.QTableWidget):
+class Table(QTableWidget):
     """ Draws a table and allows to add new rows and filter them. """
     def __init__(self, header):
         """
@@ -42,10 +41,10 @@ class Table(QtGui.QTableWidget):
         if visible is False:
             self.hideRow(row_count-2)
         for i in range(len(data)):
-            newitem = QtGui.QTableWidgetItem(data[i])
+            newitem = QTableWidgetItem(data[i])
             if color is not None:
                 red, green, blue = color
-                newitem.setBackground(QtGui.QColor(red, green, blue))
+                newitem.setBackground(QColor(red, green, blue))
             self.setItem(row_count - 2, i, newitem)
         if row_count > max_row_count:
             self.removeRow(0)
@@ -66,28 +65,28 @@ class Table(QtGui.QTableWidget):
         for msg_type, visible in enumerate(types):
             if visible is False:
                 search_string = can.MsgTypes(msg_type).name
-                items_to_hide = self.findItems(search_string, QtCore.Qt.MatchExactly)
+                items_to_hide = self.findItems(search_string, Qt.MatchExactly)
                 for item in items_to_hide:
                     self.hideRow(item.row())
 
 
-class CanTableControl(QtGui.QWidget):
+class CanTableControl(QWidget):
     """ Controls what will be be shown in the CAN table """
     def __init__(self):
         super().__init__()
-        self.autoscroll_box = QtGui.QCheckBox('Autoscroll')
-        self.run_button = QtGui.QPushButton('run')
+        self.autoscroll_box = QCheckBox('Autoscroll')
+        self.run_button = QPushButton('run')
         self.run_button.clicked.connect(self.run_button_clicked)
         self.run_button.setCheckable(True)
 
-        grid = QtGui.QGridLayout()
-        grid.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+        grid = QGridLayout()
+        grid.setSizeConstraint(QLayout.SetMinAndMaxSize)
         grid.addWidget(self.autoscroll_box, 0, 0)
         grid.addWidget(self.run_button, 0, 1)
 
         self.type_chechboxes = []
         for i, msg_type in enumerate(can.MsgTypes):
-            checkbox = QtGui.QCheckBox(msg_type.name)
+            checkbox = QCheckBox(msg_type.name)
             checkbox.setChecked(True)
             checkbox.stateChanged.connect(self.change_typ_filter)
             self.type_chechboxes.append(checkbox)
@@ -111,7 +110,7 @@ class CanTableControl(QtGui.QWidget):
         checked = []
         for checkbox in self.type_chechboxes:
             checked.append(checkbox.isChecked())
-        self.emit(QtCore.SIGNAL('Filter_changed'), checked)
+        self.emit(SIGNAL('Filter_changed'), checked)
 
     def add_data(self, msg_frame):
         """ Puts a new CAN frame in the table
@@ -131,20 +130,20 @@ class CanTableControl(QtGui.QWidget):
             current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
             new_row = [current_time, table_sender, table_type, table_msg]
             autoscroll = self.autoscroll_box.isChecked()
-            self.emit(QtCore.SIGNAL('new_can_Table_Row'), new_row, table_color, autoscroll, visible)
+            self.emit(SIGNAL('new_can_Table_Row'), new_row, table_color, autoscroll, visible)
 
 
-class EditHost(QtGui.QWidget):
+class EditHost(QWidget):
     """ This widget is used to configure the connection to the robot """
     def __init__(self):
         super().__init__()
-        host_label = QtGui.QLabel('Host:')
-        self.host_line = QtGui.QLineEdit('localhost')
-        port_label = QtGui.QLabel('Port:')
-        self.port_line = QtGui.QLineEdit('42233')
-        self.host_button = QtGui.QPushButton('Connect')
+        host_label = QLabel('Host:')
+        self.host_line = QLineEdit('localhost')
+        port_label = QLabel('Port:')
+        self.port_line = QLineEdit('42233')
+        self.host_button = QPushButton('Connect')
 
-        grid = QtGui.QGridLayout()
+        grid = QGridLayout()
         grid.addWidget(host_label, 0, 0)
         grid.addWidget(self.host_line, 0, 1)
         grid.addWidget(port_label, 1, 0)
@@ -153,10 +152,10 @@ class EditHost(QtGui.QWidget):
         self.setLayout(grid)
 
 
-class TcpConnection(QtCore.QThread):
+class TcpConnection(QThread):
     """ This thread receives and sends tcp data """
     def __init__(self, host, port):
-        QtCore.QThread.__init__(self)
+        QThread.__init__(self)
         self.host = host
         self.port = port
         self.tcp = ethernet.Client(self.host, int(self.port))
@@ -173,45 +172,45 @@ class TcpConnection(QtCore.QThread):
                     can_id = data[0]
                     can_msg = data[1].encode('latin-1')
                     msg_frame = can.unpack(can_id, can_msg)
-                    self.emit(QtCore.SIGNAL('tcp_data'), msg_frame)
+                    self.emit(SIGNAL('tcp_data'), msg_frame)
                 else:
                     time.sleep(0.01)
             speak.speak("Connection to Robot lost")
         else:
             speak.speak("connection failed")
-        self.emit(QtCore.SIGNAL('tcp connection lost'))
+        self.emit(SIGNAL('tcp connection lost'))
 
     def send(self, data):
         self.tcp.write(data)
 
 
-class SendCan(QtGui.QWidget):  # Todo: compete class
+class SendCan(QWidget):  # Todo: compete class
     """ This widget allows to send CAN messages from the robot """
     def __init__(self):
         super().__init__()
-        self.msg_type_label = QtGui.QLabel('Message Type:')
-        self.msg_label = QtGui.QLabel('Message:')
-        self.msg_type_combo = QtGui.QComboBox()
+        self.msg_type_label = QLabel('Message Type:')
+        self.msg_label = QLabel('Message:')
+        self.msg_type_combo = QComboBox()
         msg_types = []
         for msg_type in can.MsgTypes:
             msg_types.append(msg_type.name)
         self.msg_type_combo.addItems(msg_types)
         self.msg_type_combo.currentIndexChanged.connect(self.selection_changed)
-        self.send_button = QtGui.QPushButton('send')
+        self.send_button = QPushButton('send')
 
-        grid = QtGui.QGridLayout()
+        grid = QGridLayout()
         grid.addWidget(self.msg_type_label, 0, 0)
         grid.addWidget(self.msg_type_combo, 0, 1)
         grid.addWidget(self.send_button, 1, 1)
 
-        grid2 = QtGui.QGridLayout()
+        grid2 = QGridLayout()
         self.lines = []
         for i in range(8):
-            line = QtGui.QLineEdit("Byte: %s" % i)
+            line = QLineEdit("Byte: %s" % i)
             self.lines.append(line)
             grid2.addWidget(line, i / 2 + 1, i % 2)
 
-        vbox = QtGui.QVBoxLayout()
+        vbox = QVBoxLayout()
         vbox.addLayout(grid)
         vbox.addLayout(grid2)
 
