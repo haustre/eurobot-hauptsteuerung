@@ -1,14 +1,15 @@
 __author__ = 'mw'
 
 import sys
-from PyQt4 import QtGui, QtCore
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
 import eurobot.gui.field
 import eurobot.gui.communication
 from eurobot.gui.remote_control import RemoteControlWindow
 from eurobot.libraries import speak
 
 
-class CanWindow(QtGui.QWidget):
+class CanWindow(QWidget):
     """ This is the main Widget of the gui """
     def __init__(self):
         super().__init__()
@@ -18,7 +19,7 @@ class CanWindow(QtGui.QWidget):
         self.can_table = eurobot.gui.communication.Table(header)
         self.can_table_control = eurobot.gui.communication.CanTableControl()
         self.edit_host = eurobot.gui.communication.EditHost()
-        self.remote_control_button = QtGui.QPushButton('Activate Remote Control')
+        self.remote_control_button = QPushButton('Activate Remote Control')
         self.send_can = eurobot.gui.communication.SendCan()
         self.game_field = eurobot.gui.field.GameField()
         self.remote_control_window = RemoteControlWindow(self)
@@ -30,21 +31,21 @@ class CanWindow(QtGui.QWidget):
         self.edit_host.host_button.clicked.connect(self.connect_host)
         self.remote_control_button.clicked.connect(self.activate_remote_control)
         self.remote_control_button.setEnabled(False)
-        vbox = QtGui.QVBoxLayout()
+        vbox = QVBoxLayout()
         vbox.addWidget(CreateGroupBox(self.can_table_control, 'Can Table'))
         vbox.addWidget(CreateGroupBox(self.remote_control_button, 'Remote Control'))
         #vbox.addWidget(CreateGroupBox(self.send_can, 'send Message'))
         vbox.addWidget(CreateGroupBox(self.edit_host, 'connect to Host'))
         vbox.addStretch()
-        hbox = QtGui.QHBoxLayout()
+        hbox = QHBoxLayout()
         hbox.addWidget(self.game_field, 1)
         hbox.addLayout(vbox)
-        root_vbox = QtGui.QVBoxLayout()
+        root_vbox = QVBoxLayout()
         root_vbox.addWidget(self.can_table, 1)
         root_vbox.addLayout(hbox)
         self.setLayout(root_vbox)
-        self.connect(self.can_table_control, QtCore.SIGNAL('new_can_Table_Row'), self.can_table.add_row)
-        self.connect(self.can_table_control, QtCore.SIGNAL('Filter_changed'), self.can_table.filter_types)
+        self.connect(self.can_table_control, SIGNAL('new_can_Table_Row'), self.can_table.add_row)
+        self.connect(self.can_table_control, SIGNAL('Filter_changed'), self.can_table.filter_types)
 
     def connect_host(self):
         """ This method creates a new tcp connection to the robot.
@@ -59,10 +60,10 @@ class CanWindow(QtGui.QWidget):
             port = self.edit_host.port_line.text()
             print(host, port)
             thread = eurobot.gui.communication.TcpConnection(host, port)
-            self.connect(thread, QtCore.SIGNAL('tcp_data'), self.can_table_control.add_data)
-            self.connect(thread, QtCore.SIGNAL('tcp_data'), self.game_field.setpoint)
-            self.connect(thread, QtCore.SIGNAL('tcp connection lost'), self.lost_connection)
-            self.connect(self.remote_control_window, QtCore.SIGNAL('send_can_over_tcp'), thread.send)
+            self.connect(thread, SIGNAL('tcp_data'), self.can_table_control.add_data)
+            self.connect(thread, SIGNAL('tcp_data'), self.game_field.setpoint)
+            self.connect(thread, SIGNAL('tcp connection lost'), self.lost_connection)
+            self.connect(self.remote_control_window, SIGNAL('send_can_over_tcp'), thread.send)
             self.threads.append(thread)
             thread.start()
         else:
@@ -75,11 +76,11 @@ class CanWindow(QtGui.QWidget):
         self.remote_control_button.setEnabled(False)
 
     def activate_remote_control(self):
-        speak.speak("Pleas drive carefully")
+        speak.speak("Please drive carefully")
         self.remote_control_window.exec_()
 
 
-class CreateGroupBox(QtGui.QGroupBox):
+class CreateGroupBox(QGroupBox):  # TODO: remove second groupbox
     def __init__(self, widget, text):
         """
 
@@ -90,18 +91,18 @@ class CreateGroupBox(QtGui.QGroupBox):
         :rtype: QtGui.QGroupBox
         """
         super().__init__()
-        box1 = QtGui.QVBoxLayout()
+        box1 = QVBoxLayout()
         box1.addWidget(widget)
-        groupbox = QtGui.QGroupBox(text)
+        groupbox = QGroupBox(text)
         groupbox.setLayout(box1)
-        box2 = QtGui.QVBoxLayout()
+        box2 = QVBoxLayout()
         box2.addWidget(groupbox)
         self.setLayout(box2)
 
 
 def main(args):
     """ The main function starts the gui """
-    app = QtGui.QApplication(args)
+    app = QApplication(args)
     can_window = CanWindow()
     can_window.show()
     sys.exit(app.exec_())

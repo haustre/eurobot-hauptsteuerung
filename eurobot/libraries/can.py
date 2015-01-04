@@ -48,6 +48,7 @@ class Can(object):
         can_id, can_msg = _pack(msg_frame, self.sender)
         frame = self._build_can_frame(can_id, can_msg)
         self.queue_send.put_nowait((can_id, can_msg))
+        self.queue_debug.put_nowait((can_id, can_msg.decode('latin-1')))
 
     def _build_can_frame(self, can_id, data):
         """ builds CAN frame
@@ -180,7 +181,7 @@ class MsgTypes(Enum):
     Close_Range_Dedection = 7
     Goto_Position = 8
     Drive_Status = 9
-    Debug_Drive = 20
+    Debug_Drive = 10
 
 
 class MsgSender(Enum):
@@ -217,24 +218,28 @@ EncodingTypes = {
 }
 
 # the list contains which message type is encoded with which protocol
-MsgEncoding = {  # Todo: finish the List
+MsgEncoding = {
     MsgTypes.Position_Robot_1.value: EncodingTypes['position'],
     MsgTypes.Position_Robot_2.value: EncodingTypes['position'],
     MsgTypes.Position_Enemy_1.value: EncodingTypes['position'],
     MsgTypes.Position_Enemy_2.value: EncodingTypes['position'],
+    MsgTypes.Close_Range_Dedection.value: EncodingTypes['close_range_dedection'],
+    MsgTypes.Goto_Position.value: EncodingTypes['goto_position'],
+    MsgTypes.Drive_Status.value: EncodingTypes['drive_status'],
     MsgTypes.Debug_Drive.value: EncodingTypes['debug_drive']
 }
 
-# Colors used in can table
+# Colors used in can table (Red, Green, Blue)
 MsgColors = {
-    MsgTypes.EmergencyShutdown.value:      (0, 0, 255),
-    MsgTypes.Emergency_Stop.value:         (0, 0, 255),
-    MsgTypes.Game_End.value:               (0, 0, 255),
-    MsgTypes.Position_Robot_1.value:       (0, 255, 0),
-    MsgTypes.Position_Robot_2.value:       (255, 0, 0),
-    MsgTypes.Position_Enemy_1.value:       (255, 0, 0),
-    MsgTypes.Position_Enemy_2.value:       (255, 0, 0),
-    MsgTypes.Close_Range_Dedection.value:  (0, 0, 255),
-    MsgTypes.Goto_Position.value:          (0, 0, 255),
-    MsgTypes.Drive_Status.value:           (0, 0, 255)
+    MsgTypes.EmergencyShutdown.value:      (205, 41, 41),
+    MsgTypes.Emergency_Stop.value:         (205, 41, 41),
+    MsgTypes.Game_End.value:               (41, 205, 41),
+    MsgTypes.Position_Robot_1.value:       (41, 205, 180),
+    MsgTypes.Position_Robot_2.value:       (31, 154, 135),
+    MsgTypes.Position_Enemy_1.value:       (41, 175, 205),
+    MsgTypes.Position_Enemy_2.value:       (31, 131, 154),
+    MsgTypes.Close_Range_Dedection.value:  (41, 52, 205),
+    MsgTypes.Goto_Position.value:          (123, 41, 205),
+    MsgTypes.Drive_Status.value:           (205, 41, 183),
+    MsgTypes.Debug_Drive.value:            (205, 41, 183)
 }

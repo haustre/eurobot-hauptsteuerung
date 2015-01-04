@@ -184,10 +184,12 @@ class Client(_TcpConnection):
         super().__init__()
         self.connected = False
         try:
+            self.s.settimeout(2)  # Set short timeout because system default is to long
             self.s.connect((host, port))
+            self.s.settimeout(None)
             self.connected = True
-        except:  # TODO: add specific exception
-            print("Name or service not known")
+        except:
+            print("Connection Failed")
         else:
             t = threading.Thread(target=self._connection, args=[self.s])
             t.setDaemon(1)

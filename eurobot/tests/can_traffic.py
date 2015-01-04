@@ -41,7 +41,7 @@ def main():
         print(can_msg)
         can_connection.send(can_msg)
         print(angle)
-        time.sleep(1/100)
+        time.sleep(1/50)
 
 if __name__ == "__main__":
     main()

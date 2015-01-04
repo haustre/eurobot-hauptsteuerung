@@ -37,7 +37,7 @@ class GameField(QWidget):
             widget_width = widget_height / self.pixmap_ratio
         painter = QPainter()
         painter.begin(self)
-        painter.setRenderHint(QPainter.Antialiasing)  # Todo: check if necessary
+        painter.setRenderHint(QPainter.HighQualityAntialiasing)  # Doesnt make a big difference
         painter.drawPixmap(0, 0, widget_width, widget_height, self.table_pixmap)
         scale = widget_width / 3000
         self._draw_robot(painter, self.robot1, scale)
