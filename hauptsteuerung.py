@@ -3,7 +3,7 @@ __author__ = 'mw'
 import sys
 import time
 from eurobot.libraries import can
-from eurobot.kern import debug
+from eurobot.hauptsteuerung import debug
 
 
 def main():
