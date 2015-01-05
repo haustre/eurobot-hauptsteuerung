@@ -51,12 +51,6 @@ def main(args):
     GUI_window = GUI.GUI.Ui_MainWindow()
     GUI_window.show()
 
-    # Testing Function for GUI-Elements #
-    GUI.GUI.Ui_MainWindow.setTeamColorRadioButton(GUI_window,"Green")
-    GUI.GUI.Ui_MainWindow.setStrategyRadioButton(GUI_window,"A")
-    GUI.GUI.Ui_MainWindow.setLCDTime(GUI_window, "90:00")
-    #GUI.GUI.Ui_MainWindow.setCoordinate (GUI_window, 15000,10000,2)
-
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
