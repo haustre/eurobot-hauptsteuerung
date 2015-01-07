@@ -64,16 +64,16 @@ class RemoteControlWindow(QDialog):
     def keyPressEvent(self, event):
         if type(event) == QKeyEvent and event.isAutoRepeat() is False:
             if event.key() == Qt.Key_W:
-                self.speed_motor_left = self.speed
+                self.speed_motor_left = -self.speed
                 self.speed_motor_right = self.speed
             if event.key() == Qt.Key_S:
-                self.speed_motor_left = -self.speed
+                self.speed_motor_left = self.speed
                 self.speed_motor_right = -self.speed
             if event.key() == Qt.Key_A:
-                self.speed_motor_left = -self.speed
+                self.speed_motor_left = self.speed
                 self.speed_motor_right = self.speed
             if event.key() == Qt.Key_D:
-                self.speed_motor_left = self.speed
+                self.speed_motor_left = -self.speed
                 self.speed_motor_right = -self.speed
 
     def keyReleaseEvent(self, event):
