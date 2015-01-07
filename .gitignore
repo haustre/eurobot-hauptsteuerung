@@ -1,3 +1,4 @@
 docs/_build/
 .idea/
 logfile.txt
+__pycache__
