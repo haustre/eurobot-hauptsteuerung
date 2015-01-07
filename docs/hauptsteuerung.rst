@@ -1,5 +1,5 @@
-kern package
-############
+hauptsteuerung package
+######################
 
 At the moment the main robot only sends all received CAN messages over tcp to the computer.
 

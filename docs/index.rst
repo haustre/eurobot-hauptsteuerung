@@ -12,10 +12,11 @@ Contents:
    :maxdepth: 4
 
    introduction
-   gui
-   kern
+   hauptsteuerung
+   laptop
    libraries
    tests
+
 
 Todolist
 ========
