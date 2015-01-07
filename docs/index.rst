@@ -16,6 +16,7 @@ Contents:
    laptop
    libraries
    tests
+   jegge
 
 
 Todolist

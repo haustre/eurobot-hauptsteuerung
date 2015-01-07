@@ -22,6 +22,15 @@ The GUI has the following functions:
 Submodules
 ==========
 
+laptop_main
+-----------
+
+.. automodule:: laptop_main
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :exclude-members: bin_, hex_, oct_
+
 laptop.communication module
 ---------------------------
 
@@ -29,6 +38,7 @@ laptop.communication module
     :members:
     :undoc-members:
     :show-inheritance:
+    :exclude-members: bin_, hex_, oct_
 
 laptop.field module
 -------------------
@@ -37,4 +47,5 @@ laptop.field module
     :members:
     :undoc-members:
     :show-inheritance:
+    :exclude-members: bin_, hex_, oct_
 

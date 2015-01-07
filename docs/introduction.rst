@@ -6,8 +6,8 @@ The main unit of the robot controls the whole robot over CAN bus. The software i
 
 The software contains multiple parts:
 
-* The :doc:`kern` is running on the robot.
-* The :doc:`gui` contains the software for controlling the robot from a computer.
+* The :doc:`hauptsteuerung` is running on the robot.
+* The :doc:`laptop` contains the software for controlling the robot from a computer.
 * The :doc:`libraries` contains libraries used by the robot and the computer.
 * The :doc:`tests` contains different test for the software.
 
