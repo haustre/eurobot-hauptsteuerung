@@ -3,10 +3,10 @@ __author__ = 'mw'
 import sys
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-import eurobot.laptop.field
-import eurobot.laptop.communication
-from eurobot.laptop.remote_control import RemoteControlWindow
-from eurobot.libraries import speak
+import laptop.field
+import laptop.communication
+from laptop.remote_control import RemoteControlWindow
+from libraries import speak
 
 
 class CanWindow(QWidget):
@@ -16,12 +16,12 @@ class CanWindow(QWidget):
         self.threads = []
         self.connected = False
         header = ['Time', 'Source', 'Type', 'Value']
-        self.can_table = eurobot.laptop.communication.Table(header)
-        self.can_table_control = eurobot.laptop.communication.CanTableControl()
-        self.edit_host = eurobot.laptop.communication.EditHost()
+        self.can_table = laptop.communication.Table(header)
+        self.can_table_control = laptop.communication.CanTableControl()
+        self.edit_host = laptop.communication.EditHost()
         self.remote_control_button = QPushButton('Activate Remote Control')
-        self.send_can = eurobot.laptop.communication.SendCan()
-        self.game_field = eurobot.laptop.field.GameField()
+        self.send_can = laptop.communication.SendCan()
+        self.game_field = laptop.field.GameField()
         self.remote_control_window = RemoteControlWindow(self)
         self.init_ui()
 
@@ -59,7 +59,7 @@ class CanWindow(QWidget):
             host = self.edit_host.host_line.text()
             port = self.edit_host.port_line.text()
             print(host, port)
-            thread = eurobot.laptop.communication.TcpConnection(host, port)
+            thread = laptop.communication.TcpConnection(host, port)
             self.connect(thread, SIGNAL('tcp_data'), self.can_table_control.add_data)
             self.connect(thread, SIGNAL('tcp_data'), self.game_field.setpoint)
             self.connect(thread, SIGNAL('tcp connection lost'), self.lost_connection)

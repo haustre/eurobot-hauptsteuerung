@@ -1,7 +1,7 @@
 __author__ = 'mw'
 
 import os
-from eurobot.libraries import can
+from libraries import can
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 

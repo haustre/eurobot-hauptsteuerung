@@ -1,6 +1,6 @@
 __author__ = 'mw'
 
-from eurobot.libraries import can
+from libraries import can
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 import threading

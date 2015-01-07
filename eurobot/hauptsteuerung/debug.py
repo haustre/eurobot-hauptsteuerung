@@ -5,7 +5,7 @@ import queue
 import time
 import datetime
 import json
-from eurobot.libraries.ethernet import Server
+from libraries.ethernet import Server
 
 
 class LaptopCommunication():
