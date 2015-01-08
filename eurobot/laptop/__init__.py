@@ -1,1 +1,2 @@
-__author__ = 'mw'
+__author__ = 'Würsch Marcel'
+__license__ = "GPLv3"

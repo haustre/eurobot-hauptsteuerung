@@ -1,10 +1,11 @@
-__author__ = 'mw'
+__author__ = 'Würsch Marcel'
+__license__ = "GPLv3"
 
-from libraries import can
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
 import threading
 import time
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
+from libraries import can
 
 
 class RemoteControlWindow(QDialog):

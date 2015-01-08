@@ -1,4 +1,11 @@
-__author__ = 'mw'
+"""
+This module allows to comfortable send and receive CAN messages over socket-CAN. The received messages are given out
+as a dictionary. The same dictionary format is also used to send messages.
+All dictionaries contain at least a 'type' key. It shows which CAN id is used. The rest of the keys for the different
+message types are specified in the EncodingTypes dictionary in this file.
+"""
+__author__ = 'Würsch Marcel'
+__license__ = "GPLv3"
 
 import socket
 import struct

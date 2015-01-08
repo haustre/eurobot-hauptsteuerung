@@ -1,13 +1,16 @@
-from eurobot.libraries import can
-
-__author__ = 'mw'
+"""
+To test the software before the whole hardware is build this module allows to send fake position data over CAN.
+"""
+__author__ = 'Würsch Marcel'
+__license__ = "GPLv3"
 
 import sys
 import time
+from eurobot.libraries import can
 
 
 def main():
-    """ This module generates CAN test traffic. """
+    """ This function generates CAN test traffic. """
     if len(sys.argv) != 2:
             print('Provide CAN device name (can0, vcan0 etc.)')
             sys.exit(0)

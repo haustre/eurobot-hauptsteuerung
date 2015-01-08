@@ -1,13 +1,19 @@
-__author__ = 'mw'
+"""
+This class draws the Position of the Robots on a map.
+The image of the map is loaded from Table.png. And the images of the robots are loaded
+from Roboter1.png and Roboter2.png. The resolution of the images is not very important, they get automatically scaled.
+"""
+__author__ = 'Würsch Marcel'
+__license__ = "GPLv3"
 
 import os
-from libraries import can
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+from libraries import can
 
 
-class GameField(QWidget):
-    """ This class draws the Position of the Robots on a map. """
+class GameField(QWidget):  # TODO: add roboter2 and enemy2
+    """ This QWidget is displayed in the laptop gi and draws the Position of the Robots on a map. """
     def __init__(self):
         super().__init__()
         self.table_pixmap = QPixmap(os.path.join(os.path.dirname(__file__), 'Table.png'))

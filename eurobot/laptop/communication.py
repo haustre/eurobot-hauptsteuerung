@@ -1,11 +1,12 @@
-__author__ = 'mw'
+__author__ = 'Würsch Marcel'
+__license__ = "GPLv3"
 
-from libraries import can, ethernet, speak
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
 import datetime
 import copy
 import time
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
+from libraries import can, ethernet, speak
 
 
 class Table(QTableWidget):
