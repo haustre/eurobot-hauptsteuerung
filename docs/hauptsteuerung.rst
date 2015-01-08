@@ -11,7 +11,7 @@ Structure
 .. figure::  images/kern_threads_1.svg
    :align:   center
 
-   Processes on Robot
+   Processes on Robot.
 
 Submodules
 ==========
