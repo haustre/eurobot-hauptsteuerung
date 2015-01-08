@@ -27,7 +27,8 @@ from PyQt4 import QtCore, QtGui
 
 
 # Import Modules #
-import GPIOs.GPIO
+import Hardware.GPIO
+import Debug.Demo
 
 
 try:
@@ -43,47 +44,7 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 """
------------------------------------------------------------------------------------------------------
-ChasingLED(QtCore.QThread):
------------------------------------------------------------------------------------------------------
-This Class Print all Actually Settings from the GUI. This Class is a running as Thread
-This is only a Debugging Class
------------------------------------------------------------------------------------------------------
-"""
-class PrintOutSettings(QtCore.QThread):
-
-    def __init__(self,parent):
-        QtCore.QThread.__init__(self)
-        self.parent = parent
-
-    def run(self):
-        while True:
-            print(self.parent.getAllSettingsString())
-            time.sleep(4)
-"""
------------------------------------------------------------------------------------------------------
-ChasingLED(QtCore.QThread):
------------------------------------------------------------------------------------------------------
-This Class set new random Coordinate for the Roboter.This Class is a running as Thread
- This is only a Debugging Class
------------------------------------------------------------------------------------------------------
-"""
-class SetRandomCoordinate(QtCore.QThread):
-
-    def __init__(self):
-        QtCore.QThread.__init__(self)
-
-    def run(self):
-        while True:
-            X_Coordinate = random.randrange(0, 30000, 1)
-            Y_Coordinate = random.randrange(0, 20000, 1)
-            Angle= random.randrange(0, 360, 1)
-
-            self.emit(QtCore.SIGNAL('Coordinate'), X_Coordinate, Y_Coordinate, Angle)
-            time.sleep(1)
-
-"""
------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------
 Ui_MainWindow(QtGui.QWidget)
 -----------------------------------------------------------------------------------------------------
 This Class will manage the Graphical User Interface from the Main Controll of the Eurobot 2015 running
@@ -101,10 +62,10 @@ class Ui_MainWindow(QtGui.QWidget):
         # Initialize Threads #
         ######################
         self.threads = []
-        ThreadPollingButtons = GPIOs.GPIO.PollingButton(self)
-        ThreadChasingLED = GPIOs.GPIO.ChasingLED()
-        ThreadPrintOutSettings = PrintOutSettings(self)      # Only for Demo
-        ThreadSetRandomCoordinate = SetRandomCoordinate()    # Only for Demo
+        ThreadPollingButtons = Hardware.GPIO.PollingButton(self)
+        ThreadChasingLED = Hardware.GPIO.ChasingLED()
+        ThreadPrintOutSettings = Debug.Demo.PrintOutSettings(self)      # Only for Demo
+        ThreadSetRandomCoordinate = Debug.Demo.SetRandomCoordinate()    # Only for Demo
 
         self.connect(ThreadPollingButtons, QtCore.SIGNAL('Settings_TeamColor'), self.setTeamColorRadioButton)
         self.connect(ThreadPollingButtons, QtCore.SIGNAL('Settings_Strategy'), self.setStrategyRadioButton)
@@ -121,15 +82,6 @@ class Ui_MainWindow(QtGui.QWidget):
         ThreadSetRandomCoordinate.start()                    # Only for Demo
         ThreadChasingLED.start()
         ThreadPollingButtons.start()
-
-        ###############
-        # Setze Timer #
-        ###############
-        #timer = QtCore.QTimer()
-        #self.connect(timer, QtCore.SIGNAL('timeout'),fdsgfdg)
-        #timer.start(10)
-        #self.connect(timer, QtCore.SIGNAL('Settings_Strategy'), self.setStrategyRadioButton)
-
 
     """
     /*----------------------------------------------------------------------------------------------------

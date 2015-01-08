@@ -23,7 +23,6 @@ from enum import Enum
 import sys
 
 
-
 """
 -----------------------------------------------------------------------------------------------------
 LedClass():
@@ -58,11 +57,12 @@ class LedClass():
         fileSetValue.flush()
         fileSetValue.close()
 
-    def __del__(self):
+    def __exit__():
         fileUnexport = open('%sunexport' % (self.SYSFSPATH), 'w' )
         fileUnexport.write(self.myLed)
         fileUnexport.flush()
         fileUnexport.close()
+        print("Exit LED Class")
 """
 -----------------------------------------------------------------------------------------------------
 ButtonClass():
@@ -91,19 +91,12 @@ class ButtonClass():
         fileSetValue.close()
         return value
 
-    def __del__(self):
+    def __exit__():
         fileUnexport = open('%sunexport' % (self.SYSFSPATH) , 'w')
         fileUnexport.write(self.myButton)
         fileUnexport.flush()
         fileUnexport.close()
-
-
-
-
-
-
-
-
+        print("Exit Button  Class")
 """
 -----------------------------------------------------------------------------------------------------
 PollingButton(QtCore.QThread):
@@ -118,9 +111,9 @@ class PollingButton(QtCore.QThread):
         QtCore.QThread.__init__(self)
 
         self.parent = parent
-        self.BtnActualy = [0 ,0 ,0 ,0, 0, 0]
-        self.BtnOld = [0 ,0 ,0 ,0, 0, 0]
-        self.BtnPositiveEdge = [False ,False ,False ,False, False ,False]
+        self.BtnActualy = ["0" ,"0" ,"0" ,"0", "0"]
+        self.BtnOld = ["1" ,"1" ,"1", "1", "1"]
+        self.BtnNegativeEdge = [False ,False ,False ,False, False ,False]
         self.StateMenu = 0
         self.StateTeamColor = 0
         self.StateNumberofEnemy = 0
@@ -151,30 +144,27 @@ class PollingButton(QtCore.QThread):
             #########################################
             # Checking for positive Edge of Buttons #
             #########################################
+            print(self.Btn_enter.getValue())
             self.BtnActualy = [self.Btn_up.getValue() , self.Btn_down.getValue(), self.Btn_left.getValue() , self.Btn_right.getValue(), self.Btn_enter.getValue()]
 
             print(self.Btn_up.getValue())
-            print(self.Btn_left.getValue())
-            for Counter in range(4):
-               if (self.BtnActualy[Counter]== 0) and (self.BtnOld[Counter] == 1):
-                   self.BtnPositiveEdge[Counter] = True
-                   print("positive Flanke")
+            for Counter in range(5):
+               if ("0") in self.BtnActualy[Counter]  and ("1" in self.BtnOld[Counter]):
+                   self.BtnNegativeEdge[Counter] = True
                else:
-                    self.BtnPositiveEdge[Counter] = False
-                    print("nichts Flanke")
+                    self.BtnNegativeEdge[Counter] = False
+
 
             ##########################
             # Checking of Menu State #
             ##########################
             # Check if ButtonEnter or Button  Down is active #
-            self.StateMenu = State.Enemy._value_
-            if self.BtnPositiveEdge[Button.enter._value_] == 1 or self.BtnPositiveEdge[Button.down._value_]:
+            if (self.BtnNegativeEdge[Button.enter._value_] == True) or (self.BtnNegativeEdge[Button.down._value_] == True):
                 self.StateMenu = self.StateMenu + 1
-                print( self.StateMenu)
                 self.StateMenuChange = True
-            # Check if Button Up is active #
 
-            if self.BtnPositiveEdge[Button.up._value_] == 1:
+            # Check if Button Up is active #
+            if self.BtnNegativeEdge[Button.up._value_] == True:
                 self.StateMenu = self.StateMenu - 1
                 self.StateMenuChange = True
 
@@ -198,11 +188,11 @@ class PollingButton(QtCore.QThread):
 
                  # check if Button Right/Left is active #
                  # Its necessary to read the Settings, that you can control the Menu with Touchscreen and Buttons #
-                if self.BtnPositiveEdge[Button.right._value_] == True:
+                if self.BtnNegativeEdge[Button.right._value_] == True:
                     (self.StateTeamColor,Settings2,Settings3) = self.parent.getAllSettings()
                     self.StateTeamColor = self.StateTeamColor + 1
                     self.StateTeamColorChange= True
-                elif self.BtnPositiveEdge[Button.left._value_] == True:
+                elif self.BtnNegativeEdge[Button.left._value_] == True:
                     (self.StateTeamColor,Settings2,Settings3) = self.parent.getAllSettings()
                     self.StateTeamColor = self.StateTeamColor - 1
                     self.StateTeamColorChange = True
@@ -224,11 +214,11 @@ class PollingButton(QtCore.QThread):
 
                 # Check if Button Right/Left is active #
                 # Its necessary to read the Settings, that you can control the Menu with Touchscreen and Buttons #
-                if self.BtnPositiveEdge[Button.right._value_] == True:
+                if self.BtnNegativeEdge[Button.right._value_] == True:
                     (Settings1,self.StateNumberofEnemy,Settings3) = self.parent.getAllSettings()
                     self.StateNumberofEnemy = self.StateNumberofEnemy + 1
                     self.StateNumberofEnemyChange = True
-                elif self.BtnPositiveEdge[Button.left._value_] == True:
+                elif self.BtnNegativeEdge[Button.left._value_] == True:
                     (Settings1,self.StateNumberofEnemy,Settings3) = self.parent.getAllSettings()
                     self.StateNumberofEnemy = self.StateNumberofEnemy - 1
                     self.StateNumberofEnemyChange = True
@@ -250,11 +240,11 @@ class PollingButton(QtCore.QThread):
 
                 # Check if Button Right/Left is active #
                 # Its necessary to read the Settings, that you can control the Menu with Touchscreen and Buttons #
-                if self.BtnPositiveEdge[Button.right._value_] == True:
+                if self.BtnNegativeEdge[Button.right._value_] == True:
                     (Settings1,Settings2,self.StateStrategy) = self.parent.getAllSettings()
                     self.StateStrategy = self.StateStrategy + 1
                     self.StateStrategyChange = True
-                elif self.BtnPositiveEdge[Button.left._value_] == True:
+                elif self.BtnNegativeEdge[Button.left._value_] == True:
                     (Settings1,Settings2,self.StateStrategy) = self.parent.getAllSettings()
                     self.StateStrategy = self.StateStrategy - 1
                     self.StateStrategyChange = True
@@ -293,7 +283,7 @@ class PollingButton(QtCore.QThread):
                 self.StateStrategyChange = False
 
               # Update BtnOld Variable #
-            for Counter in range(4):
+            for Counter in range(5):
                 self.BtnOld[Counter] = self.BtnActualy[Counter]
 
             # Wait for 20ms #
@@ -358,9 +348,10 @@ class ChasingLED(QtCore.QThread):
                 i = i - 1
                 time.sleep(0.05)
 
-        def __del__(self):
+        def __exit__():
             # Resete all LEDs #
             self.Led1.off()
             self.Led2.off()
             self.Led3.off()
             self.Led4.off()
+            print("exit Chasing LED")
