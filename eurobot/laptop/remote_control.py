@@ -27,9 +27,9 @@ class RemoteControlWindow(QDialog):
         self.close_button = QPushButton('Close')
         self.speed_label = QLabel('Speed: 0 mm/s')
         self.speed_slider = QSlider(Qt.Horizontal, self, )
-        self.t_control_loop = threading.Thread(target=self.control_loop)
-        self.t_control_loop.setDaemon(1)
-        self.t_control_loop.start()
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.control_loop)
+        self.timer.start(90)
 
         self.init_ui()
 
@@ -68,19 +68,17 @@ class RemoteControlWindow(QDialog):
 
         If the button is released it sends a speed of 0.
         """
-        while True:
-            if self.drive_button.isDown() is False:
-                self.speed_motor_left = 0
-                self.speed_motor_right = 0
-            else:
-                print("Motor 1: %d, Motor 2: %d" % (self.speed_motor_left, self.speed_motor_right))
-                can_msg = {
-                    'type': can.MsgTypes.Debug_Drive.value,
-                    'speed_left': int(self.speed_motor_left),
-                    'speed_right': int(self.speed_motor_right)
-                }
-                self.emit(SIGNAL('send_can_over_tcp'), can_msg)
-            time.sleep(0.09)
+        if self.drive_button.isDown() is False:
+            self.speed_motor_left = 0
+            self.speed_motor_right = 0
+        else:
+            print("Motor 1: %d, Motor 2: %d" % (self.speed_motor_left, self.speed_motor_right))
+            can_msg = {
+                'type': can.MsgTypes.Debug_Drive.value,
+                'speed_left': int(self.speed_motor_left),
+                'speed_right': int(self.speed_motor_right)
+            }
+            self.emit(SIGNAL('send_can_over_tcp'), can_msg)
 
     def keyPressEvent(self, event):
         """ Is called at every key press. It sets the motor speed according to the direction. """
