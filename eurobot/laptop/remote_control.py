@@ -1,3 +1,8 @@
+"""
+This module contains the remote control window.
+It sends motor speed commands to the robot.
+The robot is controlled using a slider for speed and the W/A/S/D keys for the direction.
+"""
 __author__ = 'Würsch Marcel'
 __license__ = "GPLv3"
 
@@ -9,7 +14,11 @@ from libraries import can
 
 
 class RemoteControlWindow(QDialog):
+    """ This QWidget is used as a separate Window it shows the remote control"""
     def __init__(self, parent=None):
+        """
+        :param parent: parent widget
+        """
         super(RemoteControlWindow, self).__init__(parent)
         self.speed = 0
         self.speed_motor_left = 0
@@ -25,6 +34,9 @@ class RemoteControlWindow(QDialog):
         self.init_ui()
 
     def init_ui(self):
+        """ Initialises the GUI elements.
+        """
+        self.setWindowTitle('Remote Control')
         text = "Please drive carefully!!\n" \
             " (W) forward\n" \
             " (S) backwards\n" \
@@ -43,11 +55,19 @@ class RemoteControlWindow(QDialog):
         self.setLayout(vbox1)
 
     def slider_change(self, slider_value):
+        """ Is called when the speed slider is changed.
+
+        :param slider_value: position of the slider
+        """
         slider_value = (slider_value + 1) / 100 * 1000
         self.speed = slider_value
         self.speed_label.setText("Speed: %d mm/s" % self.speed)
 
     def control_loop(self):
+        """ Is called every 90 ms and sends the motor speed to the robot
+
+        If the button is released it sends a speed of 0.
+        """
         while True:
             if self.drive_button.isDown() is False:
                 self.speed_motor_left = 0
@@ -63,6 +83,7 @@ class RemoteControlWindow(QDialog):
             time.sleep(0.09)
 
     def keyPressEvent(self, event):
+        """ Is called at every key press. It sets the motor speed according to the direction. """
         if type(event) == QKeyEvent and event.isAutoRepeat() is False:
             if event.key() == Qt.Key_W:
                 self.speed_motor_left = -self.speed
@@ -78,6 +99,7 @@ class RemoteControlWindow(QDialog):
                 self.speed_motor_right = -self.speed
 
     def keyReleaseEvent(self, event):
+        """ Is called if a key is released. It sets the speed to 0. """
         if event.isAutoRepeat() is False:
             self.speed_motor_left = 0
             self.speed_motor_right = 0

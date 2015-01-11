@@ -1,3 +1,6 @@
+"""
+This module is responsible for the ethernet communication on both the BeagleBone and the laptop.
+"""
 __author__ = 'Würsch Marcel'
 __license__ = "GPLv3"
 

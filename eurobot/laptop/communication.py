@@ -1,3 +1,6 @@
+"""
+This module contains all the classes used in the gui to receive CAN messages and display them.
+"""
 __author__ = 'Würsch Marcel'
 __license__ = "GPLv3"
 

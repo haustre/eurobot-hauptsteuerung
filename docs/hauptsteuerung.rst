@@ -12,7 +12,7 @@ Structure
 .. figure::  images/kern_dfd_1.svg
    :align:   center
 
-   Data Flow Diagram
+   Task-Model
 
 Submodules
 ==========

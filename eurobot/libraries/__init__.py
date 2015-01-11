@@ -1,5 +1,5 @@
 """
-This module contains classes used to control hardware. It is used on the robot and on the computer.
+This package contains modules used to control hardware. It is used on the robot and on the computer.
 
 * The :ref:`ethernet-module` allows the communication between the robot and the computer over tcp.
 * The :ref:`can-module` is used to send CAN messages and it contains information over the messages

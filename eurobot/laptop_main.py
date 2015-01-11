@@ -1,3 +1,6 @@
+"""
+This is the main file to execute the GUI software on the computer.
+"""
 __author__ = 'Würsch Marcel'
 __license__ = "GPLv3"
 
@@ -28,6 +31,7 @@ class CanWindow(QWidget):
 
     def init_ui(self):
         """ Initialize different parts of the gui. """
+        self.setWindowTitle('Eurobot Robot Control')
         self.showMaximized()
         self.edit_host.host_button.clicked.connect(self.connect_host)
         self.remote_control_button.clicked.connect(self.activate_remote_control)
@@ -77,6 +81,7 @@ class CanWindow(QWidget):
         self.remote_control_button.setEnabled(False)
 
     def activate_remote_control(self):
+        """ Opens a new Window for the remote control """
         speak.speak("Please drive carefully")
         self.remote_control_window.exec_()
 
