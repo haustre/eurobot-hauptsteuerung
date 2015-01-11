@@ -1,3 +1,5 @@
+.. _laptop-package:
+
 laptop package
 ##############
 
@@ -22,8 +24,10 @@ The GUI has the following functions:
 Submodules
 ==========
 
-laptop_main
------------
+laptop_main module
+------------------
+
+For an overview of the whole package look :ref:`laptop-package`
 
 .. automodule:: laptop_main
     :members:

@@ -6,8 +6,10 @@ The main unit of the robot controls the whole robot over CAN bus. The software i
 
 The software contains multiple parts:
 
-* The :doc:`hauptsteuerung` is running on the robot.
-* The :doc:`laptop` contains the software for controlling the robot from a computer.
+* The :py:mod:`hauptsteuerung_main` module is running on the BeagleBone build in to the robot.
+  It uses the functionality of the :doc:`hauptsteuerung` to run.
+* The :py:mod:`laptop_main` module is running on a computer and allows tho connect to the robot over ethernet.
+  It uses the functionality of the :doc:`laptop` to run.
 * The :doc:`libraries` contains libraries used by the robot and the computer.
 * The :doc:`tests` contains different test for the software.
 
@@ -22,9 +24,11 @@ install `pyqt4 <http://pyqt.sourceforge.net/Docs/PyQt4/introduction.html>`_ to b
 Code style and documentation
 ____________________________
 
-:pep:`8` is used as style guide for the code.
+:pep:`8` is used as style guide for the code. We used the PyCharm 4 Professional Edition Ide
+from `Jetbrains <https://www.jetbrains.com/pycharm/>`_.
 
 This documentation is written with `Sphinx <http://sphinx-doc.org/>`_ (a tool to make technical documentations).
+The documentation is located in the docs folder.
 
 License
 _______

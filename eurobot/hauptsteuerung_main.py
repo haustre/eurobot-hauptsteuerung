@@ -1,3 +1,6 @@
+"""
+This is the main file to execute the software of the Beaglebone. It starts the all the
+"""
 __author__ = 'Würsch Marcel'
 __license__ = "GPLv3"
 
