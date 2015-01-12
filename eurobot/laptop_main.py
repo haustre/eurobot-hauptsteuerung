@@ -51,7 +51,7 @@ class CanWindow(QWidget):
         self.setLayout(root_vbox)
         self.connect(self.can_table_control, SIGNAL('new_can_Table_Row'), self.can_table.add_row)
         self.connect(self.can_table_control, SIGNAL('Filter_changed'), self.can_table.filter_types)
-        speak.speak("Hello")
+        speak.tell_a_joke()
 
     def connect_host(self):
         """ This method creates a new tcp connection to the robot.
