@@ -6,6 +6,10 @@
 Welcome to the Eurobot 2015 documentation!
 ==========================================
 
+.. figure::  images/logo_eurobot.svg
+   :align:   center
+   :width:   200px
+
 Contents:
 
 .. toctree::

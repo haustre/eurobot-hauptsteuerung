@@ -5,6 +5,8 @@ __author__ = 'Würsch Marcel'
 __license__ = "GPLv3"
 
 import subprocess
+import urllib
+import json
 
 
 def speak(text):  # TODO: check if espeak is installed

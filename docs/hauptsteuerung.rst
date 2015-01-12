@@ -3,8 +3,7 @@
 hauptsteuerung package
 ######################
 
-At the moment the main robot only sends all received CAN messages over tcp to the computer.
-Later it will be responsible to make all game decisions.
+.. automodule:: hauptsteuerung.__init__
 
 Structure
 =========

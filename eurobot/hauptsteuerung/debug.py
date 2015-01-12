@@ -1,5 +1,5 @@
 """
-This module is contains the debugging functions for the Beaglebone that are used to communicate with the computer.
+This module contains the debugging functions for the Beaglebone that are used to communicate with the computer.
 """
 __author__ = 'Würsch Marcel'
 __license__ = "GPLv3"
@@ -16,6 +16,7 @@ class LaptopCommunication():
     def __init__(self, can_socket):
         """
         This class starts a tcp server on the Beaglebone and starts the communication to the computer.
+
         * All received CAN messages are sent to the Laptop over tcp.
         * All the commands received over tcp are send over CAN.
         * All CAN messages are logged to a logfile (logfile.txt)

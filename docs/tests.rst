@@ -3,6 +3,8 @@ tests package
 
 .. automodule:: tests.__init__
 
+At the moment only a small part of the project gets tested.
+
 Submodules
 ==========
 

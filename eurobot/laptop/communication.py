@@ -142,7 +142,7 @@ class EditHost(QWidget):
     def __init__(self):
         super().__init__()
         host_label = QLabel('Host:')
-        self.host_line = QLineEdit('localhost')
+        self.host_line = QLineEdit('192.168.1.101')
         port_label = QLabel('Port:')
         self.port_line = QLineEdit('42233')
         self.host_button = QPushButton('Connect')
