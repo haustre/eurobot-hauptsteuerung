@@ -37,13 +37,13 @@ class CanWindow(QWidget):
         self.remote_control_button.clicked.connect(self.activate_remote_control)
         self.remote_control_button.setEnabled(False)
         vbox = QVBoxLayout()
-        vbox.add(CreateGroupBox(self.can_table_control, 'Can Table'))
-        vbox.addWidget(CreateGroupBox(self.remote_control_button, 'Remote Control'))
-        #vbox.addWidget(CreateGroupBox(self.send_can, 'send Message'))
-        vbox.addWidget(CreateGroupBox(self.edit_host, 'connect to Host'))
+        vbox.addWidget(self.create_groupbox(self.can_table_control, 'Can Table'))
+        vbox.addWidget(self.create_groupbox(self.remote_control_button, 'Remote Control'))
+        vbox.addWidget(self.create_groupbox(self.edit_host, 'connect to Host'))
         vbox.addStretch()
         hbox = QHBoxLayout()
         hbox.addWidget(self.game_field, 1)
+        #hbox.addWidget(self.create_groupbox(self.send_can, 'send Message'))
         hbox.addLayout(vbox)
         root_vbox = QVBoxLayout()
         root_vbox.addWidget(self.can_table, 1)
@@ -86,9 +86,7 @@ class CanWindow(QWidget):
         speak.speak("Please drive carefully")
         self.remote_control_window.exec_()
 
-
-class CreateGroupBox(QGroupBox):  # TODO: remove second groupbox
-    def __init__(self, widget, text):
+    def create_groupbox(self, widget, text):
         """ Puts the given widget in a GroupBox and returns it.
 
         :param widget: This widget gets packed in the GroupBox
@@ -97,14 +95,11 @@ class CreateGroupBox(QGroupBox):  # TODO: remove second groupbox
         :type text: str
         :rtype: QtGui.QGroupBox
         """
-        super().__init__()
         box1 = QVBoxLayout()
         box1.addWidget(widget)
         groupbox = QGroupBox(text)
         groupbox.setLayout(box1)
-        box2 = QVBoxLayout()
-        box2.addWidget(groupbox)
-        self.setLayout(box2)
+        return groupbox
 
 
 def main(args):
