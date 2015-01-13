@@ -102,7 +102,6 @@ class CreateGroupBox(QGroupBox):  # TODO: remove second groupbox
         box1.addWidget(widget)
         groupbox = QGroupBox(text)
         groupbox.setLayout(box1)
-        groupbox.setStyleSheet("QGroupBox {border:1px solid ; padding: 15 1px;}")
         box2 = QVBoxLayout()
         box2.addWidget(groupbox)
         self.setLayout(box2)
