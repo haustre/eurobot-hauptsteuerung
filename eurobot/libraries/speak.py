@@ -9,7 +9,7 @@ import urllib.request
 import json
 
 
-def speak(text):  # TODO: check if espeak is installed
+def speak(text):
     """ This function gives out a string over loudspeaker
     :param text: String to give out
     :type text: str
@@ -19,8 +19,11 @@ def speak(text):  # TODO: check if espeak is installed
     """
     language = 'en'
     speed = '0'  # Speed in words per minute, 80 to 450, default is 175
-    print("speak:", text)
-    command = subprocess.Popen(['espeak', '-v', language, '-s', speed, str(text)])
+    try:
+        command = subprocess.Popen(['espeak', '-v', language, '-s', speed, str(text)])
+        print("speak:", text)
+    except:
+        print("espeak is not installed")
 
 
 def tell_a_joke():

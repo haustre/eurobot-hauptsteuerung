@@ -37,7 +37,7 @@ class CanWindow(QWidget):
         self.remote_control_button.clicked.connect(self.activate_remote_control)
         self.remote_control_button.setEnabled(False)
         vbox = QVBoxLayout()
-        vbox.addWidget(CreateGroupBox(self.can_table_control, 'Can Table'))
+        vbox.add(CreateGroupBox(self.can_table_control, 'Can Table'))
         vbox.addWidget(CreateGroupBox(self.remote_control_button, 'Remote Control'))
         #vbox.addWidget(CreateGroupBox(self.send_can, 'send Message'))
         vbox.addWidget(CreateGroupBox(self.edit_host, 'connect to Host'))
@@ -89,7 +89,7 @@ class CanWindow(QWidget):
 
 class CreateGroupBox(QGroupBox):  # TODO: remove second groupbox
     def __init__(self, widget, text):
-        """
+        """ Puts the given widget in a GroupBox and returns it.
 
         :param widget: This widget gets packed in the GroupBox
         :type widget: QtGui.QWidget
@@ -102,6 +102,7 @@ class CreateGroupBox(QGroupBox):  # TODO: remove second groupbox
         box1.addWidget(widget)
         groupbox = QGroupBox(text)
         groupbox.setLayout(box1)
+        groupbox.setStyleSheet("QGroupBox {border:1px solid ; padding: 15 1px;}")
         box2 = QVBoxLayout()
         box2.addWidget(groupbox)
         self.setLayout(box2)
