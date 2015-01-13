@@ -6,6 +6,7 @@ __license__ = "GPLv3"
 
 import sys
 import time
+import random
 from eurobot.libraries import can
 
 
@@ -16,13 +17,10 @@ def main():
             sys.exit(0)
     can_connection = can.Can(sys.argv[1], can.MsgSender.Debugging)
 
-    x = 0
-    y = 0
-    angle = 0
+    position_robot1 = Position(50)
+    position_robot2 = Position(70)
     while True:
-        angle += 10
-        x += 5
-        y += 5
+        x, y, angle = position_robot1.get_coordinates()
         can_msg = {
             'type': can.MsgTypes.Position_Robot_1.value,
             'position_correct': True,
@@ -33,6 +31,7 @@ def main():
         }
         can_connection.send(can_msg)
 
+        x, y, angle = position_robot2.get_coordinates()
         can_msg = {
             'type': can.MsgTypes.Position_Enemy_1.value,
             'position_correct': False,
@@ -43,8 +42,27 @@ def main():
         }
         print(can_msg)
         can_connection.send(can_msg)
-        print(angle)
         time.sleep(1/50)
+
+
+class Position():
+    def __init__(self, speed):
+        self.speed = speed
+        self.x = random.randrange(0, 30000)
+        self.y = random.randrange(0, 15000)
+        self.angle = random.randrange(0, 36000)
+
+    def get_coordinates(self):
+        self.x += self.speed
+        if self.x > 30000:
+            self.x = 0
+        self.y += self.speed
+        if self.y > 15000:
+            self.y = 0
+        self.angle += self.speed
+        if self.angle > 36000:
+            self.angle = 0
+        return self.x, self.y, self.angle
 
 if __name__ == "__main__":
     main()
