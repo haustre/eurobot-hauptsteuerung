@@ -26,10 +26,16 @@ The GUI is build up with multiple widgets. Each widget has its own build in func
 The communication between the widgets is implemented with
 `QT Signal and Slots <http://qt-project.org/doc/qt-4.8/signalsandslots.html>`_.
 
-The GUI has the following functions:
+Data Flow Diagram
+-----------------
 
-* Connection to the robot over ethernet.
-    This is done with :py:class:`laptop.communication.EditHost` and :py:class:`laptop.communication.TcpConnection`.
+.. figure::  images/gui_dfd_1.svg
+   :align:   center
+
+   Data Flow Diagram
+
+* TCP Connection: Connection to the robot over TCP.
+    :py:class:`laptop.communication.EditHost` and :py:class:`laptop.communication.TcpConnection`.
 * Receiving all CAN messages received by the robot and display them in a table.
     This is done with :py:class:`laptop.communication.CanTableControl` and :py:class:`laptop.communication.Table`.
 * Send CAN messages from the robot.
@@ -39,11 +45,6 @@ The GUI has the following functions:
 * Remote control the robot.
     This is done with :py:class:`laptop.remote_control.RemoteControlWindow`.
 
-.. figure::  images/gui_dfd_1.svg
-   :align:   center
-
-   Data Flow Diagram
-
 When new date arrives over tcp it first gets packed to a dictionary. Then it is send to the CAN table control which
 controls which data should be displayed in the table. Then it is put in the table. At the same time the dictionary is
 sent to the field widget. The field widget filters out the position data and draws it on the map.
@@ -51,6 +52,10 @@ sent to the field widget. The field widget filters out the position data and dra
 There are 2 ways to send data. The first is to use the send can widget.
 Here you can select which type of data you want to send and then manually enter it.
 The second way is the remote control widget.
+
+
+* TcpConnection
+    Receives new TCP data with :py:class:`laptop.communication.TcpConnection`.
 
 Submodules
 ==========

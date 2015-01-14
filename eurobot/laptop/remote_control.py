@@ -29,7 +29,7 @@ class RemoteControlWindow(QDialog):
         self.speed_slider = QSlider(Qt.Horizontal, self, )
         self.timer = QTimer()
         self.timer.timeout.connect(self.control_loop)
-        self.timer.start(90)
+        self.timer.start(70)
 
         self.init_ui()
 
