@@ -79,7 +79,7 @@ class CanTableControl(QWidget):
     def __init__(self):
         super().__init__()
         self.autoscroll_box = QCheckBox('Autoscroll')
-        self.run_button = QPushButton('run')
+        self.run_button = QPushButton('Run')
         self.run_button.clicked.connect(self.run_button_clicked)
         self.run_button.setCheckable(True)
         self.can_window = SendCan(self)
@@ -175,7 +175,7 @@ class TcpConnection(QThread):
     def run(self):
         """ This endless loop is waiting for new data """
         if self.tcp.connected:
-            speak.speak("connect to Robot")
+            speak.speak("Connect to Robot")
             while True:
                 data = self.tcp.read_no_block()
                 if self.tcp.connected is False:
@@ -200,6 +200,7 @@ class SendCan(QDialog):  # Todo: compete class
     """ This QDialog allows to send CAN messages from the robot """
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setWindowTitle('Send CAN messages')
         self.msg_type_label = QLabel('Message Type:')
         self.msg_label = QLabel('Message:')
         self.msg_type_combo = QComboBox()
