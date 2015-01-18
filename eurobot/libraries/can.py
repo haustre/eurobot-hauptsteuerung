@@ -202,7 +202,7 @@ class MsgSender(Enum):
 # list of all CAN message protocols
 EncodingTypes = {
     'game_end':
-        ('!B', ('time_to_game_end')),
+        ('!B', ('time_to_game_end', '')),
     'position':
         ('!BHHH', ('x_position', 'y_position', 'angle', ('position_correct', 'angle_correct'))),
     'close_range_dedection':
@@ -226,6 +226,7 @@ EncodingTypes = {
 
 # the list contains which message type is encoded with which protocol
 MsgEncoding = {
+    MsgTypes.Game_End.value: EncodingTypes['game_end'],
     MsgTypes.Position_Robot_1.value: EncodingTypes['position'],
     MsgTypes.Position_Robot_2.value: EncodingTypes['position'],
     MsgTypes.Position_Enemy_1.value: EncodingTypes['position'],

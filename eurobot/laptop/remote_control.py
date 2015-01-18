@@ -14,7 +14,7 @@ from libraries import can
 
 
 class RemoteControlWindow(QDialog):
-    """ This QWidget is used as a separate Window it shows the remote control"""
+    """ This QDialog is used as a separate Window it shows the remote control"""
     def __init__(self, parent=None):
         """
         :param parent: parent widget

@@ -82,6 +82,9 @@ class CanTableControl(QWidget):
         self.run_button = QPushButton('run')
         self.run_button.clicked.connect(self.run_button_clicked)
         self.run_button.setCheckable(True)
+        self.can_window = SendCan(self)
+        self.send_button = QPushButton('Send CAN message')
+        self.send_button.clicked.connect(self.can_button_clicked)
 
         grid = QGridLayout()
         grid.setSizeConstraint(QLayout.SetMinAndMaxSize)
@@ -95,6 +98,7 @@ class CanTableControl(QWidget):
             checkbox.stateChanged.connect(self.change_typ_filter)
             self.type_chechboxes.append(checkbox)
             grid.addWidget(checkbox, i / 2 + 1, i % 2)
+        grid.addWidget(self.send_button, i / 2+2, 0)
         self.setLayout(grid)
 
     def run_button_clicked(self):
@@ -108,6 +112,10 @@ class CanTableControl(QWidget):
         else:
             for checkbox in self.type_chechboxes:
                 checkbox.setEnabled(True)
+
+    def can_button_clicked(self):
+        """ Opens a new Window for sending CAN messages """
+        self.can_window.exec_()
 
     def change_typ_filter(self):
         """ Runs a new filter on the table if the filter rules changed """
@@ -188,10 +196,10 @@ class TcpConnection(QThread):
         self.tcp.write(data)
 
 
-class SendCan(QWidget):
-    """ This widget allows to send CAN messages from the robot """
-    def __init__(self):
-        super().__init__()
+class SendCan(QDialog):  # Todo: compete class
+    """ This QDialog allows to send CAN messages from the robot """
+    def __init__(self, parent=None):
+        super().__init__(parent)
         self.msg_type_label = QLabel('Message Type:')
         self.msg_label = QLabel('Message:')
         self.msg_type_combo = QComboBox()
