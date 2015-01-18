@@ -2,7 +2,7 @@
 This module contains unittests for CAN packer functions.
 """
 
-__author__ = 'Würsch Marcel'
+__author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"
 
 from unittest import TestCase

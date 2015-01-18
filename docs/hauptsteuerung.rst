@@ -8,10 +8,10 @@ hauptsteuerung package
 Structure
 =========
 
-.. figure::  images/kern_dfd_1.svg
+.. figure::  images/kern_dfd_1.*
    :align:   center
 
-   Task-Model
+   Task-Model of robot software
 
 Submodules
 ==========

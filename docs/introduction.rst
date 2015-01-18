@@ -13,6 +13,8 @@ The software contains multiple parts:
 * The :doc:`libraries` contains libraries used by the robot and the computer.
 * The :doc:`tests` contains different test for the software.
 
+
+
 Requirements
 ____________
 
@@ -29,6 +31,16 @@ from `Jetbrains <https://www.jetbrains.com/pycharm/>`_.
 
 This documentation is written with `Sphinx <http://sphinx-doc.org/>`_ (a tool to make technical documentations).
 The documentation is located in the docs folder.
+
+Building and viewing this Documentation
+'''''''''''''''''''''''''''''''''''''''
+
+To build the documentation run::
+
+    cd 'Directory of Project'
+    sphinx-build -b html docs/  docs/_build/html
+
+This creates the full documentation in docs/_build/html.
 
 License
 _______

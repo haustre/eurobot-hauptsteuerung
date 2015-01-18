@@ -3,5 +3,5 @@ This package contains different `unittests <https://docs.python.org/3/library/un
 Those tests help to validate difficult pieces of the software.
 """
 
-__author__ = 'Würsch Marcel'
+__author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"

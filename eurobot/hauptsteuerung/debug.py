@@ -1,7 +1,7 @@
 """
 This module contains the debugging functions for the Beaglebone that are used to communicate with the computer.
 """
-__author__ = 'Würsch Marcel'
+__author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"
 
 import threading
@@ -33,6 +33,7 @@ class LaptopCommunication():
         """
         logfile = open('logfile.txt', 'a')  # TODO: close File at the end of the program
         while True:
+            idle = True
             # send new can messages to laptop
             try:
                 can_msg = self.can_socket.queue_debug.get_nowait()
@@ -41,10 +42,13 @@ class LaptopCommunication():
                 text = "\n" + current_time + ": "
                 logfile.write(text)  # TODO:  the write commands are blocking and should be put in a separate thread.
                 json.dump(can_msg, logfile)
+                idle = False
             except queue.Empty:
                 pass
             # get messages from laptop
             tcp_data = self.tcp_socket.read_no_block()
             if tcp_data:
                 self.can_socket.send(tcp_data)
-            time.sleep(0.01)  # TODO: remove
+                idle = False
+            if idle is True:
+                time.sleep(0.01)  # TODO: remove

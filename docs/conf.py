@@ -49,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Eurobot 2015'
-copyright = '2015, Würsch Marcel'
+copyright = '2015, Wuersch Marcel'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -188,7 +188,7 @@ htmlhelp_basename = 'eurobotdoc'
 
 latex_elements = {
 # The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
+#'papersize': 'a4paper, oneside',
 
 # The font size ('10pt', '11pt' or '12pt').
 #'pointsize': '10pt',
@@ -202,7 +202,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'eurobot.tex', 'eurobot Documentation',
-   'Author', 'manual'),
+   'Wuersch Marcel', 'howto'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

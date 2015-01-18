@@ -1,7 +1,7 @@
 """
 This is the main file to execute the software of the Beaglebone.
 """
-__author__ = 'Würsch Marcel'
+__author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"
 
 import sys

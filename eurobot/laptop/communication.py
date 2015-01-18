@@ -1,7 +1,7 @@
 """
 This module contains all the classes used in the gui to receive CAN messages and display them.
 """
-__author__ = 'Würsch Marcel'
+__author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"
 
 import datetime
@@ -188,7 +188,7 @@ class TcpConnection(QThread):
         self.tcp.write(data)
 
 
-class SendCan(QWidget):  # Todo: compete class
+class SendCan(QWidget):
     """ This widget allows to send CAN messages from the robot """
     def __init__(self):
         super().__init__()
@@ -201,6 +201,7 @@ class SendCan(QWidget):  # Todo: compete class
         self.msg_type_combo.addItems(msg_types)
         self.msg_type_combo.currentIndexChanged.connect(self.selection_changed)
         self.send_button = QPushButton('send')
+        self.send_button.clicked.connect(self.send)
 
         grid = QGridLayout()
         grid.addWidget(self.msg_type_label, 0, 0)
@@ -232,3 +233,12 @@ class SendCan(QWidget):  # Todo: compete class
             else:
                 line.setEnabled(False)
                 line.setText("Byte: %s" % i)
+
+    def send(self):  # Todo: compete method
+        index = self.msg_type_combo.currentIndex()
+        msg_type = can.MsgTypes(index).value
+        can_msg = {
+            'type': msg_type,
+        }
+
+        self.emit(SIGNAL('send_can_over_tcp'), can_msg)

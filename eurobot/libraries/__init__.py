@@ -6,5 +6,5 @@ This package contains modules used to control hardware. It is used on the robot 
   that are used to display them on the computer.
 * The :ref:`speak-module` allows to give out a text over loudspeaker on both the robot and the computer.
 """
-__author__ = 'Würsch Marcel'
+__author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"

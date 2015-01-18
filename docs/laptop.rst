@@ -8,14 +8,40 @@ laptop package
 Screenshots
 ===========
 
-.. figure::  images/screenshot.png
+The GUI has multiple windows. Here is a short description of each.
+
+.. figure::  images/mainwindow.*
    :align:   center
    :width:   80%
 
    Screenshot main window
 
-.. figure::  images/remote_control.png
-   :align: center
+The main windows contains multiple parts. Each with its own function.
+
+*   Connection to Host
+        Type in the IP and port of the robot you want to connect to. Normally the big robot has the IP 192.168.1.101
+        and the small robot has the address 192.168.1.101. Both listen on the port 42233. Press Connect to connect.
+*   The map draws the position and orientation of each robot. Each robot has its own image. The positions are updated
+    when the robot is connected.
+*   The table on the top shows the CAN messages the robot has received.
+*   CanTable
+        Only the message types that are selected will be displayed. The messages are only received if the run button
+        is activated. Auto Scroll activates auto scroll of the table.
+*   Send CAN message
+        This button opens the can send window.
+*   Activate Remote Control
+        This button opens the remote control windows.
+
+
+.. figure::  images/can_send.*
+   :align:   center
+   :width:   40%
+
+   Screenshot can send window
+
+.. figure::  images/remote_control.*
+   :align:   center
+   :width:   20%
 
    Screenshot control window
 
@@ -29,10 +55,10 @@ The communication between the widgets is implemented with
 Data Flow Diagram
 -----------------
 
-.. figure::  images/gui_dfd_1.svg
+.. figure::  images/gui_dfd_1.*
    :align:   center
 
-   Data Flow Diagram
+   Data Flow Diagram of the laptop software
 
 * TCP Connection: Connection to the robot over TCP.
     :py:class:`laptop.communication.EditHost` and :py:class:`laptop.communication.TcpConnection`.

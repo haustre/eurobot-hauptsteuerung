@@ -1,7 +1,7 @@
 """
 To test the software before the whole hardware is build this module allows to send fake position data over CAN.
 """
-__author__ = 'Würsch Marcel'
+__author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"
 
 import sys

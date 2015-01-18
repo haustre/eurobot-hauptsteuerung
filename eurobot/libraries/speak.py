@@ -1,7 +1,7 @@
 """
 This package contains method's to entertain the user.
 """
-__author__ = 'Würsch Marcel'
+__author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"
 
 import subprocess

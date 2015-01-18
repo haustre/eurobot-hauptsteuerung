@@ -3,7 +3,7 @@ This module draws the Position of the Robots on a map.
 The image of the map is loaded from Table.png. And the images of the robots are loaded
 from Roboter1.png and Roboter2.png. The resolution of the images is not very important, they get automatically scaled.
 """
-__author__ = 'Würsch Marcel'
+__author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"
 
 import os

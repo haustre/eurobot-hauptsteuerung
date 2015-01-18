@@ -1,7 +1,7 @@
 """
 This module is responsible for the ethernet communication on both the BeagleBone and the laptop.
 """
-__author__ = 'Würsch Marcel'
+__author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"
 
 import socket

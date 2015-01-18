@@ -3,7 +3,7 @@ This module contains the remote control window.
 It sends motor speed commands to the robot.
 The robot is controlled using a slider for speed and the W/A/S/D keys for the direction.
 """
-__author__ = 'Würsch Marcel'
+__author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"
 
 import threading

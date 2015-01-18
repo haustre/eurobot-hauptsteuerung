@@ -6,8 +6,8 @@
 Welcome to the Eurobot 2015 documentation!
 ==========================================
 
-.. figure::  images/logo_eurobot.svg
-   :align:   center
+.. figure::  images/logo_eurobot.*
+   :align:   right
    :width:   200px
 
 Contents:

@@ -15,25 +15,25 @@ Example
 ^^^^^^^
 
     Here a short example how to use the CAN interface:
-    First you have to create a new object:
+    First you have to create a new object::
 
-    >>> can_connection = libraries.can.Can("can0", MsgSender.Debugging)
+        can_connection = libraries.can.Can("can0", MsgSender.Debugging)
 
-    To send a message you have to put it in a dictionary:
+    To send a message you have to put it in a dictionary::
 
-    >>> can_msg = {
+         can_msg = {
             'type': can.MsgTypes.Position_Robot_1,
             'position_correct': True,
             'angle_correct': False,
             'angle': angle,
             'y_position': y,
             'x_position': x
-        }
-    >>> can_connection.send(can_msg)
+            }
+         can_connection.send(can_msg)
 
-    The received messages are taken from the buffer like this:
+    The received messages are taken from the buffer like this::
 
-    >>> can_msg = can_connection.queue_position_Robot_1.get()
+        can_msg = can_connection.queue_position_Robot_1.get()
 
 .. note::
     There are 2 different ways to get the next value from a buffer:
@@ -69,18 +69,18 @@ Example
 
 Here a short example how to use the ethernet interface:
 
-On the robot you have to create a server object:
+On the robot you have to create a server object::
 
->>> tcp = libraries.ethernet.Server()
+    tcp = libraries.ethernet.Server()
 
-On the computer you have to create a client object:
+On the computer you have to create a client object::
 
->>> tcp = ethernet.Client(self.host, int(self.port))
+    tcp = ethernet.Client(self.host, int(self.port))
 
-Sending and receiving messages works the same on both sides:
+Sending and receiving messages works the same on both sides::
 
->>> tcp.write(msg)
->>> tcp.read_block()
+    tcp.write(msg)
+    tcp.read_block()
 
 .. note::
     There are 2 different ways to get the next message from the ethernet interface:
