@@ -1,7 +1,7 @@
 Introduction
 ============
 
-The main unit of the robot controls the whole robot over CAN bus. The software is writen in
+This is the software for the main unit of the robot. The software is writen in
 `python3 <https://docs.python.org/3/>`_.
 
 The software contains multiple parts:
@@ -31,16 +31,6 @@ from `Jetbrains <https://www.jetbrains.com/pycharm/>`_.
 
 This documentation is written with `Sphinx <http://sphinx-doc.org/>`_ (a tool to make technical documentations).
 The documentation is located in the docs folder.
-
-Building and viewing this Documentation
-'''''''''''''''''''''''''''''''''''''''
-
-To build the documentation run::
-
-    cd 'Directory of Project'
-    sphinx-build -b html docs/  docs/_build/html
-
-This creates the full documentation in docs/_build/html.
 
 License
 _______

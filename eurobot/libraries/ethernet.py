@@ -58,7 +58,7 @@ class _TcpConnection(object):
         :param s: tcp socket for the connection
         :return: None
         """
-        s.settimeout(0.01)
+        s.settimeout(0.01)  # timeout for waiting for incoming data
         queue_send = queue.Queue(self.queue_size)
         connection_nr = len(self.queues_send)
         self.queues_send.append(queue_send)

@@ -1,6 +1,8 @@
-jegge package
-=============
-This Package contains the GUI for the BeagleBone.
+robo_gui package
+================
+
+This Package contains the GUI for the BeagleBone. It was created in the embedded linux course
+and has jet to be combined with the rest of the software.
 
 ..
     Submodules
@@ -9,7 +11,7 @@ This Package contains the GUI for the BeagleBone.
     jegge.main module
     -----------------
 
-    .. automodule:: jegge.main
+    .. automodule:: robo_gui.main
         :members:
         :undoc-members:
         :show-inheritance:
@@ -18,7 +20,7 @@ This Package contains the GUI for the BeagleBone.
     Module contents
     ---------------
 
-    .. automodule:: jegge
+    .. automodule:: robo_gui
         :members:
         :undoc-members:
         :show-inheritance:

@@ -37,13 +37,26 @@ The main windows contains multiple parts. Each with its own function.
    :align:   center
    :width:   40%
 
-   Screenshot can send window
+This window allows to send a CAN message from the robot.
+It contains the following parts:
+
+*   The message type combo box for choosing which CAN message type is to send.
+*   The send button for sending the message
+*   The data fields. Each field represents one byte of data to be send. The text in the fields gets update every time
+    the selection of the message type changes.
 
 .. figure::  images/remote_control.*
    :align:   center
    :width:   20%
 
    Screenshot control window
+
+This window allows to control the drive of the robot.
+It contains the following parts:
+
+*   The slider to select the speed.
+*   The Drive button which has to be pressed down the whole time. If it is released the robot immanently stops.
+*   The Close button for closing the window.
 
 Structure
 =========
@@ -52,24 +65,29 @@ The GUI is build up with multiple widgets. Each widget has its own build in func
 The communication between the widgets is implemented with
 `QT Signal and Slots <http://qt-project.org/doc/qt-4.8/signalsandslots.html>`_.
 
-Data Flow Diagram
------------------
-
 .. figure::  images/gui_dfd_1.*
-   :align:   center
+   :align:   right
 
    Data Flow Diagram of the laptop software
 
-* TCP Connection: Connection to the robot over TCP.
-    :py:class:`laptop.communication.EditHost` and :py:class:`laptop.communication.TcpConnection`.
-* Receiving all CAN messages received by the robot and display them in a table.
-    This is done with :py:class:`laptop.communication.CanTableControl` and :py:class:`laptop.communication.Table`.
-* Send CAN messages from the robot.
-    This is done with :py:class:`laptop.communication.SendCan`
-* Show the position of each robot on a map.
-    This is done with :py:class:`laptop.field.GameField`
-* Remote control the robot.
-    This is done with :py:class:`laptop.remote_control.RemoteControlWindow`.
+The data flow diagram shows the structure of the program. Here is a description of each widget:
+
+*   TcpConnection, :py:class:`laptop.communication.TcpConnection`
+        Receives and sends TCP data from the robot.
+*   CAN Packer, :py:class:`libraries.can._pack`
+        Packs a the data to be send to a Can message and unpacks the received CAN messages.
+*   Field, :py:class:`laptop.field.GameField`
+        Draws the position of each robot on a map.
+*   Edit Host, :py:class:`laptop.communication.EditHost`
+        Sets the IP address and the port of the TCP connection.
+*   CAN Table Control, :py:class:`laptop.communication.CanTableControl`
+        Filters the CAN messages to be displayed.
+*   CAN Table, :py:class:`laptop.communication.Table`
+        Displays all received CAN messages.
+*   Send CAN, :py:class:`laptop.communication.SendCan`
+        Send CAN messages from the robot.
+*   Remote Control, :py:class:`laptop.remote_control.RemoteControlWindow`
+        Remote control the robot
 
 When new date arrives over tcp it first gets packed to a dictionary. Then it is send to the CAN table control which
 controls which data should be displayed in the table. Then it is put in the table. At the same time the dictionary is
@@ -77,11 +95,7 @@ sent to the field widget. The field widget filters out the position data and dra
 
 There are 2 ways to send data. The first is to use the send can widget.
 Here you can select which type of data you want to send and then manually enter it.
-The second way is the remote control widget.
-
-
-* TcpConnection
-    Receives new TCP data with :py:class:`laptop.communication.TcpConnection`.
+The second way is the remote control widget. It allows to control the drive with the keyboard.
 
 Submodules
 ==========

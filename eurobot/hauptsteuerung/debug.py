@@ -1,5 +1,5 @@
 """
-This module contains the debugging functions for the Beaglebone that are used to communicate with the computer.
+This module contains the debugging functions for the Beaglebone .
 """
 __author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"

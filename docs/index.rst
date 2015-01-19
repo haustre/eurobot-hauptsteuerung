@@ -20,10 +20,9 @@ Contents:
    laptop
    libraries
    tests
-   jegge
+   robo_gui
 
+..  Todolist
+    ========
 
-Todolist
-========
-
-.. todolist::
+    .. todolist::

@@ -196,7 +196,7 @@ class TcpConnection(QThread):
         self.tcp.write(data)
 
 
-class SendCan(QDialog):  # Todo: compete class
+class SendCan(QDialog):
     """ This QDialog allows to send CAN messages from the robot """
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -244,6 +244,7 @@ class SendCan(QDialog):  # Todo: compete class
                 line.setText("Byte: %s" % i)
 
     def send(self):  # Todo: compete method
+        """ This method sends the CAN message """
         index = self.msg_type_combo.currentIndex()
         msg_type = can.MsgTypes(index).value
         can_msg = {

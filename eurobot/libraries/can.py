@@ -95,7 +95,7 @@ class Can(object):
 
 
 def _pack(msg_frame, sender):
-    """ Packs dictionary containing the CAN message to the format of the bus
+    """ Packs dictionary containing the CAN message to the format of the bus.
 
     :param msg_frame: contains Data to send
     :type msg_frame: dict
@@ -199,7 +199,8 @@ class MsgSender(Enum):
     Peripherie = 3
     Debugging = 7
 
-# list of all CAN message protocols
+# List of all CAN message protocols
+# Format: 'Encoding type: ( Format, (1 Byte, 2 Byte ....)),
 EncodingTypes = {
     'game_end':
         ('!B', ('time_to_game_end', '')),
@@ -237,7 +238,7 @@ MsgEncoding = {
     MsgTypes.Debug_Drive.value: EncodingTypes['debug_drive']
 }
 
-# Colors used in can table (Red, Green, Blue)
+# Colors used in can table (Red, Green, Blue) 0-255
 MsgColors = {
     MsgTypes.EmergencyShutdown.value:      (205, 41, 41),
     MsgTypes.Emergency_Stop.value:         (205, 41, 41),
