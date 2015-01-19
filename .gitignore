@@ -1,5 +1,4 @@
 docs/_build/
-docs/images/*.pdf
 .idea/
 logfile.txt
 __pycache__
