@@ -32,12 +32,27 @@ class Countdown():
         """
         This class counts down the remaining time till the end of the game
         """
+        self.running = False
+        self.start_time = 0
+        self.time_left = 91  # Time the end of the game in seconds
+        self.interrupts = []
         self.countdown_loop = threading.Thread(target=self.run)
         self.countdown_loop.setDaemon(1)
+
+    def start(self):
+        self.running = True
+        self.start_time = time.time()
         self.countdown_loop.start()
 
     def run(self):
-        pass
+        while self.running:
+            self.time_left = 90 - (time.time() - self.start_time)
+
+    def set_interrupt(self, object_to_call, interrupt_name, time_left):
+        self.interrupts.append((object_to_call, interrupt_name, time_left))
+
+
+
 
 if __name__ == "__main__":
     main()

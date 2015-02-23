@@ -5,8 +5,10 @@ This module contains unittests for CAN packer functions.
 __author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"
 
-from unittest import TestCase
 import struct
+import time
+import random
+from unittest import TestCase
 from eurobot.libraries import can
 
 
@@ -68,3 +70,34 @@ class TestCanPacker(TestCase):
         packer_format = '!BHHH'
         can_msg = struct.pack(packer_format, data_correct, 234, 1234, 2345)
         self.assertEqual(result, (can_id, can_msg))
+
+
+class TestCanCommunication(TestCase):
+    """ Unittest for The CAN communication with the Discovery Board
+    All tests will fail if the Discovery Board is not connected to the computer
+    """
+
+    def setUp(self):
+        self.can_connection = can.Can('can0', can.MsgSender.Debugging)
+
+    def position_robot_1(self):
+        for i in range(10):
+            msg_send = {
+                'type': can.MsgTypes.Position_Robot_1.value,
+                'position_correct': random.choice((True, False)),
+                'angle_correct': random.choice((True, False)),
+                'angle': random.randrange(0, 36000),
+                'y_position': random.randrange(0, 20000),
+                'x_position': random.randrange(0, 30000)
+            }
+            msg_recv = self.compare_send_recv(msg_send)
+            self.assertEqual(msg_recv, msg_send)
+
+    def compare_send_recv(self, msg_send):
+        self.can_connection.queue_send.put(msg_send)
+        time.sleep(0.005)
+        msg_rcv = self.can_connection.queue_debug.get_nowait()
+        return msg_rcv
+
+    def tearDown(self):
+        pass
