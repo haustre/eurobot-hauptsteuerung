@@ -34,25 +34,29 @@ class Countdown():
         """
         self.running = False
         self.start_time = 0
-        self.time_left = 91  # Time the end of the game in seconds
-        self.interrupts = []
-        self.countdown_loop = threading.Thread(target=self.run)
-        self.countdown_loop.setDaemon(1)
+        self.game_time = 90  # Time the end of the game in seconds
+        self.timers_to_start = []
 
     def start(self):
-        self.running = True
         self.start_time = time.time()
-        self.countdown_loop.start()
+        self.running = True
+        for timer in self.timers_to_start:
+            threading.Timer(timer).start()
 
-    def run(self):
-        while self.running:
-            self.time_left = 90 - (time.time() - self.start_time)
+    def time_left(self):
+        if self.running:
+            time_left = int(self.game_time - (time.time() - self.start_time))
+        else:
+            time_left = False
+        return time_left
 
     def set_interrupt(self, object_to_call, interrupt_name, time_left):
-        self.interrupts.append((object_to_call, interrupt_name, time_left))
-
-
-
+        if self.running:
+            interrupt_time = self.game_time - time_left
+            threading.Timer(interrupt_time, object_to_call.interrupt, [interrupt_name]).start()
+        else:
+            call = object_to_call, interrupt_name, time_left
+            self.timers_to_start.append(call)
 
 if __name__ == "__main__":
     main()

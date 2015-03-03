@@ -78,9 +78,12 @@ class TestCanCommunication(TestCase):
     """
 
     def setUp(self):
-        self.can_connection = can.Can('can0', can.MsgSender.Debugging)
+        try:
+            self.can_connection = can.Can('can0', can.MsgSender.Debugging)
+        except:
+            print("CAN Interface not running")
 
-    def position_robot_1(self):
+    def test_position_robot_1(self):
         for i in range(10):
             msg_send = {
                 'type': can.MsgTypes.Position_Robot_1.value,
