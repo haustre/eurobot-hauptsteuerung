@@ -48,6 +48,7 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         scale = widget_width / 3000
         self._draw_robot(painter, self.robot1, scale)
         self._draw_robot(painter, self.enemy1, scale)
+        #self._draw_path(painter, None, scale)
 
         painter.end()
 
@@ -71,6 +72,20 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         pixmap_width = rotated_pixmap.size().width()
         pixmap_height = rotated_pixmap.size().height()
         painter.drawPixmap(x - pixmap_width/2, y - pixmap_height/2, rotated_pixmap)
+
+    def _draw_path(self, painter, path, scale):
+        """ This method draws the planned route of the Robot
+
+        :param painter: painter used to draw
+        :param path: path to draw
+        :param scale: scale of the pixels
+        :return: None
+        """
+
+        pen = QPen(Qt.darkRed, 8, Qt.SolidLine)
+        painter.setPen(pen)
+        for point in path:
+            painter.drawPoint(point[0]*50*scale, point[1]*50*scale)
 
     def setpoint(self, msg_frame):
         """ This method checks if a CAN message contains the position of a Robot and actualise the position on the map.
