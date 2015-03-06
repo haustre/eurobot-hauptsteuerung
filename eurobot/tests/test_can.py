@@ -79,25 +79,29 @@ class TestCanCommunication(TestCase):
 
     def setUp(self):
         try:
-            self.can_connection = can.Can('can0', can.MsgSender.Debugging)
+            self.can_connection = can.Can('can0', can.MsgSender.Hauptsteuerung)
         except:
+            self.can_connection = None
             print("CAN Interface not running")
 
     def test_position_robot_1(self):
-        for i in range(10):
-            msg_send = {
-                'type': can.MsgTypes.Position_Robot_1.value,
-                'position_correct': random.choice((True, False)),
-                'angle_correct': random.choice((True, False)),
-                'angle': random.randrange(0, 36000),
-                'y_position': random.randrange(0, 20000),
-                'x_position': random.randrange(0, 30000)
-            }
-            msg_recv = self.compare_send_recv(msg_send)
-            self.assertEqual(msg_recv, msg_send)
+        if self.can_connection:
+            for i in range(10):
+                msg_send = {
+                    'type': can.MsgTypes.Position_Robot_1.value,
+                    'position_correct': random.choice((True, False)),
+                    'angle_correct': random.choice((True, False)),
+                    'angle': random.randrange(0, 36000),
+                    'y_position': random.randrange(0, 20000),
+                    'x_position': random.randrange(0, 30000)
+                }
+                msg_recv = self.compare_send_recv(msg_send)
+                self.assertEqual(msg_recv, msg_send)
+        else:
+            self.fail(msg="Skip Discovery Board Test")
 
     def compare_send_recv(self, msg_send):
-        self.can_connection.queue_send.put(msg_send)
+        self.can_connection.send(msg_send)
         time.sleep(0.005)
         msg_rcv = self.can_connection.queue_debug.get_nowait()
         return msg_rcv
