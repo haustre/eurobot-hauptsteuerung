@@ -188,7 +188,16 @@ class MsgTypes(Enum):
     Close_Range_Dedection = 7
     Goto_Position = 8
     Drive_Status = 9
-    Debug_Drive = 10
+    Stands_Command = 10
+    Stands_Status = 11
+    Cup_Command = 12
+    Cup_Status = 13
+    Clapper_Command = 14
+    Clapper_Status = 15
+    Popcorn_Command = 16
+    Popcorn_Status = 17
+    Peripherie_inputs = 18
+    Debug_Drive = 19
 
 
 class MsgSender(Enum):
@@ -250,5 +259,14 @@ MsgColors = {
     MsgTypes.Close_Range_Dedection.value:  (41, 52, 205),
     MsgTypes.Goto_Position.value:          (123, 41, 205),
     MsgTypes.Drive_Status.value:           (205, 41, 183),
-    MsgTypes.Debug_Drive.value:            (205, 41, 183)
+    MsgTypes.Debug_Drive.value:            (205, 41, 183),
+    MsgTypes.Stands_Command.value:         (205, 41, 183),
+    MsgTypes.Stands_Status.value:          (205, 41, 183),
+    MsgTypes.Cup_Command.value:            (205, 41, 183),
+    MsgTypes.Cup_Status.value:             (205, 41, 183),
+    MsgTypes.Clapper_Command.value:        (205, 41, 183),
+    MsgTypes.Clapper_Status.value:         (205, 41, 183),
+    MsgTypes.Popcorn_Command.value:        (205, 41, 183),
+    MsgTypes.Popcorn_Status.value:         (205, 41, 183),
+    MsgTypes.Peripherie_inputs.value:      (205, 41, 183),
 }
