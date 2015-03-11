@@ -43,7 +43,8 @@ class TestCanPacker(TestCase):
         packer_format = '!BHHH'
         can_msg = struct.pack(packer_format, data_correct, 234, 1234, 2345)
         msg_frame = can.unpack(can_id, can_msg)
-        correct_result = (False, True, 234, 1234, 2345, can.MsgTypes.Position_Robot_1, can.MsgSender.Hauptsteuerung)
+        correct_result = (False, True, 234, 1234, 2345, can.MsgTypes.Position_Robot_1.value,
+                          can.MsgSender.Hauptsteuerung.value)
         result = msg_frame['angle_correct'], msg_frame['position_correct'], msg_frame['angle'],\
             msg_frame['y_position'], msg_frame['x_position'], msg_frame['type'], msg_frame['sender']
         self.assertEqual(correct_result, result)
@@ -79,7 +80,7 @@ class TestCanCommunication(TestCase):
 
     def setUp(self):
         try:
-            self.can_connection = can.Can('can0', can.MsgSender.Hauptsteuerung)
+            self.can_connection = can.Can('vcan0', can.MsgSender.Hauptsteuerung)
         except:
             self.can_connection = None
             print("CAN Interface not running")
@@ -104,7 +105,12 @@ class TestCanCommunication(TestCase):
         self.can_connection.send(msg_send)
         time.sleep(0.005)
         msg_rcv = self.can_connection.queue_debug.get_nowait()
-        return msg_rcv
+
+        can_id = msg_rcv[0]
+        can_msg = msg_rcv[1].encode('latin-1')
+        msg_frame = can.unpack(can_id, can_msg)
+        del msg_frame['sender']
+        return msg_frame
 
     def tearDown(self):
         pass

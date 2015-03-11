@@ -130,9 +130,9 @@ def unpack(can_id, can_msg):
     """
     type_mask = 0b00111111000
     type_nr = (can_id & type_mask) >> 3
-    msg_type = MsgTypes(type_nr)
+    msg_type = MsgTypes(type_nr).value
     sender_mask = 0b00000000111
-    sender = MsgSender(can_id & sender_mask)
+    sender = MsgSender(can_id & sender_mask).value
     encoding, dictionary = MsgEncoding[MsgTypes(type_nr).value]
     data = struct.unpack(encoding, can_msg)
     msg_frame = {}
