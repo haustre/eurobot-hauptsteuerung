@@ -82,7 +82,7 @@ class TestCanCommunication(TestCase):
     def setUp(self):
         self.msgqueue = queue.Queue()
         try:
-            self.can_connection = can.Can('vcan0', can.MsgSender.Hauptsteuerung)
+            self.can_connection = can.Can('can0', can.MsgSender.Hauptsteuerung)
             self.can_connection.create_queue(can.MsgTypes.Position_Robot_1.value, self.msgqueue)
         except:
             self.can_connection = None
@@ -106,8 +106,7 @@ class TestCanCommunication(TestCase):
 
     def compare_send_recv(self, msg_send):
         self.can_connection.send(msg_send)
-        time.sleep(0.005)
-        #msg_rcv = self.can_connection.queue_debug.get_nowait()
+        time.sleep(0.1)
         msg_rcv = self.msgqueue.get_nowait()
 
         can_id = msg_rcv[0]

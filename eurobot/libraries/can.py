@@ -36,7 +36,7 @@ class Can(object):
         self.msg_queues = []
         self.can_frame_fmt = "=IB3x8s"
         self.socket = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
-        can_filter, can_mask = 0x600, 0x600
+        can_filter, can_mask = 0x600, 0x000
         can_filter = struct.pack("=II", can_filter, can_mask)
         self.socket.setsockopt(socket.SOL_CAN_RAW, socket.CAN_RAW_FILTER, can_filter)
         self.socket.bind((interface, ))
@@ -88,7 +88,6 @@ class Can(object):
             can_id, can_msg = self._dissect_can_frame(frame)
 
             msg_frame = unpack(can_id, can_msg)
-
             for queue in self.msg_queues:
                 msg_type, msg_queue = queue
                 if msg_type == msg_frame['type']:
