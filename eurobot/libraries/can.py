@@ -229,7 +229,7 @@ EncodingTypes = {
                     ('front_left_correct', 'front_middle_correct', 'front_right_correct', ),
                     ('sensor1', 'sensor2', 'sensor3', 'sensor4'))),
     'goto_position':
-        ('!HHHH', ('x_position', 'y_position', 'angle', 'speed')),
+        ('!HHHB', ('x_position', 'y_position', 'angle', 'speed')),
     'drive_status':
         ('!BB', (('status'), 'time_to_destination')),
     'task_command':
@@ -239,12 +239,15 @@ EncodingTypes = {
     'peripherie':
         ('!B', (('emergency_stop', 'key_is_removed'))),
     'debug_drive':
-        ('!hh', ('speed_left', 'speed_right'))
+        ('!hh', ('speed_left', 'speed_right')),
+    'emergency': None
 
 }
 
 # the list contains which message type is encoded with which protocol
 MsgEncoding = {
+    MsgTypes.EmergencyShutdown.value: EncodingTypes['emergency'],
+    MsgTypes.Emergency_Stop.value: EncodingTypes['emergency'],
     MsgTypes.Game_End.value: EncodingTypes['game_end'],
     MsgTypes.Position_Robot_1.value: EncodingTypes['position'],
     MsgTypes.Position_Robot_2.value: EncodingTypes['position'],
@@ -253,6 +256,15 @@ MsgEncoding = {
     MsgTypes.Close_Range_Dedection.value: EncodingTypes['close_range_dedection'],
     MsgTypes.Goto_Position.value: EncodingTypes['goto_position'],
     MsgTypes.Drive_Status.value: EncodingTypes['drive_status'],
+    MsgTypes.Stands_Command.value: EncodingTypes['task_command'],
+    MsgTypes.Stands_Status.value: EncodingTypes['task_status'],
+    MsgTypes.Cup_Command.value: EncodingTypes['task_command'],
+    MsgTypes.Cup_Status.value: EncodingTypes['task_status'],
+    MsgTypes.Clapper_Command.value: EncodingTypes['task_command'],
+    MsgTypes.Clapper_Status.value: EncodingTypes['task_status'],
+    MsgTypes.Popcorn_Command.value: EncodingTypes['task_command'],
+    MsgTypes.Popcorn_Status.value: EncodingTypes['task_status'],
+    MsgTypes.Peripherie_inputs.value: EncodingTypes['peripherie'],
     MsgTypes.Debug_Drive.value: EncodingTypes['debug_drive']
 }
 

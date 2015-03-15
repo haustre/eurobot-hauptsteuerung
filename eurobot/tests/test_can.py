@@ -83,22 +83,26 @@ class TestCanCommunication(TestCase):
         self.msgqueue = queue.Queue()
         try:
             self.can_connection = can.Can('can0', can.MsgSender.Hauptsteuerung)
-            self.can_connection.create_queue(can.MsgTypes.Position_Robot_1.value, self.msgqueue)
         except:
             self.can_connection = None
             print("CAN Interface not running")
 
     def test_position_robot_1(self):
         if self.can_connection:
+            print(len(can.MsgTypes))
+            msg_type = 1
+            _, dictionary = can.MsgEncoding[can.MsgTypes(msg_type).value]
+            self.can_connection.create_queue(msg_type, self.msgqueue)
+
             for i in range(10):
-                msg_send = {
-                    'type': can.MsgTypes.Position_Robot_1.value,
-                    'position_correct': random.choice((True, False)),
-                    'angle_correct': random.choice((True, False)),
-                    'angle': random.randrange(0, 36000),
-                    'y_position': random.randrange(0, 20000),
-                    'x_position': random.randrange(0, 30000)
-                }
+                msg_send = {'type': msg_type}
+                for byte in dictionary:
+                    if isinstance(byte, str):
+                        msg_send[byte] = random.randrange(0, 2**8-1)
+                    else:
+                        for bit in byte:
+                            msg_send[bit] = random.choice((True, False))
+
                 msg_recv = self.compare_send_recv(msg_send)
                 self.assertEqual(msg_recv, msg_send)
         else:
