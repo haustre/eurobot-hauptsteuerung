@@ -221,7 +221,7 @@ class MsgSender(Enum):
 # Format: 'Encoding type: ( Format, (1 Byte, 2 Byte ....)),
 EncodingTypes = {
     'game_end':
-        ('!B', ('time_to_game_end', '')),
+        ('!B', ['time_to_game_end']),
     'position':
         ('!BHHH', ('x_position', 'y_position', 'angle', ('position_correct', 'angle_correct'))),
     'close_range_dedection':
@@ -240,7 +240,8 @@ EncodingTypes = {
         ('!B', (('emergency_stop', 'key_is_removed'))),
     'debug_drive':
         ('!hh', ('speed_left', 'speed_right')),
-    'emergency': None
+    'emergency':
+        ('!B', ['code'])
 
 }
 

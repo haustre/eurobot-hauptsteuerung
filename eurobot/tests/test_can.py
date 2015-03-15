@@ -90,27 +90,27 @@ class TestCanCommunication(TestCase):
     def test_position_robot_1(self):
         if self.can_connection:
             print(len(can.MsgTypes))
-            msg_type = 1
-            _, dictionary = can.MsgEncoding[can.MsgTypes(msg_type).value]
-            self.can_connection.create_queue(msg_type, self.msgqueue)
+            for msg_type in range(len(can.MsgTypes)):
+                _, dictionary = can.MsgEncoding[can.MsgTypes(msg_type).value]
+                self.can_connection.create_queue(msg_type, self.msgqueue)
 
-            for i in range(10):
-                msg_send = {'type': msg_type}
-                for byte in dictionary:
-                    if isinstance(byte, str):
-                        msg_send[byte] = random.randrange(0, 2**8-1)
-                    else:
-                        for bit in byte:
-                            msg_send[bit] = random.choice((True, False))
+                for i in range(10):
+                    msg_send = {'type': msg_type}
+                    for byte in dictionary:
+                        if isinstance(byte, str):
+                            msg_send[byte] = random.randrange(0, 2**8-1)
+                        else:
+                            for bit in byte:
+                                msg_send[bit] = random.choice((True, False))
 
-                msg_recv = self.compare_send_recv(msg_send)
-                self.assertEqual(msg_recv, msg_send)
+                    msg_recv = self.compare_send_recv(msg_send)
+                    self.assertEqual(msg_recv, msg_send)
         else:
             self.fail(msg="Skip Discovery Board Test")
 
     def compare_send_recv(self, msg_send):
         self.can_connection.send(msg_send)
-        time.sleep(0.1)
+        time.sleep(20.1)
         msg_rcv = self.msgqueue.get_nowait()
 
         can_id = msg_rcv[0]
