@@ -23,6 +23,9 @@ def main():
         sys.exit(0)
     can_socket = can.Can(sys.argv[1], can.MsgSender.Hauptsteuerung)
     debugger = debug.LaptopCommunication(can_socket)
+    debugger.start()
+    enemy = debug.EnemySimulation(can_socket,  2, 10)
+    enemy.start()
     while True:
         time.sleep(1)
 

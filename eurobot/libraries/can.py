@@ -88,11 +88,10 @@ class Can(object):
             can_id, can_msg = self._dissect_can_frame(frame)
 
             msg_frame = unpack(can_id, can_msg)
-            for queue in self.msg_queues:
+            for queue in self.msg_queues:   # TODO: very slow
                 msg_type, msg_queue = queue
                 if msg_type == msg_frame['type']:
-                    msg_queue.put_nowait((can_id, can_msg.decode('latin-1')))
-
+                    msg_queue.put_nowait(msg_frame)
             self.queue_debug.put_nowait((can_id, can_msg.decode('latin-1')))     # Todo: Check if full
 
     def _send_connection(self):

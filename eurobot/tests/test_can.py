@@ -82,7 +82,7 @@ class TestCanCommunication(TestCase):
     def setUp(self):
         self.msgqueue = queue.Queue()
         try:
-            self.can_connection = can.Can('can0', can.MsgSender.Hauptsteuerung)
+            self.can_connection = can.Can('vcan0', can.MsgSender.Hauptsteuerung)
         except:
             self.can_connection = None
             print("CAN Interface not running")
@@ -94,7 +94,7 @@ class TestCanCommunication(TestCase):
                 _, dictionary = can.MsgEncoding[can.MsgTypes(msg_type).value]
                 self.can_connection.create_queue(msg_type, self.msgqueue)
 
-                for i in range(10):
+                for i in range(1):
                     msg_send = {'type': msg_type}
                     for byte in dictionary:
                         if isinstance(byte, str):
@@ -112,12 +112,8 @@ class TestCanCommunication(TestCase):
         self.can_connection.send(msg_send)
         time.sleep(20.1)
         msg_rcv = self.msgqueue.get_nowait()
-
-        can_id = msg_rcv[0]
-        can_msg = msg_rcv[1].encode('latin-1')
-        msg_frame = can.unpack(can_id, can_msg)
-        del msg_frame['sender']
-        return msg_frame
+        del msg_rcv['sender']
+        return msg_rcv
 
     def tearDown(self):
         pass
