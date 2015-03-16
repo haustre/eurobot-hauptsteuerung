@@ -89,7 +89,7 @@ class EnemySimulation():
                 #    msg_type, msg_queue = queue
                 #    if msg_type == can_msg['type']:
                 #        msg_queue.put_nowait(can_msg)
-            time.sleep(1)
+            time.sleep(0.1)
 
     def start(self):
         self.simulate_enemy.start()

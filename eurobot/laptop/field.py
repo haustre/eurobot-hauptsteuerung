@@ -21,7 +21,9 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         self.enemy1_pixmap = QPixmap(os.path.join(os.path.dirname(__file__), 'Robot2.png'))
         self.pixmap_ratio = self.table_pixmap.height() / self.table_pixmap.width()
         self.robot1 = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.robot1_pixmap}
+        self.robot2 = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.robot1_pixmap}
         self.enemy1 = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.enemy1_pixmap}
+        self.enemy2 = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.enemy1_pixmap}
 
     def paintEvent(self, event):
         """ Overrides method: :py:func:`QtGui.paintEvent`
@@ -46,8 +48,10 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         painter.setRenderHint(QPainter.HighQualityAntialiasing)  # Doesnt make a big difference
         painter.drawPixmap(0, 0, widget_width, widget_height, self.table_pixmap)
         scale = widget_width / 3000
-        self._draw_robot(painter, self.robot1, scale)
+        #self._draw_robot(painter, self.robot1, scale)
+        self._draw_robot(painter, self.robot2, scale)
         self._draw_robot(painter, self.enemy1, scale)
+        self._draw_robot(painter, self.enemy2, scale)
         #self._draw_path(painter, None, scale)
 
         painter.end()
@@ -94,13 +98,23 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         :type msg_frame: dict
         :return: None
         """
-        if msg_frame['type'] == can.MsgTypes.Position_Robot_1:
+        if msg_frame['type'] == can.MsgTypes.Position_Robot_1.value:
             self.robot1['x_position'] = msg_frame['x_position'] / 10
             self.robot1['y_position'] = msg_frame['y_position'] / 10
             self.robot1['angle'] = msg_frame['angle'] / 100
 
-        elif msg_frame['type'] == can.MsgTypes.Position_Enemy_1:
+        elif msg_frame['type'] == can.MsgTypes.Position_Robot_2.value:
+            self.robot2['x_position'] = msg_frame['x_position'] / 10
+            self.robot2['y_position'] = msg_frame['y_position'] / 10
+            self.robot2['angle'] = msg_frame['angle'] / 100
+
+        elif msg_frame['type'] == can.MsgTypes.Position_Enemy_1.value:
             self.enemy1['x_position'] = msg_frame['x_position'] / 10
             self.enemy1['y_position'] = msg_frame['y_position'] / 10
             self.enemy1['angle'] = msg_frame['angle'] / 100
+
+        elif msg_frame['type'] == can.MsgTypes.Position_Enemy_2.value:
+            self.enemy2['x_position'] = msg_frame['x_position'] / 10
+            self.enemy2['y_position'] = msg_frame['y_position'] / 10
+            self.enemy2['angle'] = msg_frame['angle'] / 100
         self.update()

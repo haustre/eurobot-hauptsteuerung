@@ -82,7 +82,7 @@ class TestCanCommunication(TestCase):
     def setUp(self):
         self.msgqueue = queue.Queue()
         try:
-            self.can_connection = can.Can('can0', can.MsgSender.Hauptsteuerung)
+            self.can_connection = can.Can('vcan0', can.MsgSender.Hauptsteuerung)
         except:
             self.can_connection = None
             print("CAN Interface not running")
