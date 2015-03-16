@@ -236,7 +236,7 @@ EncodingTypes = {
     'task_status':
         ('!BBB', ('task_nr', ('task_ready', 'task_running', 'task_finished'), 'collected_pieces')),
     'peripherie':
-        ('!B', (('emergency_stop', 'key_is_removed'))),
+        ('!BB', (('emergency_stop', 'key_is_removed'), 'reserve')),
     'debug_drive':
         ('!hh', ('speed_left', 'speed_right')),
     'emergency':

@@ -82,7 +82,7 @@ class TestCanCommunication(TestCase):
     def setUp(self):
         self.msgqueue = queue.Queue()
         try:
-            self.can_connection = can.Can('vcan0', can.MsgSender.Hauptsteuerung)
+            self.can_connection = can.Can('can0', can.MsgSender.Hauptsteuerung)
         except:
             self.can_connection = None
             print("CAN Interface not running")
@@ -91,10 +91,11 @@ class TestCanCommunication(TestCase):
         if self.can_connection:
             print(len(can.MsgTypes))
             for msg_type in range(len(can.MsgTypes)):
+                print(msg_type)
                 _, dictionary = can.MsgEncoding[can.MsgTypes(msg_type).value]
                 self.can_connection.create_queue(msg_type, self.msgqueue)
 
-                for i in range(1):
+                for i in range(10):
                     msg_send = {'type': msg_type}
                     for byte in dictionary:
                         if isinstance(byte, str):
@@ -110,8 +111,7 @@ class TestCanCommunication(TestCase):
 
     def compare_send_recv(self, msg_send):
         self.can_connection.send(msg_send)
-        time.sleep(20.1)
-        msg_rcv = self.msgqueue.get_nowait()
+        msg_rcv = self.msgqueue.get()
         del msg_rcv['sender']
         return msg_rcv
 

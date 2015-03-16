@@ -68,7 +68,7 @@ class EnemySimulation():
         self.simulate_enemy = threading.Thread(target=self.simulate_enemy_loop)
         self.simulate_enemy.setDaemon(1)
         self.robots = []
-        for robot in robot_count:
+        for robot in range(robot_count):
             self.robots.append(Position(speed))
 
     def simulate_enemy_loop(self):
@@ -84,10 +84,12 @@ class EnemySimulation():
                     'y_position': y,
                     'x_position': x
                 }
-                for queue in self.can_socket.msg_queues:
-                    msg_type, msg_queue = queue
-                    if msg_type == can_msg['type']:
-                        msg_queue.put_nowait(can_msg)
+                self.can_socket.send(can_msg)
+                #for queue in self.can_socket.msg_queues:
+                #    msg_type, msg_queue = queue
+                #    if msg_type == can_msg['type']:
+                #        msg_queue.put_nowait(can_msg)
+            time.sleep(1)
 
     def start(self):
         self.simulate_enemy.start()
