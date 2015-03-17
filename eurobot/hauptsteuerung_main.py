@@ -8,6 +8,7 @@ import sys
 import time
 import socket
 import threading
+import queue
 from libraries import can
 from hauptsteuerung import debug
 from hauptsteuerung import game_logic
@@ -29,8 +30,18 @@ def main():
     debugger = debug.LaptopCommunication(can_socket)
     debugger.start()
     enemy = debug.EnemySimulation(can_socket,  3, 70)
-    #enemy.start()
+    peripherie_queue = queue.Queue()
+    can_socket.create_queue(can.MsgTypes.Peripherie_inputs.value, peripherie_queue)
+
+    game_started = False
+    while game_started is False:
+        peripherie_msg = peripherie_queue.get()
+        print(peripherie_msg)
+        if peripherie_msg['emergency_stop'] is False and peripherie_msg['key_is_removed'] is True:
+            game_started = True
+
     countdown.start()   # start of the game
+    #enemy.start()
     while True:
         time.sleep(1)
 
