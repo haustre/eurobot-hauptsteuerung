@@ -85,10 +85,10 @@ class EnemySimulation():
                     'x_position': x
                 }
                 self.can_socket.send(can_msg)
-                #for queue in self.can_socket.msg_queues:
-                #    msg_type, msg_queue = queue
-                #    if msg_type == can_msg['type']:
-                #        msg_queue.put_nowait(can_msg)
+                for queue in self.can_socket.msg_queues:
+                    msg_type, msg_queue = queue
+                    if msg_type == can_msg['type']:
+                        msg_queue.put_nowait(can_msg)
             time.sleep(0.1)
 
     def start(self):
