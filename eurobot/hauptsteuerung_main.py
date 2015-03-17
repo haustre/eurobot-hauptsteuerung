@@ -12,6 +12,7 @@ import queue
 from libraries import can
 from hauptsteuerung import debug
 from hauptsteuerung import game_logic
+from hauptsteuerung import route_finding
 
 
 def main():
@@ -29,10 +30,19 @@ def main():
     countdown = game_logic.Countdown(can_socket)
     debugger = debug.LaptopCommunication(can_socket)
     debugger.start()
+    route_finder = route_finding.RouteFinding()
     enemy = debug.EnemySimulation(can_socket,  3, 70)
+
+    wait_for_game_start(can_socket)  # start of the game (key removed, emergency stop not pressed)
+    countdown.start()
+    enemy.start()
+    while True:
+        time.sleep(1)
+
+
+def wait_for_game_start(can_socket):
     peripherie_queue = queue.Queue()
     can_socket.create_queue(can.MsgTypes.Peripherie_inputs.value, peripherie_queue)
-
     game_started = False
     while game_started is False:
         peripherie_msg = peripherie_queue.get()
@@ -40,10 +50,6 @@ def main():
         if peripherie_msg['emergency_stop'] is False and peripherie_msg['key_is_removed'] is True:
             game_started = True
 
-    countdown.start()   # start of the game
-    #enemy.start()
-    while True:
-        time.sleep(1)
 
 if __name__ == "__main__":
     main()
