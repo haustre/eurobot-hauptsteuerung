@@ -10,6 +10,7 @@ import socket
 import threading
 from libraries import can
 from hauptsteuerung import debug
+from hauptsteuerung import game_logic
 
 
 def main():
@@ -24,44 +25,14 @@ def main():
             print('Wrong Hostname\nSet Hostname to "Roboter-klein" or "Roboter-gross"')
             sys.exit(0)
     can_socket = can.Can(can_connection, can.MsgSender.Hauptsteuerung)
+    countdown = game_logic.Countdown(can_socket)
     debugger = debug.LaptopCommunication(can_socket)
     debugger.start()
     enemy = debug.EnemySimulation(can_socket,  3, 70)
-    enemy.start()
+    #enemy.start()
+    countdown.start()   # start of the game
     while True:
         time.sleep(1)
-
-
-class Countdown():
-    def __init__(self):
-        """
-        This class counts down the remaining time till the end of the game
-        """
-        self.running = False
-        self.start_time = 0
-        self.game_time = 90  # Time the end of the game in seconds
-        self.timers_to_start = []
-
-    def start(self):
-        self.start_time = time.time()
-        self.running = True
-        for timer in self.timers_to_start:
-            threading.Timer(timer).start()
-
-    def time_left(self):
-        if self.running:
-            time_left = int(self.game_time - (time.time() - self.start_time))
-        else:
-            time_left = False
-        return time_left
-
-    def set_interrupt(self, object_to_call, interrupt_name, time_left):
-        if self.running:
-            interrupt_time = self.game_time - time_left
-            threading.Timer(interrupt_time, object_to_call.interrupt, [interrupt_name]).start()
-        else:
-            call = object_to_call, interrupt_name, time_left
-            self.timers_to_start.append(call)
 
 if __name__ == "__main__":
     main()
