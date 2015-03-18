@@ -17,7 +17,9 @@ class RouteFinding():
         self.table = self._make_table(self.resolution)
         self.graph = self._create_graph(self.table)
 
-    def calculate_path(self, robot1_x, robot1_y, robot2_x, robot2_y):
+    def calculate_path(self, robot1_pos, robot2_pos):
+        robot1_x, robot1_y = robot1_pos
+        robot2_x, robot2_y = robot2_pos
         gamefield = np.copy(self.table)
         result = self._add_array(gamefield, self.robot_weight, robot1_x - 10/2, robot1_y - 10/2)
         result = self._add_array(result, self.robot_weight, robot2_x - 10/2, robot2_y - 10/2)
@@ -106,5 +108,5 @@ class RouteFinding():
 
 if __name__ == "__main__":
     rout_finder = RouteFinding()
-    route = rout_finder.calculate_path(30, 30, 50, 50)
+    route = rout_finder.calculate_path((30, 30), (50, 50))
     print(route)

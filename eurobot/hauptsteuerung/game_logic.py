@@ -52,6 +52,7 @@ class Countdown():
                 'type': can.MsgTypes.Game_End.value,
                 'time_to_game_end': int(time_left)
             }
-            self.can_socket.send(can_msg)
+            if self.can_socket:
+                self.can_socket.send(can_msg)
             time.sleep(0.99)
             time_left = self.start_time + self.game_time - time.time()

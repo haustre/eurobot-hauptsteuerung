@@ -35,17 +35,26 @@ class Main():
         self.strategy = {
             'enemy count': 2, 'friend count': '1', 'robot name': hostname, 'robot color': 'green', 'strategy': 0
         }
-        self.enemy1 = RobotPosition(self.can_socket, can.MsgTypes.Position_Enemy_1.value)
+        self.robots = {'my': None, 'friendly robot': None, 'enemy1': None, 'enemy2': None}
         self.run()
 
     def run(self):
         self.debugger.start()
+        # TODO: get information from gui
+        self.robots['my'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_1)
+        if self.strategy['friend count'] == 1:
+            self.robots['friendly robot'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_2)
+        if self.strategy['enemy count'] >= 1:
+            self.robots['enemy1'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Enemy_1.value)
+        if self.strategy['enemy count'] == 2:
+            self.robots['enemy2'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Enemy_2.value)
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
         self.countdown.start()
         self.enemy_simulation.start()
         while True:
-
-            time.sleep(0.1)
+            route = self.route_finder.calculate_path(self.robots['enemy1'].get_position(), self.robots['enemy2'].get_position())
+            print(route)
+            time.sleep(2)
 
     def wait_for_game_start(self):
         peripherie_queue = queue.Queue()
@@ -77,7 +86,11 @@ class RobotPosition():
 
     def get_position(self):
         with self.lock:
-            return self.position, self.angle
+            return self.position
+
+    def get_angle(self):
+        with self.lock:
+            return self.angle
 
 if __name__ == "__main__":
     main_program = Main()
