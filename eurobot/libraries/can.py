@@ -206,6 +206,8 @@ class MsgTypes(Enum):
     Popcorn_Status = 17
     Peripherie_inputs = 18
     Debug_Drive = 19
+    Configuration = 20
+    Board_Status = 21
 
 
 class MsgSender(Enum):
@@ -240,8 +242,11 @@ EncodingTypes = {
     'debug_drive':
         ('!hh', ('speed_left', 'speed_right')),
     'emergency':
-        ('!B', ['code'])
-
+        ('!B', ['code']),
+    'configuration':
+        ('!B', ['is_robot_small', 'is_robot_big', 'is_enemy_small', 'is_enemy_big', 'start_left']),
+    'Board_Status':
+        ('!BB', ('config_complete'), 'error_code')
 }
 
 # the list contains which message type is encoded with which protocol
@@ -265,7 +270,9 @@ MsgEncoding = {
     MsgTypes.Popcorn_Command.value: EncodingTypes['task_command'],
     MsgTypes.Popcorn_Status.value: EncodingTypes['task_status'],
     MsgTypes.Peripherie_inputs.value: EncodingTypes['peripherie'],
-    MsgTypes.Debug_Drive.value: EncodingTypes['debug_drive']
+    MsgTypes.Debug_Drive.value: EncodingTypes['debug_drive'],
+    MsgTypes.Configuration.value: EncodingTypes['configuration'],
+    MsgTypes.Board_Status.value: EncodingTypes['Board_Status']
 }
 
 # Colors used in can table (Red, Green, Blue) 0-255
@@ -290,4 +297,6 @@ MsgColors = {
     MsgTypes.Popcorn_Command.value:        (205, 41, 183),
     MsgTypes.Popcorn_Status.value:         (205, 41, 183),
     MsgTypes.Peripherie_inputs.value:      (205, 41, 183),
+    MsgTypes.Configuration.value:          (205, 41, 183),
+    MsgTypes.Board_Status.value:           (205, 41, 183),
 }
