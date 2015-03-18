@@ -189,10 +189,10 @@ class MsgTypes(Enum):
     EmergencyShutdown = 0
     Emergency_Stop = 1
     Game_End = 2
-    Position_Robot_1 = 3
-    Position_Robot_2 = 4
-    Position_Enemy_1 = 5
-    Position_Enemy_2 = 6
+    Position_Robot_small = 3
+    Position_Robot_big = 4
+    Position_Enemy_small = 5
+    Position_Enemy_big = 6
     Close_Range_Dedection = 7
     Goto_Position = 8
     Drive_Status = 9
@@ -254,10 +254,10 @@ MsgEncoding = {
     MsgTypes.EmergencyShutdown.value: EncodingTypes['emergency'],
     MsgTypes.Emergency_Stop.value: EncodingTypes['emergency'],
     MsgTypes.Game_End.value: EncodingTypes['game_end'],
-    MsgTypes.Position_Robot_1.value: EncodingTypes['position'],
-    MsgTypes.Position_Robot_2.value: EncodingTypes['position'],
-    MsgTypes.Position_Enemy_1.value: EncodingTypes['position'],
-    MsgTypes.Position_Enemy_2.value: EncodingTypes['position'],
+    MsgTypes.Position_Robot_small.value: EncodingTypes['position'],
+    MsgTypes.Position_Robot_big.value: EncodingTypes['position'],
+    MsgTypes.Position_Enemy_small.value: EncodingTypes['position'],
+    MsgTypes.Position_Enemy_big.value: EncodingTypes['position'],
     MsgTypes.Close_Range_Dedection.value: EncodingTypes['close_range_dedection'],
     MsgTypes.Goto_Position.value: EncodingTypes['goto_position'],
     MsgTypes.Drive_Status.value: EncodingTypes['drive_status'],
@@ -280,10 +280,10 @@ MsgColors = {
     MsgTypes.EmergencyShutdown.value:      (205, 41, 41),
     MsgTypes.Emergency_Stop.value:         (205, 41, 41),
     MsgTypes.Game_End.value:               (41, 205, 41),
-    MsgTypes.Position_Robot_1.value:       (41, 205, 180),
-    MsgTypes.Position_Robot_2.value:       (31, 154, 135),
-    MsgTypes.Position_Enemy_1.value:       (41, 175, 205),
-    MsgTypes.Position_Enemy_2.value:       (31, 131, 154),
+    MsgTypes.Position_Robot_small.value:       (41, 205, 180),
+    MsgTypes.Position_Robot_big.value:       (31, 154, 135),
+    MsgTypes.Position_Enemy_small.value:       (41, 175, 205),
+    MsgTypes.Position_Enemy_big.value:       (31, 131, 154),
     MsgTypes.Close_Range_Dedection.value:  (41, 52, 205),
     MsgTypes.Goto_Position.value:          (123, 41, 205),
     MsgTypes.Drive_Status.value:           (205, 41, 183),

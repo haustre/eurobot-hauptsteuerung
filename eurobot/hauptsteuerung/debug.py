@@ -74,7 +74,7 @@ class EnemySimulation():
     def simulate_enemy_loop(self):
         while True:
             for i, robot in enumerate(self.robots):
-                msg_type = can.MsgTypes.Position_Robot_2.value + i
+                msg_type = can.MsgTypes.Position_Robot_big.value + i
                 x, y, angle = robot.get_coordinates()
                 can_msg = {
                     'type': msg_type,

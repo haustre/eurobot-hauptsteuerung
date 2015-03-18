@@ -33,21 +33,36 @@ class Main():
         self.route_finder = route_finding.RouteFinding()
         self.enemy_simulation = debug.EnemySimulation(self.can_socket,  3, 70)
         self.strategy = {
-            'enemy count': 2, 'friend count': '1', 'robot name': hostname, 'robot color': 'green', 'strategy': 0
+            'robot_small': True, 'robot_big': True, 'enemy_small': True, 'enemy_big': True,
+            'robot_name': hostname, 'side': 'left', 'strategy': 0
         }
-        self.robots = {'my': None, 'friendly robot': None, 'enemy1': None, 'enemy2': None}
+        self.robots = {'me': None, 'friendly robot': None, 'enemy1': None, 'enemy2': None}
         self.run()
 
     def run(self):
         self.debugger.start()
         # TODO: get information from gui
-        self.robots['my'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_1)
-        if self.strategy['friend count'] == 1:
-            self.robots['friendly robot'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_2)
-        if self.strategy['enemy count'] >= 1:
-            self.robots['enemy1'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Enemy_1.value)
-        if self.strategy['enemy count'] == 2:
-            self.robots['enemy2'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Enemy_2.value)
+        can_msg = {
+            'type': can.MsgTypes.Configuration.value,
+            'is_robot_small': self.strategy['robot_small'],
+            'is_robot_big': self.strategy['robot_big'],
+            'is_enemy_small': self.strategy['enemy_small'],
+            'is_enemy_big': self.strategy['enemy_big'],
+            'start_left': self.strategy['side'] is 'left'
+        }
+        self.can_socket.send(can_msg)
+        if self.strategy['robot_name'] is 'Roboter-klein':
+            self.robots['me'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_small)
+            if self.strategy['robot_big']:
+                self.robots['friendly robot'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_big)
+        else:
+            self.robots['me'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_big)
+            if self.strategy['robot_small']:
+                self.robots['friendly robot'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_small)
+        if self.strategy['enemy_small']:
+            self.robots['enemy1'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Enemy_small.value)
+        if self.strategy['robot_big'] == 2:
+            self.robots['enemy2'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Enemy_big.value)
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
         self.countdown.start()
         self.enemy_simulation.start()

@@ -22,7 +22,7 @@ def main():
     while True:
         x, y, angle = position_robot1.get_coordinates()
         can_msg = {
-            'type': can.MsgTypes.Position_Robot_1.value,
+            'type': can.MsgTypes.Position_Robot_small.value,
             'position_correct': True,
             'angle_correct': False,
             'angle': angle,
@@ -33,7 +33,7 @@ def main():
 
         x, y, angle = position_robot2.get_coordinates()
         can_msg = {
-            'type': can.MsgTypes.Position_Enemy_1.value,
+            'type': can.MsgTypes.Position_Enemy_small.value,
             'position_correct': False,
             'angle_correct': True,
             'angle': angle + 100,

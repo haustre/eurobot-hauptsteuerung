@@ -98,22 +98,22 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         :type msg_frame: dict
         :return: None
         """
-        if msg_frame['type'] == can.MsgTypes.Position_Robot_1.value:
+        if msg_frame['type'] == can.MsgTypes.Position_Robot_small.value:
             self.robot1['x_position'] = msg_frame['x_position'] / 10
             self.robot1['y_position'] = msg_frame['y_position'] / 10
             self.robot1['angle'] = msg_frame['angle'] / 100
 
-        elif msg_frame['type'] == can.MsgTypes.Position_Robot_2.value:
+        elif msg_frame['type'] == can.MsgTypes.Position_Robot_big.value:
             self.robot2['x_position'] = msg_frame['x_position'] / 10
             self.robot2['y_position'] = msg_frame['y_position'] / 10
             self.robot2['angle'] = msg_frame['angle'] / 100
 
-        elif msg_frame['type'] == can.MsgTypes.Position_Enemy_1.value:
+        elif msg_frame['type'] == can.MsgTypes.Position_Enemy_small.value:
             self.enemy1['x_position'] = msg_frame['x_position'] / 10
             self.enemy1['y_position'] = msg_frame['y_position'] / 10
             self.enemy1['angle'] = msg_frame['angle'] / 100
 
-        elif msg_frame['type'] == can.MsgTypes.Position_Enemy_2.value:
+        elif msg_frame['type'] == can.MsgTypes.Position_Enemy_big.value:
             self.enemy2['x_position'] = msg_frame['x_position'] / 10
             self.enemy2['y_position'] = msg_frame['y_position'] / 10
             self.enemy2['angle'] = msg_frame['angle'] / 100
