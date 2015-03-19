@@ -7,7 +7,7 @@ __license__ = "GPLv3"
 import numpy as np
 import networkx as nx
 import math
-import copy
+import time
 
 
 class RouteFinding():
@@ -107,6 +107,9 @@ class RouteFinding():
         return distance
 
 if __name__ == "__main__":
+    start = time.time()
     rout_finder = RouteFinding()
+    print(time.time() - start)
     route = rout_finder.calculate_path((30, 30), (50, 50))
+    print(time.time() - start)
     print(route)

@@ -51,6 +51,7 @@ class Main():
             'start_left': self.strategy['side'] is 'left'
         }
         self.can_socket.send(can_msg)
+
         if self.strategy['robot_name'] is 'Roboter-klein':
             self.robots['me'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_small)
             if self.strategy['robot_big']:
@@ -63,6 +64,7 @@ class Main():
             self.robots['enemy1'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Enemy_small.value)
         if self.strategy['robot_big'] == 2:
             self.robots['enemy2'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Enemy_big.value)
+
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
         self.countdown.start()
         self.enemy_simulation.start()
