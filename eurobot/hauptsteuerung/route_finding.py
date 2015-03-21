@@ -14,7 +14,7 @@ class RouteFinding():
     def __init__(self):
         self.resolution = 40
         self.table_size = 2000
-        self.robot_size = 10
+        self.robot_size = 20
         self.scale = self.table_size / self.resolution
         self.robot_weight = self._make_robot(self.robot_size)
         self.table = self._make_table(self.resolution)
@@ -105,7 +105,7 @@ class RouteFinding():
 
     def _find_route(self, weights):
         g = self._create_graph(weights)
-        route = nx.astar_path(g, (20, 2), (20, 39), heuristic=self._path_heuristic)
+        route = nx.astar_path(g, (1, 1), (49, 59), heuristic=self._path_heuristic)
         return route
 
     def _path_heuristic(self, start, end):

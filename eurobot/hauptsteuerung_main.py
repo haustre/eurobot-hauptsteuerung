@@ -32,7 +32,7 @@ class Main():
         self.countdown = game_logic.Countdown(self.can_socket)
         self.debugger = debug.LaptopCommunication(self.can_socket)
         self.route_finder = route_finding.RouteFinding()
-        self.enemy_simulation = debug.EnemySimulation(self.can_socket,  3, 7)
+        self.enemy_simulation = debug.EnemySimulation(self.can_socket,  3, 20)
         self.strategy = {
             'robot_small': True, 'robot_big': True, 'enemy_small': True, 'enemy_big': True,
             'robot_name': hostname, 'side': 'left', 'strategy': 0

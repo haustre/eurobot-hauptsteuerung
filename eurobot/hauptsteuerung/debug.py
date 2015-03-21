@@ -10,6 +10,7 @@ import time
 import datetime
 import json
 import random
+import math
 from libraries import can
 from libraries.ethernet import Server
 
@@ -109,13 +110,11 @@ class Position():
         self.angle = random.randrange(0, 36000)
 
     def get_coordinates(self):
-        self.x += self.speed
-        if self.x > 3000:
-            self.x = 0
-        self.y += self.speed
-        if self.y > 1500:
-            self.y = 0
-        self.angle += self.speed
+        self.angle += self.speed * 3
+        self.x += int(self.speed * math.cos(self.angle / 100 / 360*2*math.pi))
+        self.y += int(self.speed * math.sin(self.angle / 100 / 360*2*math.pi))
+        if self.x > 3000-self.speed or self.x < self.speed or self.y > 2000-self.speed or self.y < self.speed:
+            self.angle += 18000
         if self.angle > 36000:
-            self.angle = 0
+            self.angle -= 36000
         return self.x, self.y, self.angle
