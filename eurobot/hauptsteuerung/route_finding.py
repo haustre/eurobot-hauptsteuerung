@@ -12,7 +12,9 @@ import time
 
 class RouteFinding():
     def __init__(self):
-        self.resolution = 200
+        self.resolution = 40
+        self.table_size = 2000
+        self.scale = self.table_size / self.resolution
         self.robot_weight = self._make_robot(10)
         self.table = self._make_table(self.resolution)
         self.graph = self._create_graph(self.table)
@@ -22,6 +24,9 @@ class RouteFinding():
         for robot in robots:
             result = self._add_array(gamefield, self.robot_weight, robot.get_position())
         route = self._find_route(result)
+        scale = self.scale
+        route[:] = [(int(x*scale), int(y*scale)) for x, y in route]
+        print(route)
         return route
 
     def _add_array(self, gamefield, array, position):
@@ -34,6 +39,9 @@ class RouteFinding():
         :return: sum of arrays
         """
         pos_x, pos_y = position
+        print(pos_x, pos_y)
+        pos_x = int(pos_x / self.scale)
+        pos_y = int(pos_y / self.scale)
         v_range1 = slice(max(0, pos_x), max(min(pos_x + array.shape[0], gamefield.shape[0]), 0))
         h_range1 = slice(max(0, pos_y), max(min(pos_y + array.shape[1], gamefield.shape[1]), 0))
 
@@ -98,7 +106,7 @@ class RouteFinding():
 
     def _find_route(self, weights):
         g = self._create_graph(weights)
-        route = nx.astar_path(g, (1, 2), (99, 89), heuristic=self._path_heuristic)
+        route = nx.astar_path(g, (20, 2), (39, 39), heuristic=self._path_heuristic)
         return route
 
     def _path_heuristic(self, start, end):
@@ -109,6 +117,6 @@ if __name__ == "__main__":
     start = time.time()
     rout_finder = RouteFinding()
     print(time.time() - start)
-    route = rout_finder.calculate_path((30, 30), (50, 50))
+    route = rout_finder.calculate_path(((30, 30), (50, 50)))
     print(time.time() - start)
     print(route)

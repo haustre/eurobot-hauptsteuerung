@@ -208,6 +208,7 @@ class MsgTypes(Enum):
     Debug_Drive = 19
     Configuration = 20
     Board_Status = 21
+    Path = 22
 
 
 class MsgSender(Enum):
@@ -230,7 +231,7 @@ EncodingTypes = {
                     ('front_left_correct', 'front_middle_correct', 'front_right_correct', ),
                     ('sensor1', 'sensor2', 'sensor3', 'sensor4'))),
     'goto_position':
-        ('!HHHB', ('x_position', 'y_position', 'angle', 'speed')),
+        ('!HHHBB', ('x_position', 'y_position', 'angle', 'speed', 'path_length')),
     'drive_status':
         ('!BB', (('status'), 'time_to_destination')),
     'task_command':
@@ -246,7 +247,9 @@ EncodingTypes = {
     'configuration':
         ('!BB', (('is_robot_small', 'is_robot_big', 'is_enemy_small', 'is_enemy_big', 'start_left'),  'reserve')),
     'Board_Status':
-        ('!BB', ('config_complete'), 'error_code')
+        ('!BB', (('config_complete'), 'error_code')),
+    'Path':
+        ('!HHHH', ('point_1_x', 'point_1_y', 'point_2_x', 'point_2_y'))
 }
 
 # the list contains which message type is encoded with which protocol
@@ -272,7 +275,8 @@ MsgEncoding = {
     MsgTypes.Peripherie_inputs.value: EncodingTypes['peripherie'],
     MsgTypes.Debug_Drive.value: EncodingTypes['debug_drive'],
     MsgTypes.Configuration.value: EncodingTypes['configuration'],
-    MsgTypes.Board_Status.value: EncodingTypes['Board_Status']
+    MsgTypes.Board_Status.value: EncodingTypes['Board_Status'],
+    MsgTypes.Path.value: EncodingTypes['Path']
 }
 
 # Colors used in can table (Red, Green, Blue) 0-255
@@ -299,4 +303,5 @@ MsgColors = {
     MsgTypes.Peripherie_inputs.value:      (205, 41, 183),
     MsgTypes.Configuration.value:          (205, 41, 183),
     MsgTypes.Board_Status.value:           (205, 41, 183),
+    MsgTypes.Path.value:                   (205, 41, 183),
 }

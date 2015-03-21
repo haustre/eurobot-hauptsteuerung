@@ -55,7 +55,6 @@ class Table(QTableWidget):
         if autoscroll is True:
             slide_bar = self.verticalScrollBar()
             slide_bar.setValue(slide_bar.maximum())
-        print(row_count)
 
     def filter_types(self, types):
         """ Applies a filter to the list and hides unwanted rows

@@ -104,16 +104,16 @@ class Position():
     """
     def __init__(self, speed):
         self.speed = speed
-        self.x = random.randrange(0, 30000)
-        self.y = random.randrange(0, 15000)
+        self.x = random.randrange(0, 3000)
+        self.y = random.randrange(0, 1500)
         self.angle = random.randrange(0, 36000)
 
     def get_coordinates(self):
         self.x += self.speed
-        if self.x > 30000:
+        if self.x > 3000:
             self.x = 0
         self.y += self.speed
-        if self.y > 15000:
+        if self.y > 1500:
             self.y = 0
         self.angle += self.speed
         if self.angle > 36000:

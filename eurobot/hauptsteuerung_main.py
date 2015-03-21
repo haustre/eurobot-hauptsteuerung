@@ -9,6 +9,7 @@ import time
 import socket
 import threading
 import queue
+import math
 from libraries import can
 from hauptsteuerung import debug
 from hauptsteuerung import game_logic
@@ -31,7 +32,7 @@ class Main():
         self.countdown = game_logic.Countdown(self.can_socket)
         self.debugger = debug.LaptopCommunication(self.can_socket)
         self.route_finder = route_finding.RouteFinding()
-        self.enemy_simulation = debug.EnemySimulation(self.can_socket,  3, 70)
+        self.enemy_simulation = debug.EnemySimulation(self.can_socket,  3, 7)
         self.strategy = {
             'robot_small': True, 'robot_big': True, 'enemy_small': True, 'enemy_big': True,
             'robot_name': hostname, 'side': 'left', 'strategy': 0
@@ -70,8 +71,8 @@ class Main():
         self.enemy_simulation.start()
         while True:
             route = self.route_finder.calculate_path((self.robots['enemy1'], self.robots['enemy2']))
-            print(route)
-            time.sleep(2)
+            self.send_path(route)
+            time.sleep(0.1)
 
     def wait_for_game_start(self):
         peripherie_queue = queue.Queue()
@@ -81,6 +82,35 @@ class Main():
             peripherie_msg = peripherie_queue.get()
             if peripherie_msg['emergency_stop'] is False and peripherie_msg['key_is_removed'] is True:
                 game_started = True
+
+    def send_path(self, path):
+        can_msg = {  # TODO: add final position
+            'type': can.MsgTypes.Goto_Position.value,
+            'x_position': 0,
+            'y_position': 0,
+            'angle': 0,
+            'speed': 100,
+            'path_length': len(path),
+        }
+        self.can_socket.send(can_msg)
+        for i in range(math.floor(len(path) / 2)):
+            can_msg = {
+                'type': can.MsgTypes.Path.value,
+                'point_1_x': path[2*i][0],
+                'point_1_y': path[2*i][1],
+                'point_2_x': path[2*i+1][0],
+                'point_2_y': path[2*i+1][1],
+            }
+            self.can_socket.send(can_msg)
+        if len(path) % 2 != 0:
+            can_msg = {
+                'type': can.MsgTypes.Path.value,
+                'point_1_x': path[len(path)-1][0],
+                'point_1_y': path[len(path)-1][1],
+                'point_2_x': 0,
+                'point_2_y': 0,
+            }
+            self.can_socket.send(can_msg)
 
 
 class RobotPosition():
