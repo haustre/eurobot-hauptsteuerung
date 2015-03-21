@@ -17,16 +17,14 @@ class RouteFinding():
         self.table = self._make_table(self.resolution)
         self.graph = self._create_graph(self.table)
 
-    def calculate_path(self, robot1_pos, robot2_pos):
-        robot1_x, robot1_y = robot1_pos
-        robot2_x, robot2_y = robot2_pos
+    def calculate_path(self, robots):
         gamefield = np.copy(self.table)
-        result = self._add_array(gamefield, self.robot_weight, robot1_x - 10/2, robot1_y - 10/2)
-        result = self._add_array(result, self.robot_weight, robot2_x - 10/2, robot2_y - 10/2)
+        for robot in robots:
+            result = self._add_array(gamefield, self.robot_weight, robot.get_position())
         route = self._find_route(result)
         return route
 
-    def _add_array(self, gamefield, array, pos_x, pos_y):
+    def _add_array(self, gamefield, array, position):
         """ Adds an two arrays together
 
         :param gamefield:
@@ -35,6 +33,7 @@ class RouteFinding():
         :param pos_y:
         :return: sum of arrays
         """
+        pos_x, pos_y = position
         v_range1 = slice(max(0, pos_x), max(min(pos_x + array.shape[0], gamefield.shape[0]), 0))
         h_range1 = slice(max(0, pos_y), max(min(pos_y + array.shape[1], gamefield.shape[1]), 0))
 

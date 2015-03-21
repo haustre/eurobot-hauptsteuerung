@@ -6,7 +6,7 @@ __license__ = "GPLv3"
 
 import threading
 import time
-from eurobot.libraries import can
+from libraries import can
 
 
 class Countdown():

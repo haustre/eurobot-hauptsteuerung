@@ -244,7 +244,7 @@ EncodingTypes = {
     'emergency':
         ('!B', ['code']),
     'configuration':
-        ('!B', ['is_robot_small', 'is_robot_big', 'is_enemy_small', 'is_enemy_big', 'start_left']),
+        ('!BB', (('is_robot_small', 'is_robot_big', 'is_enemy_small', 'is_enemy_big', 'start_left'),  'reserve')),
     'Board_Status':
         ('!BB', ('config_complete'), 'error_code')
 }

@@ -10,7 +10,7 @@ import time
 import datetime
 import json
 import random
-from eurobot.libraries import can
+from libraries import can
 from libraries.ethernet import Server
 
 
