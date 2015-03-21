@@ -14,8 +14,9 @@ class RouteFinding():
     def __init__(self):
         self.resolution = 40
         self.table_size = 2000
+        self.robot_size = 10
         self.scale = self.table_size / self.resolution
-        self.robot_weight = self._make_robot(10)
+        self.robot_weight = self._make_robot(self.robot_size)
         self.table = self._make_table(self.resolution)
         self.graph = self._create_graph(self.table)
 
@@ -25,8 +26,7 @@ class RouteFinding():
             result = self._add_array(gamefield, self.robot_weight, robot.get_position())
         route = self._find_route(result)
         scale = self.scale
-        route[:] = [(int(x*scale), int(y*scale)) for x, y in route]
-        print(route)
+        route[:] = [(int(x*scale), int(y*scale)) for y, x in route]
         return route
 
     def _add_array(self, gamefield, array, position):
@@ -38,10 +38,9 @@ class RouteFinding():
         :param pos_y:
         :return: sum of arrays
         """
-        pos_x, pos_y = position
-        print(pos_x, pos_y)
-        pos_x = int(pos_x / self.scale)
-        pos_y = int(pos_y / self.scale)
+        pos_y, pos_x = position
+        pos_x = int(pos_x / self.scale) - self.robot_size / 2
+        pos_y = int(pos_y / self.scale) - self.robot_size / 2
         v_range1 = slice(max(0, pos_x), max(min(pos_x + array.shape[0], gamefield.shape[0]), 0))
         h_range1 = slice(max(0, pos_y), max(min(pos_y + array.shape[1], gamefield.shape[1]), 0))
 
@@ -71,42 +70,42 @@ class RouteFinding():
         y_size = size
         wall_size = int(size / 20)
         wall_height = 20
-        array = 1 + np.random.random((x_size, y_size)) / 2
+        array = 1 + np.random.random((y_size, x_size)) / 2
         for y in range(wall_size):
-            array[:, y] = wall_height-wall_height/wall_size*y
+            array[y, :] = wall_height-wall_height/wall_size*y
         for y in range(y_size-1, y_size-wall_size, -1):
-            array[:, y] = wall_height-wall_height/wall_size*(y_size-y)
+            array[y, :] = wall_height-wall_height/wall_size*(y_size-y)
         for x in range(wall_size):
-            array[x, :] = wall_height-wall_height/wall_size*x
+            array[:, x] = wall_height-wall_height/wall_size*x
         for x in range(x_size-1, x_size-wall_size, -1):
-            array[x, :] = wall_height-wall_height/wall_size*(x_size-x)
-        array[int(97.8 * pixel_per_cm):int(202.2 * pixel_per_cm), 0:int(58 * pixel_per_cm)] = 100  # Stairs
+            array[:, x] = wall_height-wall_height/wall_size*(x_size-x)
+        array[0:int(58 * pixel_per_cm), int(97.8 * pixel_per_cm):int(202.2 * pixel_per_cm)] = 100  # Stairs
         return array
 
     def _create_graph(self, table):
-        x_size = table.shape[0]
-        y_size = table.shape[1]
+        x_size = table.shape[1]
+        y_size = table.shape[0]
         g = nx.Graph()
         for x in range(x_size):
             for y in range(y_size):
-                g.add_node((x, y), weight=table[(x, y)])
+                g.add_node((y, x), weight=table[(y, x)])
         for x in range(x_size):
             for y in range(y_size-1):
-                g.add_edge((x, y), (x, y+1), weight=table[(x, y)])
+                g.add_edge((y, x), (y, x+1), weight=table[(y, x)])
         for x in range(x_size-1):
             for y in range(y_size):
-                g.add_edge((x, y), (x+1, y), weight=table[(x, y)])
+                g.add_edge((y, x), (y+1, x), weight=table[(y, x)])
         for x in range(x_size-1):
             for y in range(y_size-1):
-                g.add_edge((x, y), (x+1, y+1), weight=table[(x, y)] * math.sqrt(2))
+                g.add_edge((y, x), (y+1, x+1), weight=table[(y, x)] * math.sqrt(2))
         for x in range(x_size-1):
             for y in range(1, y_size):
-                g.add_edge((x, y), (x+1, y-1), weight=table[(x, y)] * math.sqrt(2))
+                g.add_edge((y, x), (y+1, x-1), weight=table[(y, x)] * math.sqrt(2))
         return g
 
     def _find_route(self, weights):
         g = self._create_graph(weights)
-        route = nx.astar_path(g, (20, 2), (39, 39), heuristic=self._path_heuristic)
+        route = nx.astar_path(g, (20, 2), (20, 39), heuristic=self._path_heuristic)
         return route
 
     def _path_heuristic(self, start, end):
