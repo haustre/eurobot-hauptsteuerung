@@ -32,7 +32,7 @@ class Main():
         self.countdown = game_logic.Countdown(self.can_socket)
         self.debugger = debug.LaptopCommunication(self.can_socket)
         self.route_finder = route_finding.RouteFinding()
-        self.enemy_simulation = debug.EnemySimulation(self.can_socket,  3, 20)
+        self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
         self.strategy = {
             'robot_small': True, 'robot_big': True, 'enemy_small': True, 'enemy_big': True,
             'robot_name': hostname, 'side': 'left', 'strategy': 0
@@ -54,23 +54,28 @@ class Main():
         }
         self.can_socket.send(can_msg)
         if self.strategy['robot_name'] is 'Roboter-klein':
-            self.robots['me'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_small)
+            self.robots['me'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_small.value)
             if self.strategy['robot_big']:
-                self.robots['friendly robot'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_big)
+                self.robots['friendly robot'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_big.value)
         else:
-            self.robots['me'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_big)
+            self.robots['me'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_big.value)
             if self.strategy['robot_small']:
-                self.robots['friendly robot'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_small)
+                self.robots['friendly robot'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_small.value)
         if self.strategy['enemy_small']:
             self.robots['enemy1'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Enemy_small.value)
         if self.strategy['robot_big']:
             self.robots['enemy2'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Enemy_big.value)
 
+        self.route_finder.add_my_robot(self.robots['me'])
+        for name, robot in self.robots.items():
+            if robot is not None and name is not 'me':
+                self.route_finder.add_robot(robot)
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
         self.countdown.start()
         self.enemy_simulation.start()
         while True:
-            route = self.route_finder.calculate_path((self.robots['enemy1'], self.robots['enemy2']))
+            route = self.route_finder.calculate_path((39, 59))
+            print(self.robots['me'].get_position())
             self.send_path(route)
             time.sleep(0.1)
 

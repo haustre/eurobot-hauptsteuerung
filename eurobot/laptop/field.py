@@ -50,7 +50,7 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         painter.setRenderHint(QPainter.HighQualityAntialiasing)  # Doesnt make a big difference
         painter.drawPixmap(0, 0, widget_width, widget_height, self.table_pixmap)
         scale = widget_width / 3000
-        #self._draw_robot(painter, self.robot1, scale)
+        self._draw_robot(painter, self.robot1, scale)
         self._draw_robot(painter, self.robot2, scale)
         self._draw_robot(painter, self.enemy1, scale)
         self._draw_robot(painter, self.enemy2, scale)
