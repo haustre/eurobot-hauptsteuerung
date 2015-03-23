@@ -35,13 +35,13 @@ class RouteFinding():
             x, y = robot.get_position()
             position = (int(x/self.scale), int(y/self.scale))
             result = self._add_array(gamefield, self.robot_weight, position)
-        #x, y = target
-        #target = (int(x/self.scale), int(y/self.scale))
+        x, y = target
+        target = (int(y/self.scale), int(x/self.scale))
         x, y = self.my_robot.get_position()
         my_position = (int(y/self.scale), int(x/self.scale))
-        route = self._find_route(result, my_position, target)
-        route[:] = [(int(x*self.scale), int(y*self.scale)) for y, x in route]
-        return route
+        path, path_len = self._find_route(result, my_position, target)
+        path[:] = [(int(x*self.scale), int(y*self.scale)) for y, x in path]
+        return path, path_len
 
     def _add_array(self, gamefield, array, position):
         """ Adds an two arrays together
@@ -103,7 +103,7 @@ class RouteFinding():
         array[int((1211-50) * pixel_per_mm):int(1233 * pixel_per_mm), int(2600 * pixel_per_mm):int(3000 * pixel_per_mm)] = weight
 
         array[int(1800 * pixel_per_mm):int(2000 * pixel_per_mm), int(1100 * pixel_per_mm):int(1900 * pixel_per_mm)] = weight
-        array = morphology.grey_dilation(array, size=(5, 5))
+        array = morphology.grey_dilation(array, size=(7, 7))
         return array
 
     def _create_graph(self, table):
@@ -129,8 +129,9 @@ class RouteFinding():
 
     def _find_route(self, weights, position, destination):
         g = self._create_graph(weights)
-        route = nx.astar_path(g, position, destination, heuristic=self._path_heuristic)
-        return route
+        path = nx.astar_path(g, position, destination, heuristic=self._path_heuristic)
+        path_len = sum(g[u][v].get('weight', 1) for u, v in zip(path[:-1], path[1:]))
+        return path, path_len
 
     def _path_heuristic(self, start, end):
         distance = math.sqrt((start[0] - end[0])**2 + (start[1] - end[1])**2)*1.5

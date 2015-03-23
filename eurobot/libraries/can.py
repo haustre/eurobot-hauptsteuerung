@@ -189,10 +189,10 @@ class MsgTypes(Enum):
     EmergencyShutdown = 0
     Emergency_Stop = 1
     Game_End = 2
-    Position_Robot_small = 3
-    Position_Robot_big = 4
-    Position_Enemy_small = 5
-    Position_Enemy_big = 6
+    Position_Robot_big = 3
+    Position_Robot_small = 4
+    Position_Enemy_big = 5
+    Position_Enemy_small = 6
     Close_Range_Dedection = 7
     Goto_Position = 8
     Drive_Status = 9
@@ -231,7 +231,7 @@ EncodingTypes = {
                     ('front_left_correct', 'front_middle_correct', 'front_right_correct', ),
                     ('sensor1', 'sensor2', 'sensor3', 'sensor4'))),
     'goto_position':
-        ('!HHHBB', ('x_position', 'y_position', 'angle', 'speed', 'path_length')),
+        ('!BBHHH', ('x_position', 'y_position', 'angle', 'speed', 'path_length')),
     'drive_status':
         ('!BB', (('status'), 'time_to_destination')),
     'task_command':

@@ -53,31 +53,36 @@ class Main():
             'reserve': 0
         }
         self.can_socket.send(can_msg)
-        if self.strategy['robot_name'] is 'Roboter-klein':
+        if self.strategy['robot_name'] == 'Roboter-klein':
+            print("Robot small")
             self.robots['me'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_small.value)
             if self.strategy['robot_big']:
                 self.robots['friendly robot'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_big.value)
-        else:
+        elif self.strategy['robot_name'] == 'Roboter-gross':
+            print("Robot big")
             self.robots['me'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_big.value)
             if self.strategy['robot_small']:
                 self.robots['friendly robot'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_small.value)
+        else:
+            print("Wrong Robot name")
         if self.strategy['enemy_small']:
             self.robots['enemy1'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Enemy_small.value)
         if self.strategy['robot_big']:
             self.robots['enemy2'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Enemy_big.value)
-
         self.route_finder.add_my_robot(self.robots['me'])
         for name, robot in self.robots.items():
-            if robot is not None and name is not 'me':
+            if robot is not None and name != 'me':
                 self.route_finder.add_robot(robot)
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
         self.countdown.start()
         self.enemy_simulation.start()
         while True:
-            route = self.route_finder.calculate_path((39, 59))
-            print(self.robots['me'].get_position())
-            self.send_path(route)
-            time.sleep(0.1)
+            points = [(1000, 800), (2000, 800), (1000, 1700), (2000, 1700)]
+            for point in points:
+                for i in range(30):
+                    path, path_len = self.route_finder.calculate_path(point)
+                    self.send_path(path, point)
+                    time.sleep(0.1)
 
     def wait_for_game_start(self):
         peripherie_queue = queue.Queue()
@@ -88,11 +93,11 @@ class Main():
             if peripherie_msg['emergency_stop'] is False and peripherie_msg['key_is_removed'] is True:
                 game_started = True
 
-    def send_path(self, path):
+    def send_path(self, path, destination):
         can_msg = {  # TODO: add final position
             'type': can.MsgTypes.Goto_Position.value,
-            'x_position': 0,
-            'y_position': 0,
+            'x_position': destination[0],
+            'y_position': destination[1],
             'angle': 0,
             'speed': 100,
             'path_length': len(path),

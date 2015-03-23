@@ -47,7 +47,7 @@ class Countdown():
     def _loop(self):
         time_left = 90
         while time_left >= 0:
-            print(time_left)
+            print(int(time_left))
             can_msg = {
                 'type': can.MsgTypes.Game_End.value,
                 'time_to_game_end': int(time_left)

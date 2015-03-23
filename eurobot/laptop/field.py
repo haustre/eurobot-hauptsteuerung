@@ -22,10 +22,10 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         self.pixmap_ratio = self.table_pixmap.height() / self.table_pixmap.width()
         self.path_length = 0
         self.path = []
-        self.robot1 = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.robot1_pixmap}
-        self.robot2 = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.robot1_pixmap}
-        self.enemy1 = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.enemy1_pixmap}
-        self.enemy2 = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.enemy1_pixmap}
+        self.robot_big = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.robot1_pixmap}
+        self.robot_small = {'x_position': 1500, 'y_position': 1000, 'diameter': 200, 'angle': 0, 'pixmap': self.robot1_pixmap}
+        self.enemy_big = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.enemy1_pixmap}
+        self.enemy_small = {'x_position': 1500, 'y_position': 1000, 'diameter': 200, 'angle': 0, 'pixmap': self.enemy1_pixmap}
 
     def paintEvent(self, event):
         """ Overrides method: :py:func:`QtGui.paintEvent`
@@ -50,10 +50,10 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         painter.setRenderHint(QPainter.HighQualityAntialiasing)  # Doesnt make a big difference
         painter.drawPixmap(0, 0, widget_width, widget_height, self.table_pixmap)
         scale = widget_width / 3000
-        self._draw_robot(painter, self.robot1, scale)
-        self._draw_robot(painter, self.robot2, scale)
-        self._draw_robot(painter, self.enemy1, scale)
-        self._draw_robot(painter, self.enemy2, scale)
+        self._draw_robot(painter, self.robot_big, scale)
+        self._draw_robot(painter, self.robot_small, scale)
+        self._draw_robot(painter, self.enemy_big, scale)
+        self._draw_robot(painter, self.enemy_small, scale)
         self._draw_path(painter, scale)
 
         painter.end()
@@ -102,24 +102,24 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         """
         redraw = False
         if msg_frame['type'] == can.MsgTypes.Position_Robot_small.value:
-            self.robot1['x_position'] = msg_frame['x_position']
-            self.robot1['y_position'] = msg_frame['y_position']
-            self.robot1['angle'] = msg_frame['angle'] / 100
+            self.robot_big['x_position'] = msg_frame['x_position']
+            self.robot_big['y_position'] = msg_frame['y_position']
+            self.robot_big['angle'] = msg_frame['angle'] / 100
             redraw = True
         elif msg_frame['type'] == can.MsgTypes.Position_Robot_big.value:
-            self.robot2['x_position'] = msg_frame['x_position']
-            self.robot2['y_position'] = msg_frame['y_position']
-            self.robot2['angle'] = msg_frame['angle'] / 100
+            self.robot_small['x_position'] = msg_frame['x_position']
+            self.robot_small['y_position'] = msg_frame['y_position']
+            self.robot_small['angle'] = msg_frame['angle'] / 100
             redraw = True
         elif msg_frame['type'] == can.MsgTypes.Position_Enemy_small.value:
-            self.enemy1['x_position'] = msg_frame['x_position']
-            self.enemy1['y_position'] = msg_frame['y_position']
-            self.enemy1['angle'] = msg_frame['angle'] / 100
+            self.enemy_big['x_position'] = msg_frame['x_position']
+            self.enemy_big['y_position'] = msg_frame['y_position']
+            self.enemy_big['angle'] = msg_frame['angle'] / 100
             redraw = True
         elif msg_frame['type'] == can.MsgTypes.Position_Enemy_big.value:
-            self.enemy2['x_position'] = msg_frame['x_position']
-            self.enemy2['y_position'] = msg_frame['y_position']
-            self.enemy2['angle'] = msg_frame['angle'] / 100
+            self.enemy_small['x_position'] = msg_frame['x_position']
+            self.enemy_small['y_position'] = msg_frame['y_position']
+            self.enemy_small['angle'] = msg_frame['angle'] / 100
             redraw = True
         elif msg_frame['type'] == can.MsgTypes.Goto_Position.value:
             self.path_length = msg_frame['path_length']
