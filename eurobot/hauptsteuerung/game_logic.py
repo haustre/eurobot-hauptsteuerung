@@ -56,3 +56,24 @@ class Countdown():
                 self.can_socket.send(can_msg)
             time.sleep(0.99)
             time_left = self.start_time + self.game_time - time.time()
+
+# prototype
+stands_left = [{'position': (90, 200)},
+               {'position': (90, 1750)},
+               {'position': (90, 1850)},
+               {'position': (850, 100)},
+               {'position': (850, 200)},
+               {'position': (870, 1355)},
+               {'position': (1100, 1770)},
+               {'position': (1300, 1400)},
+               ]
+
+for stand in stands_left:
+    stand['collected'] = False
+    stand['moved'] = False
+    stand['points'] = 3
+
+stands_right = list(stands_left)
+for stand in stands_right:
+    x, y = stand['position']
+    stand['position'] = (3000-x, y)
