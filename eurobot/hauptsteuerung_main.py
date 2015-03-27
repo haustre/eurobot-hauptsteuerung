@@ -26,8 +26,7 @@ class Main():
         else:
             can_connection = 'can0'
             if not (hostname == 'Roboter-klein' or hostname == 'Roboter-gross'):
-                print('Wrong Hostname\nSet Hostname to "Roboter-klein" or "Roboter-gross"')
-                sys.exit(0)
+                raise Exception('Wrong Hostname\nSet Hostname to "Roboter-klein" or "Roboter-gross"')
         self.can_socket = can.Can(can_connection, can.MsgSender.Hauptsteuerung)
         self.countdown = game_logic.Countdown(self.can_socket)
         self.debugger = debug.LaptopCommunication(self.can_socket)

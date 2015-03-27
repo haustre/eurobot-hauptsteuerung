@@ -6,6 +6,7 @@ __license__ = "GPLv3"
 
 import threading
 import time
+import math
 from libraries import can
 
 
@@ -57,23 +58,47 @@ class Countdown():
             time.sleep(0.99)
             time_left = self.start_time + self.game_time - time.time()
 
-# prototype
-stands_left = [{'position': (90, 200)},
-               {'position': (90, 1750)},
-               {'position': (90, 1850)},
-               {'position': (850, 100)},
-               {'position': (850, 200)},
-               {'position': (870, 1355)},
-               {'position': (1100, 1770)},
-               {'position': (1300, 1400)},
-               ]
 
-for stand in stands_left:
-    stand['collected'] = False
-    stand['moved'] = False
-    stand['points'] = 3
+class StandsTask():
+    def __init__(self, my_color):
+        self.points_per_stand = 3
+        stands_left = [{'position': (90, 200)},
+                       {'position': (90, 1750)},
+                       {'position': (90, 1850)},
+                       {'position': (850, 100)},
+                       {'position': (850, 200)},
+                       {'position': (870, 1355)},
+                       {'position': (1100, 1770)},
+                       {'position': (1300, 1400)},
+                       ]
 
-stands_right = list(stands_left)
-for stand in stands_right:
-    x, y = stand['position']
-    stand['position'] = (3000-x, y)
+        for stand in stands_left:
+            stand['collected'] = False
+            stand['moved'] = False
+
+        stands_right = list(stands_left)
+        for stand in stands_right:
+            x, y = stand['position']
+            stand['position'] = (3000-x, y)
+
+        if my_color is 'left':
+            self.my_stands = stands_left
+            self.enemy_stands = stands_right
+        elif my_color is 'right':
+            self.my_stands = stands_right
+            self.enemy_stands = stands_left
+        else:
+            raise Exception("Unknown team color")
+
+    def estimate_distance(self, robot):
+        robot_x, robot_y = robot.get_position()
+        shortest_distance = 100000
+        nearest_stand = None
+        for i, stand in enumerate(self.my_stands):
+            if stand['collected'] is False and stand['moved'] is False:
+                stand_x, stand_y = stand['position']
+                distance = math.sqrt((robot_x - stand_x)**2 + (robot_y - stand_y)**2)
+                if distance < shortest_distance:
+                    shortest_distance = distance
+                    nearest_stand = i
+        return shortest_distance, nearest_stand
