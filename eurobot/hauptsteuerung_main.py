@@ -80,7 +80,14 @@ class Main():
             for point in points:
                 for i in range(30):
                     path, path_len = self.route_finder.calculate_path(point)
-                    self.send_path(path, point)
+                    if path_len < 200:
+                        self.send_path(path, point)
+                    else:
+                        can_msg = {
+                            'type': can.MsgTypes.Emergency_Stop.value,
+                            'code': 0
+                        }
+                        self.can_socket.send(can_msg)
                     time.sleep(0.1)
 
     def wait_for_game_start(self):
@@ -92,8 +99,15 @@ class Main():
             if peripherie_msg['emergency_stop'] is False and peripherie_msg['key_is_removed'] is True:
                 game_started = True
 
+    def game_end(self):
+        can_msg = {
+            'type': can.MsgTypes.EmergencyShutdown.value,
+            'code': 0,
+        }
+        self.can_socket.send(can_msg)
+
     def send_path(self, path, destination):
-        can_msg = {  # TODO: add final position
+        can_msg = {  # TODO: add angle, speed
             'type': can.MsgTypes.Goto_Position.value,
             'x_position': destination[0],
             'y_position': destination[1],
