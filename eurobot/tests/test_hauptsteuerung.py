@@ -29,7 +29,7 @@ class TestHauptsteuerung(TestCase):
 class CountdownTestClass():
     def __init__(self, countdown):
         self.interrupt_called = False
-        countdown.set_interrupt(self, '88_seconds_left', 88)
+        countdown.set_interrupt(self.interrupt, '88_seconds_left', 88)
 
     def interrupt(self, interrupt_name):
         if interrupt_name == '88_seconds_left':

@@ -40,7 +40,7 @@ class Countdown():
     def set_interrupt(self, object_to_call, interrupt_name, time_left):
         if self.running:
             interrupt_time = self.game_time - time_left
-            threading.Timer(interrupt_time, object_to_call.interrupt, [interrupt_name]).start()
+            threading.Timer(interrupt_time, object_to_call, [interrupt_name]).start()
         else:
             call = object_to_call, interrupt_name, time_left
             self.timers_to_start.append(call)
