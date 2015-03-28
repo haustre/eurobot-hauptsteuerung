@@ -10,6 +10,7 @@ import socket
 import threading
 import queue
 import math
+import numpy as np
 from libraries import can
 from hauptsteuerung import debug
 from hauptsteuerung import game_logic
@@ -74,11 +75,12 @@ class Main():
                 self.route_finder.add_robot(robot)
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
         self.countdown.start()
-        self.enemy_simulation.start()
+        self.countdown.set_interrupt(self.game_end, 'game_end', 2)
+        #self.enemy_simulation.start()
         while True:
             points = [(1000, 800), (2000, 800), (1000, 1700), (2000, 1700)]
             for point in points:
-                for i in range(30):
+                for i in range(1):
                     path, path_len = self.route_finder.calculate_path(point)
                     if path_len < 200:
                         self.send_path(path, point)
@@ -88,7 +90,7 @@ class Main():
                             'code': 0
                         }
                         self.can_socket.send(can_msg)
-                    time.sleep(0.1)
+                    time.sleep(3)
 
     def wait_for_game_start(self):
         peripherie_queue = queue.Queue()
@@ -142,18 +144,26 @@ class RobotPosition():
         self.position = (0, 0)
         self.angle = 0
         self.can_queue = queue.Queue()
-        can_socket.create_queue(msg_type, self.can_queue)
         self.lock = threading.Lock()
+        resolution = 200
+        table_size = 2000
+        self.map = np.zeros((resolution*1.5, resolution))
+        self.scale = table_size / resolution
+        can_socket.create_queue(msg_type, self.can_queue)
         self.listen_can = threading.Thread(target=self.listen_can_loop)
         self.listen_can.setDaemon(1)
         self.listen_can.start()
 
     def listen_can_loop(self):
+        margin = int(20 * self.scale)
         while True:
             can_msg = self.can_queue.get()
+            x, y = can_msg['x_position'], can_msg['y_position']
             with self.lock:
-                self.position = can_msg['x_position'], can_msg['y_position']
+                self.position = x, y
                 self.angle = can_msg['angle']
+                self.map[round(x / self.scale) - margin: round(x / self.scale) + margin,
+                         round(y / self.scale) - margin: round(y / self.scale) + margin] += 1
 
     def get_position(self):
         with self.lock:
@@ -162,6 +172,10 @@ class RobotPosition():
     def get_angle(self):
         with self.lock:
             return self.angle
+
+    def get_map(self):
+        with self.lock:
+            return self.map
 
 if __name__ == "__main__":
     main_program = Main()
