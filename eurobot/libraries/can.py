@@ -34,6 +34,7 @@ class Can(object):
         self.queue_send = queue.Queue()
         self.queue_debug = queue.Queue()
         self.msg_queues = []
+        self.msg_interrupts = []
         self.can_frame_fmt = "=IB3x8s"
         self.socket = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
         can_filter, can_mask = 0x600, 0x000
@@ -49,6 +50,13 @@ class Can(object):
 
     def create_queue(self, msg_type, msg_queue):
         self.msg_queues.append((msg_type, msg_queue))
+        return len(self.msg_queues)-1
+
+    def remove_queue(self, queue_number):
+        self.msg_queues.pop(queue_number)
+
+    def create_interrupt(self, msg_type, function):
+        self.msg_interrupts.append((msg_type, function))
 
     def send(self, msg_frame):
         """ Packs a CAN-dictionary to a CAN-frame encodes it and puts it in the send queue
@@ -86,12 +94,15 @@ class Can(object):
         while 1:
             frame, addr = self.socket.recvfrom(16)
             can_id, can_msg = self._dissect_can_frame(frame)
-
             msg_frame = unpack(can_id, can_msg)
             for queue in self.msg_queues:   # TODO: very slow
                 msg_type, msg_queue = queue
                 if msg_type == msg_frame['type']:
                     msg_queue.put_nowait(msg_frame)
+            for interrupt in self.msg_interrupts:
+                msg_type, function = interrupt
+                if msg_type == msg_frame['type']:
+                    function(msg_frame)
             self.queue_debug.put_nowait((can_id, can_msg.decode('latin-1')))     # Todo: Check if full
 
     def _send_connection(self):

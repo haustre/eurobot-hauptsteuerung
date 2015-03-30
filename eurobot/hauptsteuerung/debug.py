@@ -90,6 +90,10 @@ class EnemySimulation():
                     msg_type, msg_queue = queue
                     if msg_type == can_msg['type']:
                         msg_queue.put_nowait(can_msg)
+                for interrupt in self.can_socket.msg_interrupts:
+                    msg_type, function = interrupt
+                    if msg_type == can_msg['type']:
+                        function(can_msg)
             time.sleep(0.1)
 
     def start(self):
