@@ -7,6 +7,7 @@ __license__ = "GPLv3"
 import threading
 import time
 import math
+import queue
 from libraries import can
 
 
@@ -60,33 +61,44 @@ class Countdown():
 
 
 class Task():
-    def __init__(self, robots):
+    def __init__(self, robots, can_socket, can_id):
         self.robots = robots
+        can_socket.create_interrupt(can_id, self.can_command)
+        can_socket.create_interrupt(can_id+1, self.can_status)
         self.my_game_elements = [None]
+        self.collected = 0
 
     def estimate_distance(self, robot):
         robot_x, robot_y = robot.get_position()
         shortest_distance = None
-        nearest_stand = None
+        nearest_element = None
         for i, stand in enumerate(self.my_game_elements):
             if stand['moved'] is False:
                 stand_x, stand_y = stand['position']
                 distance = math.sqrt((robot_x - stand_x)**2 + (robot_y - stand_y)**2)
                 if distance < shortest_distance:
                     shortest_distance = distance
-                    nearest_stand = i
-        return shortest_distance, nearest_stand
+                    nearest_element = i
+        return shortest_distance, nearest_element
 
     def check_if_moved(self):
         for robot in self.robots:
             drive_map = robot.get_map()
             for game_element in self.my_game_elements:
-                pass
+                x, y = game_element['position']
+                if drive_map[x, y]:
+                    game_element['moved'] = True
+
+    def can_command(self, can_msg):
+        pass
+
+    def can_status(self, can_msg):
+        self.collected = can_msg['collected_pieces']
 
 
 class StandsTask(Task):
-    def __init__(self, robots, my_color):
-        super().__init__(robots)
+    def __init__(self, robots, my_color, can_socket):
+        super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value)
         self.points_per_stand = 3
         stands_left = [{'position': (90, 200)},
                        {'position': (90, 1750)},

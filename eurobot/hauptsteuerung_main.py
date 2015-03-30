@@ -94,12 +94,13 @@ class Main():
 
     def wait_for_game_start(self):
         peripherie_queue = queue.Queue()
-        self.can_socket.create_queue(can.MsgTypes.Peripherie_inputs.value, peripherie_queue)    # TODO: delete after start
+        queue_number = self.can_socket.create_queue(can.MsgTypes.Peripherie_inputs.value, peripherie_queue)
         game_started = False
         while game_started is False:
             peripherie_msg = peripherie_queue.get()
-            if peripherie_msg['emergency_stop'] is False and peripherie_msg['key_is_removed'] is True:
+            if peripherie_msg['emergency_stop'] is False and peripherie_msg['key_inserted'] is False:
                 game_started = True
+        self.can_socket.remove_queue(queue_number)
 
     def game_end(self, time_string):
         if time_string is 'game_end':
@@ -144,27 +145,21 @@ class RobotPosition():
         self.size = size
         self.position = (0, 0)
         self.angle = 0
-        self.can_queue = queue.Queue()
         self.lock = threading.Lock()
         resolution = 200
         table_size = 2000
         self.map = np.zeros((resolution*1.5, resolution))
         self.scale = table_size / resolution
-        can_socket.create_queue(msg_type, self.can_queue)
-        self.listen_can = threading.Thread(target=self.listen_can_loop)
-        self.listen_can.setDaemon(1)
-        self.listen_can.start()
+        can_socket.create_interrupt(msg_type, self.can_robot_position)
 
-    def listen_can_loop(self):
+    def can_robot_position(self, can_msg):
         margin = int(20 * self.scale)
-        while True:
-            can_msg = self.can_queue.get()
-            x, y = can_msg['x_position'], can_msg['y_position']
-            with self.lock:
-                self.position = x, y
-                self.angle = can_msg['angle']
-                self.map[round(x / self.scale) - margin: round(x / self.scale) + margin,
-                         round(y / self.scale) - margin: round(y / self.scale) + margin] += 1
+        x, y = can_msg['x_position'], can_msg['y_position']
+        with self.lock:
+            self.position = x, y
+            self.angle = can_msg['angle']
+            self.map[round(x / self.scale) - margin: round(x / self.scale) + margin,
+                     round(y / self.scale) - margin: round(y / self.scale) + margin] += 1
 
     def get_position(self):
         with self.lock:
