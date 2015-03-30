@@ -98,7 +98,7 @@ class Main():
         game_started = False
         while game_started is False:
             peripherie_msg = peripherie_queue.get()
-            if peripherie_msg['emergency_stop'] is False and peripherie_msg['key_inserted'] is False:
+            if peripherie_msg['emergency_stop'] == 0 and peripherie_msg['key_inserted'] == 0:
                 game_started = True
         self.can_socket.remove_queue(queue_number)
 
