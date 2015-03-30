@@ -34,12 +34,12 @@ class RouteFinding():
         for robot in self.robots:
             x, y = robot.get_position()
             position = (int(x/self.scale), int(y/self.scale))
-            result = self._add_array(gamefield, self.robot_weight, position)
+            gamefield = self._add_array(gamefield, self.robot_weight, position)
         x, y = target
         target = (int(y/self.scale), int(x/self.scale))
         x, y = self.my_robot.get_position()
         my_position = (int(y/self.scale), int(x/self.scale))
-        path, path_len = self._find_route(result, my_position, target)
+        path, path_len = self._find_route(gamefield, my_position, target)
         path[:] = [(int(x*self.scale), int(y*self.scale)) for y, x in path]
         return path, path_len
 
