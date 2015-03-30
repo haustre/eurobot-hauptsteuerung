@@ -55,20 +55,20 @@ class Main():
         self.can_socket.send(can_msg)
         if self.strategy['robot_name'] == 'Roboter-klein':
             print("Robot small")
-            self.robots['me'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_small.value)
+            self.robots['me'] = PositionMyRobot(self.can_socket, can.MsgTypes.Position_Robot_small.value)
             if self.strategy['robot_big']:
-                self.robots['friendly robot'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_big.value)
+                self.robots['friendly robot'] = PositionOtherRobot(self.can_socket, can.MsgTypes.Position_Robot_big.value)
         elif self.strategy['robot_name'] == 'Roboter-gross':
             print("Robot big")
-            self.robots['me'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_big.value)
+            self.robots['me'] = PositionMyRobot(self.can_socket, can.MsgTypes.Position_Robot_big.value)
             if self.strategy['robot_small']:
-                self.robots['friendly robot'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Robot_small.value)
+                self.robots['friendly robot'] = PositionOtherRobot(self.can_socket, can.MsgTypes.Position_Robot_small.value)
         else:
-            print("Wrong Robot name")
+            raise Exception("Wrong Robot name")
         if self.strategy['enemy_small']:
-            self.robots['enemy1'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Enemy_small.value)
+            self.robots['enemy1'] = PositionOtherRobot(self.can_socket, can.MsgTypes.Position_Enemy_small.value)
         if self.strategy['robot_big']:
-            self.robots['enemy2'] = RobotPosition(self.can_socket, can.MsgTypes.Position_Enemy_big.value)
+            self.robots['enemy2'] = PositionOtherRobot(self.can_socket, can.MsgTypes.Position_Enemy_big.value)
         self.route_finder.add_my_robot(self.robots['me'])
         for name, robot in self.robots.items():
             if robot is not None and name != 'me':
@@ -141,25 +141,32 @@ class Main():
 
 
 class RobotPosition():
-    def __init__(self, can_socket, msg_type, size=20):
+    def __init__(self, can_socket, msg_type, size):
         self.size = size
-        self.position = (0, 0)
-        self.angle = 0
+        self.position = None
+        self.angle = None
         self.lock = threading.Lock()
         resolution = 200
         table_size = 2000
         self.map = np.zeros((resolution*1.5, resolution))
         self.scale = table_size / resolution
+        self.last_position_update = 0
+        self.last_angle_update = 0
         can_socket.create_interrupt(msg_type, self.can_robot_position)
 
     def can_robot_position(self, can_msg):
         margin = int(20 * self.scale)
-        x, y = can_msg['x_position'], can_msg['y_position']
-        with self.lock:
-            self.position = x, y
-            self.angle = can_msg['angle']
-            self.map[round(x / self.scale) - margin: round(x / self.scale) + margin,
-                     round(y / self.scale) - margin: round(y / self.scale) + margin] += 1
+        if can_msg['position_correct']:
+            x, y = can_msg['x_position'], can_msg['y_position']
+            with self.lock:
+                self.position = x, y
+                self.map[round(x / self.scale) - margin: round(x / self.scale) + margin,
+                         round(y / self.scale) - margin: round(y / self.scale) + margin] += 1
+            self.last_position_update = time.time()
+        if can_msg['angle_correct']:
+            with self.lock:
+                self.angle = can_msg['angle']
+            self.last_angle_update = time.time()
 
     def get_position(self):
         with self.lock:
@@ -172,6 +179,28 @@ class RobotPosition():
     def get_map(self):
         with self.lock:
             return self.map
+
+
+class PositionMyRobot(RobotPosition):
+    def __init__(self, can_socket, msg_type, size=20):
+        super().__init__(can_socket, msg_type, size)
+
+
+class PositionOtherRobot(RobotPosition):
+    def __init__(self, can_socket, msg_type, size=20):
+        super().__init__(can_socket, msg_type, size)
+        self.check_thread = threading.Thread(target=self.check_navigation)
+        self.check_thread.setDaemon(1)
+        self.check_thread.start()
+
+    def check_navigation(self):
+        while True:
+            now = time.time()
+            if now - self.last_position_update > 0.1:
+                self.angle = None
+            if now - self.last_angle_update > 0.1:
+                self.position = None
+            time.sleep(0.03)
 
 if __name__ == "__main__":
     main_program = Main()
