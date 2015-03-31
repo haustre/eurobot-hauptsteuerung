@@ -60,6 +60,32 @@ class Countdown():
             time_left = self.start_time + self.game_time - time.time()
 
 
+class StairTask():
+    def __init__(self, can_socket, my_color):
+        self.can_socket = can_socket
+        path_left = [{'bottom': (1200, 800, 270),
+                      'top': (1200, 200, 270),
+                      'carpet 1': (1100, 200, 290),
+                      'carpet 2': (1370, 200, 250)}
+                     ]
+
+        path_right = [{'bottom': (3000 - 1200, 800, 270),
+                       'top': (3000 - 1200, 200, 270),
+                       'carpet 1': (3000 - 1100, 200, 290),
+                       'carpet 2': (3000 - 1370, 200, 250)}
+                      ]
+
+        if my_color is 'left':
+            self.my_path = path_left
+        elif my_color is 'right':
+            self.my_path = path_right
+        else:
+            raise Exception("Unknown team color")
+
+    def run(self):
+        pass
+
+
 class Task():
     def __init__(self, robots, can_socket, can_id):
         self.robots = robots
@@ -99,7 +125,7 @@ class Task():
 class StandsTask(Task):
     def __init__(self, robots, my_color, can_socket):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value)
-        self.points_per_stand = 3
+        self.points_game_element = 3
         stands_left = [{'position': (90, 200)},
                        {'position': (90, 1750)},
                        {'position': (90, 1850)},
@@ -127,3 +153,32 @@ class StandsTask(Task):
         else:
             raise Exception("Unknown team color")
 
+
+class ClapperTask(Task):
+    def __init__(self, robots, my_color, can_socket):
+        super().__init__(robots, can_socket, can.MsgTypes.Clapper_Command.value)
+        self.points_game_element = 5
+        clapper_left = [{'position': (300, 1700), 'side': 'right'},
+                        {'position': (900, 1700), 'side': 'right'},
+                        {'position': (2400, 1700), 'side': 'left'}
+                        ]
+
+        clapper_right = [{'position': (2700, 1700), 'side': 'left'},
+                         {'position': (2100, 1700), 'side': 'left'},
+                         {'position': (600, 1700), 'side': 'right'}
+                         ]
+
+        for clapper in clapper_left:
+            clapper['moved'] = False
+
+        for clapper in clapper_right:
+            clapper['moved'] = False
+
+        if my_color is 'left':
+            self.my_game_elements = clapper_left
+            self.enemy_stands = clapper_right
+        elif my_color is 'right':
+            self.my_game_elements = clapper_right
+            self.enemy_stands = clapper_left
+        else:
+            raise Exception("Unknown team color")
