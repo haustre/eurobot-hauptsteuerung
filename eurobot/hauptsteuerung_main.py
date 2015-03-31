@@ -31,8 +31,9 @@ class Main():
         self.can_socket = can.Can(can_connection, can.MsgSender.Hauptsteuerung)
         self.countdown = game_logic.Countdown(self.can_socket)
         self.debugger = debug.LaptopCommunication(self.can_socket)
-        self.route_finder = route_finding.RouteFinding()
+        self.route_finder = route_finding.RouteFinding(self.can_socket)
         self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
+        self.reset = False
         self.strategy = {
             'robot_small': True, 'robot_big': True, 'enemy_small': True, 'enemy_big': True,
             'robot_name': hostname, 'side': 'left', 'strategy': 0
@@ -75,9 +76,10 @@ class Main():
                 self.route_finder.add_robot(robot)
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
         self.countdown.start()
+        self.can_socket.create_interrupt(can.MsgTypes.Peripherie_inputs.value, self.periphery_input)
         self.countdown.set_interrupt(self.game_end, 'game_end', 2)
         self.enemy_simulation.start()
-        while True:
+        while self.reset is False:
             points = [(1000, 800), (2000, 800), (1000, 1700), (2000, 1700)]
             for point in points:
                 for i in range(1):
@@ -102,6 +104,10 @@ class Main():
                 game_started = True
         self.can_socket.remove_queue(queue_number)
 
+    def periphery_input(self, can_msg):
+        if can_msg['emergency_stop'] == 1 and can_msg['key_inserted']:
+            self.reset = True
+
     def game_end(self, time_string):
         if time_string is 'game_end':
             can_msg = {
@@ -109,6 +115,9 @@ class Main():
                 'code': 0,
             }
             self.can_socket.send(can_msg)
+            time.sleep(5)  # TODO: make longer
+            print("Game End")
+            self.reset = True
 
     def send_path(self, path, destination):
         can_msg = {  # TODO: add angle, speed
@@ -203,4 +212,6 @@ class PositionOtherRobot(RobotPosition):
             time.sleep(0.03)
 
 if __name__ == "__main__":
-    main_program = Main()
+    while True:
+        main_program = Main()
+        print("Robot Resets")

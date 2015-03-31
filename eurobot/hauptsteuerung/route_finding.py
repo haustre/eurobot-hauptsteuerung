@@ -8,11 +8,13 @@ import numpy as np
 import networkx as nx
 import math
 import time
+import threading
 from scipy.ndimage import morphology
+from libraries import can
 
 
 class RouteFinding():
-    def __init__(self):
+    def __init__(self, can_socket):
         self.resolution = 40
         self.table_size = 2000
         self.robot_size = 20
@@ -22,6 +24,9 @@ class RouteFinding():
         self.graph = self._create_graph(self.table)
         self.my_robot = None
         self.robots = []
+        self.close_range_robots = []
+        self.lock_close_range = threading.Lock()
+        can_socket.create_interrupt(can.MsgTypes.Close_Range_Dedection.value, self.can_close_range_detection)
 
     def add_my_robot(self, robot):
         self.my_robot = robot
@@ -30,11 +35,23 @@ class RouteFinding():
         self.robots.append(robot)
 
     def calculate_path(self, target):
+        robot_position_unknown = False
         gamefield = np.copy(self.table)
         for robot in self.robots:
-            x, y = robot.get_position()
-            position = (int(x/self.scale), int(y/self.scale))
-            gamefield = self._add_array(gamefield, self.robot_weight, position)
+            position = robot.get_position()
+            if position:
+                x, y = position
+                position = (int(x/self.scale), int(y/self.scale))
+                gamefield = self._add_array(gamefield, self.robot_weight, position)
+            else:
+                robot_position_unknown = True
+        if robot_position_unknown:
+            with self.lock_close_range:
+                robots = self.close_range_robots
+            for robot in robots:
+                x, y = robot
+                position = (int(x/self.scale), int(y/self.scale))
+                gamefield = self._add_array(gamefield, self.robot_weight, position)
         x, y = target
         target = (int(y/self.scale), int(x/self.scale))
         x, y = self.my_robot.get_position()
@@ -42,6 +59,26 @@ class RouteFinding():
         path, path_len = self._find_route(gamefield, my_position, target)
         path[:] = [(int(x*self.scale), int(y*self.scale)) for y, x in path]
         return path, path_len
+
+    def can_close_range_detection(self, can_msg):
+        my_x, my_y = self.my_robot.get_position()
+        my_angle = self.my_robot.get_angle() / 100
+        self.close_range_robots = []
+        with self.lock_close_range:
+            if can_msg['front_left_correct']:
+                sensor_angle = - 20
+                x = my_x + math.cos(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
+                y = my_y + math.sin(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
+                self.close_range_robots.append((x, y))
+            if can_msg['front_middle_correct']:
+                x = my_x + math.cos(math.radians(my_angle))*can_msg['distance_front_middle']
+                y = my_y + math.sin(math.radians(my_angle))*can_msg['distance_front_middle']
+                self.close_range_robots.append((x, y))
+            if can_msg['front_right_correct']:
+                sensor_angle = 20
+                x = my_x + math.cos(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
+                y = my_y + math.sin(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
+                self.close_range_robots.append((x, y))
 
     def _add_array(self, gamefield, array, position):
         """ Adds an two arrays together
