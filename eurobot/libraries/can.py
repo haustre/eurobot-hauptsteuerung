@@ -246,9 +246,9 @@ EncodingTypes = {
     'drive_status':
         ('!BB', (('status'), 'time_to_destination')),
     'task_command':
-        ('!BB', ('task_nr', ('start_task', 'stop_task', 'get_status'))),
+        ('!B', ['command']),
     'task_status':
-        ('!BBB', ('task_nr', ('task_ready', 'task_running', 'task_finished'), 'collected_pieces')),
+        ('!BBB', ('state', 'collected_pieces')),
     'peripherie':
         ('!BB', (['emergency_stop', 'key_inserted'])),
     'debug_drive':
@@ -256,7 +256,8 @@ EncodingTypes = {
     'emergency':
         ('!B', ['code']),
     'configuration':
-        ('!BB', (('is_robot_small', 'is_robot_big', 'is_enemy_small', 'is_enemy_big', 'start_left'),  'reserve')),
+        ('!BB', (('is_robot_small', 'is_robot_big', 'is_enemy_small', 'is_enemy_big',
+                  'start_left', 'start_orientation'), 'reserve')),
     'Board_Status':
         ('!BB', (('config_complete'), 'error_code')),
     'Path':

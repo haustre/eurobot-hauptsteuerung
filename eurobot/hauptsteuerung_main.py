@@ -44,13 +44,22 @@ class Main():
     def run(self):
         self.debugger.start()
         # TODO: get information from gui
+        if self.strategy['side'] == 'left':
+            side = 0
+        else:
+            side = 1
+        if self.strategy['strategy'] == 0 or self.strategy['strategy'] == 1:
+            start_orientation = 0
+        else:
+            start_orientation = 1
         can_msg = {
             'type': can.MsgTypes.Configuration.value,
             'is_robot_small': self.strategy['robot_small'],
             'is_robot_big': self.strategy['robot_big'],
             'is_enemy_small': self.strategy['enemy_small'],
             'is_enemy_big': self.strategy['enemy_big'],
-            'start_left': self.strategy['side'] is 'left',
+            'start_left': side,
+            'start_orientation': start_orientation,
             'reserve': 0
         }
         self.can_socket.send(can_msg)
