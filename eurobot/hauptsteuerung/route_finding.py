@@ -61,24 +61,27 @@ class RouteFinding():
         return path, path_len
 
     def can_close_range_detection(self, can_msg):
-        my_x, my_y = self.my_robot.get_position()
-        my_angle = self.my_robot.get_angle() / 100
-        self.close_range_robots = []
-        with self.lock_close_range:
-            if can_msg['front_left_correct']:
-                sensor_angle = - 20
-                x = my_x + math.cos(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
-                y = my_y + math.sin(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
-                self.close_range_robots.append((x, y))
-            if can_msg['front_middle_correct']:
-                x = my_x + math.cos(math.radians(my_angle))*can_msg['distance_front_middle']
-                y = my_y + math.sin(math.radians(my_angle))*can_msg['distance_front_middle']
-                self.close_range_robots.append((x, y))
-            if can_msg['front_right_correct']:
-                sensor_angle = 20
-                x = my_x + math.cos(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
-                y = my_y + math.sin(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
-                self.close_range_robots.append((x, y))
+        try:
+            my_x, my_y = self.my_robot.get_position()
+            my_angle = self.my_robot.get_angle() / 100
+            self.close_range_robots = []
+            with self.lock_close_range:
+                if can_msg['front_left_correct']:
+                    sensor_angle = - 20
+                    x = my_x + math.cos(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
+                    y = my_y + math.sin(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
+                    self.close_range_robots.append((x, y))
+                if can_msg['front_middle_correct']:
+                    x = my_x + math.cos(math.radians(my_angle))*can_msg['distance_front_middle']
+                    y = my_y + math.sin(math.radians(my_angle))*can_msg['distance_front_middle']
+                    self.close_range_robots.append((x, y))
+                if can_msg['front_right_correct']:
+                    sensor_angle = 20
+                    x = my_x + math.cos(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
+                    y = my_y + math.sin(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
+                    self.close_range_robots.append((x, y))
+        except:
+            print("Close range detection failed")
 
     def _add_array(self, gamefield, array, position):
         """ Adds an two arrays together
