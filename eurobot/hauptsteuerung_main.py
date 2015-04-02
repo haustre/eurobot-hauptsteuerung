@@ -32,7 +32,7 @@ class Main():
         self.countdown = game_logic.Countdown(self.can_socket)
         self.debugger = debug.LaptopCommunication(self.can_socket)
         self.route_finder = route_finding.RouteFinding(self.can_socket)
-        self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
+        #self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
         self.reset = False
         self.strategy = {
             'robot_small': True, 'robot_big': True, 'enemy_small': True, 'enemy_big': True,
@@ -87,7 +87,7 @@ class Main():
         self.countdown.start()
         self.can_socket.create_interrupt(can.MsgTypes.Peripherie_inputs.value, self.periphery_input)
         self.countdown.set_interrupt(self.game_end, 'game_end', 2)
-        self.enemy_simulation.start()
+        #self.enemy_simulation.start()
         while self.reset is False:
             points = [(1000, 800), (2000, 800), (1000, 1700), (2000, 1700)]
             for point in points:
@@ -114,7 +114,7 @@ class Main():
         self.can_socket.remove_queue(queue_number)
 
     def periphery_input(self, can_msg):
-        if can_msg['emergency_stop'] == 1 and can_msg['key_inserted']:
+        if can_msg['emergency_stop'] == 1 and can_msg['key_inserted'] == 0:
             self.reset = True
 
     def game_end(self, time_string):

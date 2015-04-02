@@ -131,8 +131,8 @@ class CanTableControl(QWidget):
         """
         msg_frame_copy = copy.copy(msg_frame)
         if self.run_button.isChecked():
-            table_sender = str(can.MsgSender(msg_frame_copy['sender']))
-            table_type = str(can.MsgTypes(msg_frame_copy['type']))
+            table_sender = str(can.MsgSender(msg_frame_copy['sender']).name)
+            table_type = str(can.MsgTypes(msg_frame_copy['type']).name)
             table_color = can.MsgColors[msg_frame_copy['type']]
             visible = self.type_chechboxes[msg_frame_copy['type']].isChecked()
             del msg_frame_copy['type']
