@@ -248,7 +248,7 @@ EncodingTypes = {
     'task_command':
         ('!B', ['command']),
     'task_status':
-        ('!BBB', ('state', 'collected_pieces')),
+        ('!BB', ('state', 'collected_pieces')),
     'peripherie':
         ('!BB', (['emergency_stop', 'key_inserted'])),
     'debug_drive':
