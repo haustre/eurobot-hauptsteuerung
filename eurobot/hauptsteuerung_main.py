@@ -134,28 +134,19 @@ class Main():
             'x_position': destination[0],
             'y_position': destination[1],
             'angle': 0,
-            'speed': 100,
+            'speed': 25,
             'path_length': len(path),
         }
         self.can_socket.send(can_msg)
-        for i in range(math.floor(len(path) / 2)):
-            can_msg = {
-                'type': can.MsgTypes.Path.value,
-                'point_1_x': path[2*i][0],
-                'point_1_y': path[2*i][1],
-                'point_2_x': path[2*i+1][0],
-                'point_2_y': path[2*i+1][1],
-            }
-            self.can_socket.send(can_msg)
-        if len(path) % 2 != 0:
-            can_msg = {
-                'type': can.MsgTypes.Path.value,
-                'point_1_x': path[len(path)-1][0],
-                'point_1_y': path[len(path)-1][1],
-                'point_2_x': 0,
-                'point_2_y': 0,
-            }
-            self.can_socket.send(can_msg)
+        if len(path) > 0:
+            for point in path:
+                can_msg = {
+                    'type': can.MsgTypes.Path.value,
+                    'x': point[0],
+                    'y': point[1],
+                    'speed': 25
+                }
+                self.can_socket.send(can_msg)
 
 
 class RobotPosition():
@@ -174,6 +165,7 @@ class RobotPosition():
 
     def can_robot_position(self, can_msg):
         margin = int(20 * self.scale)
+        # TODO: check sender ID (in case drive and navigation both send)
         if can_msg['position_correct']:
             x, y = can_msg['x_position'], can_msg['y_position']
             with self.lock:

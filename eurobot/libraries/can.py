@@ -261,7 +261,7 @@ EncodingTypes = {
     'Board_Status':
         ('!BB', (('config_complete'), 'error_code')),
     'Path':
-        ('!HHHH', ('point_1_x', 'point_1_y', 'point_2_x', 'point_2_y'))
+        ('!BHH', ('x', 'y', 'speed'))
 }
 
 # the list contains which message type is encoded with which protocol
