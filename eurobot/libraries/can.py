@@ -220,6 +220,10 @@ class MsgTypes(Enum):
     Configuration = 20
     Board_Status = 21
     Path = 22
+    Carpet_Command = 23
+    Carpet_Status = 24
+    Climbing_Command = 25
+    Climbing_Status = 26
 
 
 class MsgSender(Enum):

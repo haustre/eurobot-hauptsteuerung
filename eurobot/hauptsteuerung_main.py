@@ -36,7 +36,7 @@ class Main():
         self.reset = False
         self.strategy = {
             'robot_small': True, 'robot_big': True, 'enemy_small': True, 'enemy_big': True,
-            'robot_name': hostname, 'side': 'left', 'strategy': 0
+            'robot_name': hostname, 'side': 'left', 'strategy': 2
         }
         self.robots = {'me': None, 'friendly robot': None, 'enemy1': None, 'enemy2': None}
         self.run()
@@ -45,13 +45,13 @@ class Main():
         self.debugger.start()
         # TODO: get information from gui
         if self.strategy['side'] == 'left':
-            side = 0
-        else:
             side = 1
-        if self.strategy['strategy'] == 0 or self.strategy['strategy'] == 1:
-            start_orientation = 0
         else:
-            start_orientation = 1
+            side = 0
+        if self.strategy['strategy'] == 0 or self.strategy['strategy'] == 1:
+            start_orientation = 0   # Clapper
+        else:
+            start_orientation = 1   # Stair
         can_msg = {
             'type': can.MsgTypes.Configuration.value,
             'is_robot_small': self.strategy['robot_small'],

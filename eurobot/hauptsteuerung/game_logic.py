@@ -60,20 +60,67 @@ class Countdown():
             time_left = self.start_time + self.game_time - time.time()
 
 
-class StairTask():
-    def __init__(self, can_socket, my_color):
+class Task():
+    def __init__(self, robots, can_socket, can_id):
+        self.robots = robots
         self.can_socket = can_socket
-        path_left = [{'bottom': (1200, 800, 270),
-                      'top': (1200, 200, 270),
-                      'carpet 1': (1100, 200, 290),
-                      'carpet 2': (1370, 200, 250)}
-                     ]
+        self.can_socket.create_interrupt(can_id, self.can_command)
+        self.can_socket.create_interrupt(can_id+1, self.can_status)
+        self.my_game_elements = [None]
+        self.collected = 0
+        self.movable = True
 
-        path_right = [{'bottom': (3000 - 1200, 800, 270),
-                       'top': (3000 - 1200, 200, 270),
-                       'carpet 1': (3000 - 1100, 200, 290),
-                       'carpet 2': (3000 - 1370, 200, 250)}
-                      ]
+    def estimate_distance(self, robot):
+        robot_x, robot_y = robot.get_position()
+        shortest_distance = None
+        nearest_element = None
+        for i, game_element in enumerate(self.my_game_elements):
+            if game_element['moved'] is False:
+                stand_x, stand_y = game_element['position']
+                distance = math.sqrt((robot_x - stand_x)**2 + (robot_y - stand_y)**2)
+                if distance < shortest_distance:
+                    shortest_distance = distance
+                    nearest_element = i
+        return shortest_distance, nearest_element
+
+    def check_if_moved(self):
+        if self.movable:
+            for robot in self.robots:
+                drive_map = robot.get_map()
+                for game_element in self.my_game_elements:
+                    x, y = game_element['position']
+                    if drive_map[x, y]:
+                        game_element['moved'] = True
+
+    def can_command(self, can_msg):
+        pass
+
+    def can_status(self, can_msg):
+        self.collected = can_msg['collected_pieces']
+
+
+class StairTask(Task):
+    def __init__(self, robots, my_color, can_socket):
+        super().__init__(robots, can_socket, can.MsgTypes.Climbing_Command.value)
+        self.climbing_command = {'up': 0, 'bottom': 1, 'middle': 2, 'top': 3}
+        self.carpet_command = {'fire right': 0, 'fire left': 1}
+        path_left = {'bottom': (1200, 800, 270),
+                     'beginning': (1200, 600, 270),
+                     'top': (1200, 200, 270),
+                     'carpet 1': (1100, 200, 290),
+                     'fire 1': self.carpet_command['fire right'],
+                     'carpet 2': (1370, 200, 250),
+                     'fire 2': self.carpet_command['fire left']
+                     }
+
+        path_right = {'bottom': (3000 - 1200, 800, 270),
+                      'beginning': (3000 - 1200, 600, 270),
+                      'top': (3000 - 1200, 200, 270),
+                      'carpet 1': (3000 - 1100, 200, 290),
+                      'fire 1': self.carpet_command['fire left'],
+                      'carpet 2': (3000 - 1370, 200, 250),
+                      'fire 2': self.carpet_command['fire right']
+                      }
 
         if my_color is 'left':
             self.my_path = path_left
@@ -82,44 +129,47 @@ class StairTask():
         else:
             raise Exception("Unknown team color")
 
-    def run(self):
-        pass
+    def goto_task(self):
+        return self.my_path['bottom']
 
+    def do_task(self):
+        self._send_command(self.climbing_command['bottom'])
+        time.sleep(10)
+        self._goto_position('beginning')
+        self._send_command(self.climbing_command['middle'])
+        # TODO: drive to the top
+        self._goto_position('carpet 1')
+        self._send_command(self.my_path['fire 1'])
+        self._goto_position('carpet 2')
+        self._send_command(self.my_path['fire 2'])
 
-class Task():
-    def __init__(self, robots, can_socket, can_id):
-        self.robots = robots
-        can_socket.create_interrupt(can_id, self.can_command)
-        can_socket.create_interrupt(can_id+1, self.can_status)
-        self.my_game_elements = [None]
-        self.collected = 0
+    def _goto_position(self, waypoint):
+        can_msg = {
+            'type': can.MsgTypes.Goto_Position.value,
+            'x_position': self.my_path[waypoint][0],
+            'y_position': self.my_path['waypoint'][1],
+            'angle': self.my_path['waypoint'][3],
+            'speed': 25,    # TODO: check
+            'path_length': 0,
+        }
+        self.can_socket.send(can_msg)
 
-    def estimate_distance(self, robot):
-        robot_x, robot_y = robot.get_position()
-        shortest_distance = None
-        nearest_element = None
-        for i, stand in enumerate(self.my_game_elements):
-            if stand['moved'] is False:
-                stand_x, stand_y = stand['position']
-                distance = math.sqrt((robot_x - stand_x)**2 + (robot_y - stand_y)**2)
-                if distance < shortest_distance:
-                    shortest_distance = distance
-                    nearest_element = i
-        return shortest_distance, nearest_element
+        can_queue = queue.Queue()
+        queue_number = self.can_socket.create_queue(can.MsgTypes.Drive_Status.value, can_queue)
+        arrived = False
+        while arrived is False:
+            can_msg = can_queue.get()
+            if can_msg['status'] == 0 and can_msg['time_to_destination'] == 0:  # TODO: change status
+                arrived = True
+        self.can_socket.remove_queue(queue_number)
 
-    def check_if_moved(self):
-        for robot in self.robots:
-            drive_map = robot.get_map()
-            for game_element in self.my_game_elements:
-                x, y = game_element['position']
-                if drive_map[x, y]:
-                    game_element['moved'] = True
-
-    def can_command(self, can_msg):
-        pass
-
-    def can_status(self, can_msg):
-        self.collected = can_msg['collected_pieces']
+    def _send_command(self, command):
+        can_msg = {
+            'type': can.MsgTypes.Climbing_Command.value,
+            'command': command,
+        }
+        self.can_socket.send(can_msg)
+        # TODO: wait to finish
 
 
 class StandsTask(Task):
@@ -158,14 +208,16 @@ class ClapperTask(Task):
     def __init__(self, robots, my_color, can_socket):
         super().__init__(robots, can_socket, can.MsgTypes.Clapper_Command.value)
         self.points_game_element = 5
-        clapper_left = [{'position': (300, 1700), 'side': 'right'},
-                        {'position': (900, 1700), 'side': 'right'},
-                        {'position': (2400, 1700), 'side': 'left'}
+        self.movable = False
+        y_pos = 1700
+        clapper_left = [{'position': (300, y_pos), 'side': 'right', 'angle': 0, 'end_position': (500, y_pos)},
+                        {'position': (900, y_pos), 'side': 'right', 'angle': 0, 'end_position': (1100, y_pos)},
+                        {'position': (2400, y_pos), 'side': 'left', 'angle': 180, 'end_position': (2200, y_pos)}
                         ]
 
-        clapper_right = [{'position': (2700, 1700), 'side': 'left'},
-                         {'position': (2100, 1700), 'side': 'left'},
-                         {'position': (600, 1700), 'side': 'right'}
+        clapper_right = [{'position': (2700, y_pos), 'side': 'left', 'angle': 180, 'end_position': (2500, y_pos)},
+                         {'position': (2100, y_pos), 'side': 'left', 'angle': 180, 'end_position': (1900, y_pos)},
+                         {'position': (600, y_pos), 'side': 'right', 'angle': 0, 'end_position': (800, y_pos)}
                          ]
 
         for clapper in clapper_left:
@@ -176,9 +228,40 @@ class ClapperTask(Task):
 
         if my_color is 'left':
             self.my_game_elements = clapper_left
-            self.enemy_stands = clapper_right
+            self.enemy_game_elements = clapper_right
         elif my_color is 'right':
             self.my_game_elements = clapper_right
-            self.enemy_stands = clapper_left
+            self.enemy_game_elements = clapper_left
         else:
             raise Exception("Unknown team color")
+
+    def goto_task(self, clapper_number):
+        return self.my_game_elements[clapper_number]['position'], self.my_game_elements[clapper_number]['angle'] * 100
+
+    def do_task(self, clapper_number):
+        if self.my_game_elements[clapper_number]['side'] == 'left':
+            clapper_side = 2
+        else:
+            clapper_side = 1
+        can_msg = {
+            'type': can.MsgTypes.Clapper_Command.value,
+            'command': clapper_side,
+        }
+        self.can_socket.send(can_msg)
+        time.sleep(1)
+        # TODO: check if the way is free
+        can_msg = {
+            'type': can.MsgTypes.Goto_Position.value,
+            'x_position': self.my_game_elements[clapper_number]['end_position'][0],
+            'y_position': self.my_game_elements[clapper_number]['end_position'][1],
+            'angle': self.my_game_elements[clapper_number]['angle'][0] * 100,
+            'speed': 25,    # TODO: check
+            'path_length': 0,
+        }
+        self.can_socket.send(can_msg)
+        can_msg = {
+            'type': can.MsgTypes.Clapper_Command.value,
+            'command': 0,   # both arms up
+        }
+        self.can_socket.send(can_msg)
+        time.sleep(0.2)
