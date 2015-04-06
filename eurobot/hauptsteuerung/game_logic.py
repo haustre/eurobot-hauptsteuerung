@@ -236,7 +236,7 @@ class ClapperTask(Task):
             raise Exception("Unknown team color")
 
     def goto_task(self, clapper_number):
-        return self.my_game_elements[clapper_number]['position'], self.my_game_elements[clapper_number]['angle'] * 100
+        return self.my_game_elements[clapper_number]['position'], self.my_game_elements[clapper_number]['angle']
 
     def do_task(self, clapper_number):
         if self.my_game_elements[clapper_number]['side'] == 'left':
@@ -254,7 +254,7 @@ class ClapperTask(Task):
             'type': can.MsgTypes.Goto_Position.value,
             'x_position': self.my_game_elements[clapper_number]['end_position'][0],
             'y_position': self.my_game_elements[clapper_number]['end_position'][1],
-            'angle': self.my_game_elements[clapper_number]['angle'][0] * 100,
+            'angle': self.my_game_elements[clapper_number]['angle'] * 100,
             'speed': 25,    # TODO: check
             'path_length': 0,
         }

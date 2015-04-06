@@ -39,6 +39,10 @@ class Main():
             'robot_name': hostname, 'side': 'left', 'strategy': 2
         }
         self.robots = {'me': None, 'friendly robot': None, 'enemy1': None, 'enemy2': None}
+
+        self.game_tasks = {'clapper': game_logic.ClapperTask(self.robots, self.strategy['side'], self.can_socket),
+                           'stair': game_logic.StairTask(self.robots, self.strategy['side'], self.can_socket)
+                           }
         self.run()
 
     def run(self):
@@ -88,20 +92,38 @@ class Main():
         self.can_socket.create_interrupt(can.MsgTypes.Peripherie_inputs.value, self.periphery_input)
         self.countdown.set_interrupt(self.game_end, 'game_end', 2)
         #self.enemy_simulation.start()
+        can_msg = {  # TODO: create function for each starting point
+            'type': can.MsgTypes.Goto_Position.value,
+            'x_position': 600,
+            'y_position': 1000,
+            'angle': 0,
+            'speed': 25,
+            'path_length': 0,
+        }
+        self.can_socket.send(can_msg)
+        time.sleep(1)
+        #self.send_path((), (1000, 1000), 9000)
+        #time.sleep(9999999999)
+        (x, y), angle = self.game_tasks['clapper'].goto_task(1)
+        path, path_len = self.route_finder.calculate_path((x, y))
+        self.send_path(path, (x, y), angle)
+        time.sleep(15)
+        self.game_tasks['clapper'].do_task(1)
+        time.sleep(9999999)
         while self.reset is False:
-            points = [(990, 1210), (990, 1585)]
+            points = [(990, 1210), (2000, 1200)]
             for point in points:
-                for i in range(1):
+                for i in range(10):
                     path, path_len = self.route_finder.calculate_path(point)
                     if path_len < 999999999999:     # TODO: define max
-                        self.send_path(path, point)
+                        self.send_path(path, point, 0)
                     elif False:
                         can_msg = {
                             'type': can.MsgTypes.Emergency_Stop.value,
                             'code': 0
                         }
                         self.can_socket.send(can_msg)
-                    time.sleep(3)
+                    time.sleep(0.2)
 
     def wait_for_game_start(self):
         peripherie_queue = queue.Queue()
@@ -109,12 +131,12 @@ class Main():
         game_started = False
         while game_started is False:
             peripherie_msg = peripherie_queue.get()
-            if peripherie_msg['emergency_stop'] == 0 and peripherie_msg['key_inserted'] == 0:
+            if peripherie_msg['key_inserted'] == 0:
                 game_started = True
         self.can_socket.remove_queue(queue_number)
 
     def periphery_input(self, can_msg):
-        if can_msg['emergency_stop'] == 1 and can_msg['key_inserted'] == 0:
+        if can_msg['emergency_stop'] == 1 and can_msg['key_inserted'] == 0 and False:  # TODO: activate
             self.reset = True
 
     def game_end(self, time_string):
@@ -126,18 +148,25 @@ class Main():
             self.can_socket.send(can_msg)
             time.sleep(5)  # TODO: make longer
             print("Game End")
-            self.reset = True
+            #self.reset = True  # TODO: activate
 
-    def send_path(self, path, destination):
+    def send_path(self, path, destination, angle):
+        # look if point is near the robot
+        x, y = self.robots['me'].get_position()
+        for i, point in enumerate(path):
+            if abs(point[0] - x) < 100 or abs(point[1] - y) < 100:
+                del path[i]
+
         can_msg = {  # TODO: add angle, speed
             'type': can.MsgTypes.Goto_Position.value,
             'x_position': destination[0],
             'y_position': destination[1],
-            'angle': 0,
+            'angle': angle,
             'speed': 25,
             'path_length': len(path),
         }
         self.can_socket.send(can_msg)
+        time.sleep(0.002)
         if len(path) > 0:
             for point in path:
                 can_msg = {
@@ -147,7 +176,6 @@ class Main():
                     'speed': 25
                 }
                 self.can_socket.send(can_msg)
-                time.sleep(0.05)
 
 
 class RobotPosition():

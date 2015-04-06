@@ -60,6 +60,16 @@ class RouteFinding():
         path[:] = [(int(x*self.scale), int(y*self.scale)) for y, x in path]
         return path, path_len
 
+    def filter_path(self, path):
+        previous_point = None
+        points_to_delete = ()
+        for i, point in enumerate(path):
+            if previous_point:
+                x1, y1 = previous_point
+                x2, y2 = point
+
+                previous_point = point
+
     def can_close_range_detection(self, can_msg):
         if self.my_robot:
             my_x, my_y = self.my_robot.get_position()
@@ -141,7 +151,7 @@ class RouteFinding():
         array[int((1211-50) * pixel_per_mm):int(1233 * pixel_per_mm), int(2600 * pixel_per_mm):int(3000 * pixel_per_mm)] = weight
 
         array[int(1800 * pixel_per_mm):int(2000 * pixel_per_mm), int(1100 * pixel_per_mm):int(1900 * pixel_per_mm)] = weight
-        array = morphology.grey_dilation(array, size=(7, 7))
+        array = morphology.grey_dilation(array, size=(8, 8))
         return array
 
     def _create_graph(self, table):
