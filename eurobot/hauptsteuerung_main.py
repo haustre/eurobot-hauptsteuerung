@@ -49,9 +49,9 @@ class Main():
         else:
             side = 0
         if self.strategy['strategy'] == 0 or self.strategy['strategy'] == 1:
-            start_orientation = 0   # Clapper
+            start_orientation = 0   # near Clapper
         else:
-            start_orientation = 1   # Stair
+            start_orientation = 1   # near Stair
         can_msg = {
             'type': can.MsgTypes.Configuration.value,
             'is_robot_small': self.strategy['robot_small'],
