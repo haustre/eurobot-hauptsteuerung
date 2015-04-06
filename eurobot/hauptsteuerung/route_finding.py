@@ -68,8 +68,8 @@ class RouteFinding():
             with self.lock_close_range:
                 if can_msg['front_left_correct']:
                     sensor_angle = - 20
-                    x = my_x + math.cos(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
-                    y = my_y + math.sin(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
+                    x = my_x + math.cos(math.radians(my_angle+sensor_angle))*can_msg['distance_front_left']
+                    y = my_y + math.sin(math.radians(my_angle+sensor_angle))*can_msg['distance_front_left']
                     self.close_range_robots.append((x, y))
                 if can_msg['front_middle_correct']:
                     x = my_x + math.cos(math.radians(my_angle))*can_msg['distance_front_middle']
@@ -77,8 +77,8 @@ class RouteFinding():
                     self.close_range_robots.append((x, y))
                 if can_msg['front_right_correct']:
                     sensor_angle = 20
-                    x = my_x + math.cos(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
-                    y = my_y + math.sin(math.radians(my_angle+sensor_angle))*can_msg['distance_front_middle']
+                    x = my_x + math.cos(math.radians(my_angle+sensor_angle))*can_msg['distance_front_right']
+                    y = my_y + math.sin(math.radians(my_angle+sensor_angle))*can_msg['distance_front_right']
                     self.close_range_robots.append((x, y))
 
     def _add_array(self, gamefield, array, position):
