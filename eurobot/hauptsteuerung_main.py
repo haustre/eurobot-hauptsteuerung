@@ -35,7 +35,7 @@ class Main():
         #self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
         self.reset = False
         self.strategy = {
-            'robot_small': True, 'robot_big': True, 'enemy_small': True, 'enemy_big': True,
+            'robot_small': False, 'robot_big': True, 'enemy_small': False, 'enemy_big': False,
             'robot_name': hostname, 'side': 'left', 'strategy': 2
         }
         self.robots = {'me': None, 'friendly robot': None, 'enemy1': None, 'enemy2': None}
@@ -89,11 +89,11 @@ class Main():
         self.countdown.set_interrupt(self.game_end, 'game_end', 2)
         #self.enemy_simulation.start()
         while self.reset is False:
-            points = [(1000, 800), (2000, 800), (1000, 1700), (2000, 1700)]
+            points = [(990, 1210), (990, 1585)]
             for point in points:
                 for i in range(1):
                     path, path_len = self.route_finder.calculate_path(point)
-                    if path_len < 200:
+                    if path_len < 999999999999:     # TODO: define max
                         self.send_path(path, point)
                     elif False:
                         can_msg = {
@@ -147,6 +147,7 @@ class Main():
                     'speed': 25
                 }
                 self.can_socket.send(can_msg)
+                time.sleep(0.05)
 
 
 class RobotPosition():
