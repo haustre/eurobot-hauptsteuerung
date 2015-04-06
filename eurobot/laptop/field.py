@@ -125,9 +125,7 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
             self.path_length = msg_frame['path_length']
             self.path = []
         elif msg_frame['type'] == can.MsgTypes.Path.value:
-            self.path.append((msg_frame['point_1_x'], msg_frame['point_1_y']))
-            if msg_frame['point_2_x'] != 0:
-                self.path.append((msg_frame['point_2_x'], msg_frame['point_2_y']))
+            self.path.append((msg_frame['x'], msg_frame['y']))
             if len(self.path) == self.path_length:
                 redraw = True
         elif msg_frame['type'] == can.MsgTypes.Emergency_Stop.value:
