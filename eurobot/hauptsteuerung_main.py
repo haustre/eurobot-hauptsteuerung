@@ -153,8 +153,8 @@ class Main():
 class RobotPosition():
     def __init__(self, can_socket, msg_type, size):
         self.size = size
-        self.position = None
-        self.angle = None
+        self.position = (0, 0)
+        self.angle = 0
         self.lock = threading.Lock()
         resolution = 200
         table_size = 2000
