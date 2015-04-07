@@ -5,6 +5,7 @@ __author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"
 
 import sys
+import os
 import time
 import socket
 import threading
@@ -32,7 +33,7 @@ class Main():
         self.countdown = game_logic.Countdown(self.can_socket)
         self.debugger = debug.LaptopCommunication(self.can_socket)
         self.route_finder = route_finding.RouteFinding(self.can_socket)
-        #self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
+        self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
         self.reset = False
         self.strategy = {
             'robot_small': False, 'robot_big': True, 'enemy_small': False, 'enemy_big': False,
@@ -102,14 +103,13 @@ class Main():
         }
         self.can_socket.send(can_msg)
         time.sleep(1)
-        #self.send_path((), (1000, 1000), 9000)
-        #time.sleep(9999999999)
-        (x, y), angle = self.game_tasks['clapper'].goto_task(1)
-        path, path_len = self.route_finder.calculate_path((x, y))
-        self.send_path(path, (x, y), angle)
-        time.sleep(15)
-        self.game_tasks['clapper'].do_task(1)
-        time.sleep(9999999)
+        if False:
+            (x, y), angle = self.game_tasks['clapper'].goto_task(1)
+            path, path_len = self.route_finder.calculate_path((x, y))
+            self.send_path(path, (x, y), angle)
+            time.sleep(15)
+            self.game_tasks['clapper'].do_task(1)
+            time.sleep(9999999)
         while self.reset is False:
             points = [(990, 1210), (2000, 1200)]
             for point in points:
@@ -151,12 +151,6 @@ class Main():
             #self.reset = True  # TODO: activate
 
     def send_path(self, path, destination, angle):
-        # look if point is near the robot
-        x, y = self.robots['me'].get_position()
-        for i, point in enumerate(path):
-            if abs(point[0] - x) < 100 or abs(point[1] - y) < 100:
-                del path[i]
-
         can_msg = {  # TODO: add angle, speed
             'type': can.MsgTypes.Goto_Position.value,
             'x_position': destination[0],

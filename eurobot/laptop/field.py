@@ -90,6 +90,10 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         if len(self.path) == self.path_length:
             pen = QPen(Qt.darkRed, 8, Qt.SolidLine)
             painter.setPen(pen)
+            for i in range(len(self.path)-1):
+                painter.drawLine(self.path[i][0]*scale, self.path[i][1]*scale, self.path[i+1][0]*scale, self.path[i+1][1]*scale)
+            pen = QPen(Qt.darkBlue, 8, Qt.SolidLine)
+            painter.setPen(pen)
             for point in self.path:
                 painter.drawPoint(point[0]*scale, point[1]*scale)
 

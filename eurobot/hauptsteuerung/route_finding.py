@@ -58,17 +58,26 @@ class RouteFinding():
         my_position = (int(y/self.scale), int(x/self.scale))
         path, path_len = self._find_route(gamefield, my_position, target)
         path[:] = [(int(x*self.scale), int(y*self.scale)) for y, x in path]
+        self.filter_path(path)
         return path, path_len
 
     def filter_path(self, path):
-        previous_point = None
-        points_to_delete = ()
+        # look if point is near the robot
+        x, y = self.my_robot.get_position()
         for i, point in enumerate(path):
-            if previous_point:
-                x1, y1 = previous_point
-                x2, y2 = point
-
-                previous_point = point
+            if abs(point[0] - x) < 200 or abs(point[1] - y) < 200:
+                del path[i]
+        if len(path) > 3:
+            points_to_delete = []
+            for i in range(len(path)-2):
+                for dir in (0, 1):
+                    if ((path[i][dir] == path[i+1][dir] and path[i+1][dir] == path[i+2][dir]) or
+                            (path[i][0] - path[i+1][0] == path[i+1][0] - path[i+2][0]) and
+                            (path[i][1] - path[i+1][1] == path[i+1][1] - path[i+2][1])):
+                        points_to_delete.append(i+1)
+            print(len(path), set(points_to_delete))
+            for index in reversed(sorted(list(set(points_to_delete)))):
+                del path[index]
 
     def can_close_range_detection(self, can_msg):
         if self.my_robot:
