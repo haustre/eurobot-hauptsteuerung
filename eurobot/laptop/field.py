@@ -22,6 +22,7 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         self.pixmap_ratio = self.table_pixmap.height() / self.table_pixmap.width()
         self.path_length = 0
         self.path = []
+        self.goto = (0, 0)
         self.robot_big = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.robot1_pixmap}
         self.robot_small = {'x_position': 1500, 'y_position': 1000, 'diameter': 200, 'angle': 0, 'pixmap': self.robot1_pixmap}
         self.enemy_big = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.enemy1_pixmap}
@@ -127,10 +128,12 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
             redraw = True
         elif msg_frame['type'] == can.MsgTypes.Goto_Position.value:
             self.path_length = msg_frame['path_length']
+            self.goto = msg_frame['x_position'], msg_frame['y_position']
             self.path = []
         elif msg_frame['type'] == can.MsgTypes.Path.value:
             self.path.append((msg_frame['x'], msg_frame['y']))
             if len(self.path) == self.path_length:
+                self.path.append(self.goto)
                 redraw = True
         elif msg_frame['type'] == can.MsgTypes.Emergency_Stop.value:
             self.path = (0, 0)

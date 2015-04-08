@@ -9,6 +9,7 @@ import time
 import math
 import queue
 from libraries import can
+import copy
 
 
 class Countdown():
@@ -176,6 +177,7 @@ class StandsTask(Task):
     def __init__(self, robots, my_color, can_socket):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value)
         self.points_game_element = 3
+        self.command = {'blocked': 0, 'ready collect': 1, 'ready platform': 2, 'open case': 3}
         stands_left = [{'position': (90, 200)},
                        {'position': (90, 1750)},
                        {'position': (90, 1850)},
@@ -189,11 +191,10 @@ class StandsTask(Task):
         for stand in stands_left:
             stand['moved'] = False
 
-        stands_right = list(stands_left)
+        stands_right = copy.deepcopy(stands_left)
         for stand in stands_right:
             x, y = stand['position']
             stand['position'] = (3000-x, y)
-
         if my_color is 'left':
             self.my_game_elements = stands_left
             self.enemy_stands = stands_right
@@ -203,13 +204,19 @@ class StandsTask(Task):
         else:
             raise Exception("Unknown team color")
 
+    def goto_task(self, clapper_number):
+        return self.my_game_elements[clapper_number]['position'], self.my_game_elements[clapper_number]['angle']
+
+    def do_task(self,):
+        pass
+
 
 class ClapperTask(Task):
     def __init__(self, robots, my_color, can_socket):
         super().__init__(robots, can_socket, can.MsgTypes.Clapper_Command.value)
         self.points_game_element = 5
         self.movable = False
-        y_pos = 1700
+        y_pos = 1740
         clapper_left = [{'position': (300, y_pos), 'side': 'right', 'angle': 0, 'end_position': (500, y_pos)},
                         {'position': (900, y_pos), 'side': 'right', 'angle': 0, 'end_position': (1100, y_pos)},
                         {'position': (2400, y_pos), 'side': 'left', 'angle': 180, 'end_position': (2200, y_pos)}
@@ -255,7 +262,7 @@ class ClapperTask(Task):
             'x_position': self.my_game_elements[clapper_number]['end_position'][0],
             'y_position': self.my_game_elements[clapper_number]['end_position'][1],
             'angle': self.my_game_elements[clapper_number]['angle'] * 100,
-            'speed': 25,    # TODO: check
+            'speed': -25,    # TODO: check
             'path_length': 0,
         }
         self.can_socket.send(can_msg)

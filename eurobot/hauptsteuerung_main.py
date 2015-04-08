@@ -16,11 +16,13 @@ from libraries import can
 from hauptsteuerung import debug
 from hauptsteuerung import game_logic
 from hauptsteuerung import route_finding
+from hauptsteuerung.robot import PositionMyRobot, PositionOtherRobot
 
 
 class Main():
     def __init__(self):
         """ Main programm running on Robot"""
+        self.speed = 25
         hostname = socket.gethostname()
         if len(sys.argv) == 3:
             can_connection = sys.argv[1]
@@ -37,12 +39,13 @@ class Main():
         self.reset = False
         self.strategy = {
             'robot_small': False, 'robot_big': True, 'enemy_small': False, 'enemy_big': False,
-            'robot_name': hostname, 'side': 'left', 'strategy': 2
+            'robot_name': hostname, 'side': 'left', 'strategy': 0
         }
         self.robots = {'me': None, 'friendly robot': None, 'enemy1': None, 'enemy2': None}
 
         self.game_tasks = {'clapper': game_logic.ClapperTask(self.robots, self.strategy['side'], self.can_socket),
-                           'stair': game_logic.StairTask(self.robots, self.strategy['side'], self.can_socket)
+                           'stair': game_logic.StairTask(self.robots, self.strategy['side'], self.can_socket),
+                           'stand': game_logic.StandsTask(self.robots, self.strategy['side'], self.can_socket)
                            }
         self.run()
 
@@ -53,7 +56,7 @@ class Main():
             side = 1
         else:
             side = 0
-        if self.strategy['strategy'] == 0 or self.strategy['strategy'] == 1:
+        if self.strategy['strategy'] == 1 or self.strategy['strategy'] == 2:
             start_orientation = 0   # near Clapper
         else:
             start_orientation = 1   # near Stair
@@ -67,7 +70,7 @@ class Main():
             'start_orientation': start_orientation,
             'reserve': 0
         }
-        self.can_socket.send(can_msg)
+        self.can_socket.send(can_msg)  #TODO: uncomment !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if self.strategy['robot_name'] == 'Roboter-klein':
             print("Robot small")
             self.robots['me'] = PositionMyRobot(self.can_socket, can.MsgTypes.Position_Robot_small.value)
@@ -101,15 +104,27 @@ class Main():
             'speed': 25,
             'path_length': 0,
         }
-        self.can_socket.send(can_msg)
-        time.sleep(1)
+        #self.can_socket.send(can_msg)
+        #self.wait_for_arrival()
         if False:
             (x, y), angle = self.game_tasks['clapper'].goto_task(1)
             path, path_len = self.route_finder.calculate_path((x, y))
             self.send_path(path, (x, y), angle)
             time.sleep(15)
             self.game_tasks['clapper'].do_task(1)
-            time.sleep(9999999)
+        if False:
+            can_msg = {  # TODO: create function for each starting point
+                'type': can.MsgTypes.Goto_Position.value,
+                'x_position': 2045,
+                'y_position': 1460,
+                'angle': 0,
+                'speed': 25,
+                'path_length': 0,
+            }
+            self.can_socket.send(can_msg)
+        if True:
+            self.strategy_start()
+        time.sleep(9999999)
         while self.reset is False:
             points = [(990, 1210), (2000, 1200)]
             for point in points:
@@ -135,6 +150,16 @@ class Main():
                 game_started = True
         self.can_socket.remove_queue(queue_number)
 
+    def wait_for_arrival(self,):    # TODO: add timeout
+        can_queue = queue.Queue()
+        queue_number = self.can_socket.create_queue(can.MsgTypes.Drive_Status.value, can_queue)
+        arrived = False
+        while arrived is False:
+            can_msg = can_queue.get()
+            if can_msg['status'] == 0:
+                arrived = True
+        self.can_socket.remove_queue(queue_number)
+
     def periphery_input(self, can_msg):
         if can_msg['emergency_stop'] == 1 and can_msg['key_inserted'] == 0 and False:  # TODO: activate
             self.reset = True
@@ -150,13 +175,13 @@ class Main():
             print("Game End")
             #self.reset = True  # TODO: activate
 
-    def send_path(self, path, destination, angle):
+    def send_path(self, path, destination, angle, blocking=False):
         can_msg = {  # TODO: add angle, speed
             'type': can.MsgTypes.Goto_Position.value,
-            'x_position': destination[0],
-            'y_position': destination[1],
-            'angle': angle,
-            'speed': 25,
+            'x_position': int(destination[0]),
+            'y_position': int(destination[1]),
+            'angle': int((abs(angle) % 36000)*100),
+            'speed': self.speed,
             'path_length': len(path),
         }
         self.can_socket.send(can_msg)
@@ -167,73 +192,75 @@ class Main():
                     'type': can.MsgTypes.Path.value,
                     'x': point[0],
                     'y': point[1],
-                    'speed': 25
+                    'speed': self.speed
                 }
                 self.can_socket.send(can_msg)
+        if blocking:   # TODO: add timeout
+            self.wait_for_arrival()
 
+    def calculate_stoping_point(self, from_pos, to_pos, distance):
+        stoping_point = [0, 0]
+        dx = to_pos[0] - from_pos[0]
+        dy = to_pos[1] - from_pos[1]
+        angle = math.atan(abs(dx/dy))
+        x = math.sin(angle) * distance
+        y = math.cos(angle) * distance
+        if to_pos[0] - from_pos[0] > 0:
+            stoping_point[0] = int(to_pos[0] - x)
+        else:
+            stoping_point[0] = int(to_pos[0] + x)
+        if to_pos[1] - from_pos[1] > 0:
+            stoping_point[1] = int(to_pos[1] - y)
+        else:
+            stoping_point[1] = int(to_pos[1] + y)
+        return stoping_point, angle / (2 * math.pi) * 360
 
-class RobotPosition():
-    def __init__(self, can_socket, msg_type, size):
-        self.size = size
-        self.position = (0, 0)
-        self.angle = 0
-        self.lock = threading.Lock()
-        resolution = 200
-        table_size = 2000
-        self.map = np.zeros((resolution*1.5, resolution))
-        self.scale = table_size / resolution
-        self.last_position_update = 0
-        self.last_angle_update = 0
-        can_socket.create_interrupt(msg_type, self.can_robot_position)
+    def send_task_command(self, msg_id, command, blocking=False):  # TODO: Not tested
+        can_msg = {
+            'type': msg_id,
+            'command': command,
+        }
+        self.can_socket.send(can_msg)
+        if blocking:
+            self.wait_for_task(msg_id, 0)
 
-    def can_robot_position(self, can_msg):
-        margin = int(20 * self.scale)
-        # TODO: check sender ID (in case drive and navigation both send)
-        if can_msg['position_correct']:
-            x, y = can_msg['x_position'], can_msg['y_position']
-            with self.lock:
-                self.position = x, y
-                self.map[round(x / self.scale) - margin: round(x / self.scale) + margin,
-                         round(y / self.scale) - margin: round(y / self.scale) + margin] += 1
-            self.last_position_update = time.time()
-        if can_msg['angle_correct']:
-            with self.lock:
-                self.angle = can_msg['angle']
-            self.last_angle_update = time.time()
+    def wait_for_task(self, msg_id, value):
+        can_queue = queue.Queue()
+        queue_number = self.can_socket.create_queue(msg_id, can_queue)
+        finished = False
+        while finished is False:
+            can_msg = can_queue.get()
+            if can_msg['state'] == value:
+                finished = True
+        self.can_socket.remove_queue(queue_number)
 
-    def get_position(self):
-        with self.lock:
-            return self.position
+    def strategy_start(self):
+        if self.strategy['strategy'] == 0:
+            starting_point = self.robots['me'].get_position()
+            position_stand1 = self.game_tasks['stand'].my_game_elements[5]['position']
+            position_stand2 = self.game_tasks['stand'].my_game_elements[6]['position']
+            can_msg = {
+                'type': can.MsgTypes.Stands_Command.value,
+                'command': self.game_tasks['stand'].command['ready collect'],
+            }
+            self.can_socket.send(can_msg)
+            point, angle = self.calculate_stoping_point(starting_point, position_stand1, 170)
+            self.send_path([], point, angle, True)
+            self.wait_for_task(can.MsgTypes.Stands_Status.value, 0)
+            point, angle = self.calculate_stoping_point(position_stand1, position_stand2, 170)
+            self.send_path([], point, angle, True)
+            self.send_path([], (1500, 1000), 18000, True)
+            self.wait_for_arrival()
+            can_msg = {
+                'type': can.MsgTypes.Stands_Command.value,
+                'command': self.game_tasks['stand'].command['open case'],
+            }
+            self.can_socket.send(can_msg)
 
-    def get_angle(self):
-        with self.lock:
-            return self.angle
-
-    def get_map(self):
-        with self.lock:
-            return self.map
-
-
-class PositionMyRobot(RobotPosition):
-    def __init__(self, can_socket, msg_type, size=20):
-        super().__init__(can_socket, msg_type, size)
-
-
-class PositionOtherRobot(RobotPosition):
-    def __init__(self, can_socket, msg_type, size=20):
-        super().__init__(can_socket, msg_type, size)
-        self.check_thread = threading.Thread(target=self.check_navigation)
-        self.check_thread.setDaemon(1)
-        self.check_thread.start()
-
-    def check_navigation(self):
-        while True:
-            now = time.time()
-            if now - self.last_position_update > 0.1:
-                self.angle = None
-            if now - self.last_angle_update > 0.1:
-                self.position = None
-            time.sleep(0.03)
+        elif self.strategy['strategy'] == 1:
+            pass
+        elif self.strategy['strategy'] == 2:
+            pass
 
 if __name__ == "__main__":
     while True:

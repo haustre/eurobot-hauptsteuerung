@@ -62,6 +62,7 @@ class RouteFinding():
         return path, path_len
 
     def filter_path(self, path):
+        del path[len(path)-1]
         # look if point is near the robot
         x, y = self.my_robot.get_position()
         for i, point in enumerate(path):
