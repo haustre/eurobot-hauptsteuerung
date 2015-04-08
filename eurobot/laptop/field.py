@@ -97,6 +97,9 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
             painter.setPen(pen)
             for point in self.path:
                 painter.drawPoint(point[0]*scale, point[1]*scale)
+            pen = QPen(Qt.magenta, 12, Qt.SolidLine)
+            painter.setPen(pen)
+            painter.drawPoint(self.goto[0]*scale, self.goto[1]*scale)
 
     def setpoint(self, msg_frame):
         """ This method checks if a CAN message contains the position of a Robot and actualise the position on the map.
@@ -130,6 +133,7 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
             self.path_length = msg_frame['path_length']
             self.goto = msg_frame['x_position'], msg_frame['y_position']
             self.path = []
+            redraw = True
         elif msg_frame['type'] == can.MsgTypes.Path.value:
             self.path.append((msg_frame['x'], msg_frame['y']))
             if len(self.path) == self.path_length:

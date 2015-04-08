@@ -70,7 +70,7 @@ class Main():
             'start_orientation': start_orientation,
             'reserve': 0
         }
-        self.can_socket.send(can_msg)  #TODO: uncomment !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        self.can_socket.send(can_msg)
         if self.strategy['robot_name'] == 'Roboter-klein':
             print("Robot small")
             self.robots['me'] = PositionMyRobot(self.can_socket, can.MsgTypes.Position_Robot_small.value)
@@ -113,7 +113,7 @@ class Main():
             time.sleep(15)
             self.game_tasks['clapper'].do_task(1)
         if False:
-            can_msg = {  # TODO: create function for each starting point
+            can_msg = {
                 'type': can.MsgTypes.Goto_Position.value,
                 'x_position': 2045,
                 'y_position': 1460,
@@ -162,6 +162,12 @@ class Main():
 
     def periphery_input(self, can_msg):
         if can_msg['emergency_stop'] == 1 and can_msg['key_inserted'] == 0 and False:  # TODO: activate
+            can_msg = {
+                'type': can.MsgTypes.EmergencyShutdown.value,
+                'code': 0,
+            }
+            self.can_socket.send(can_msg)
+            print("Emergency stop")
             self.reset = True
 
     def game_end(self, time_string):
@@ -173,14 +179,14 @@ class Main():
             self.can_socket.send(can_msg)
             time.sleep(5)  # TODO: make longer
             print("Game End")
-            #self.reset = True  # TODO: activate
+            self.reset = True
 
     def send_path(self, path, destination, angle, blocking=False):
         can_msg = {  # TODO: add angle, speed
             'type': can.MsgTypes.Goto_Position.value,
             'x_position': int(destination[0]),
             'y_position': int(destination[1]),
-            'angle': int((abs(angle) % 36000)*100),
+            'angle': int((abs(angle) % 360000)*100),
             'speed': self.speed,
             'path_length': len(path),
         }
@@ -198,22 +204,22 @@ class Main():
         if blocking:   # TODO: add timeout
             self.wait_for_arrival()
 
-    def calculate_stoping_point(self, from_pos, to_pos, distance):
-        stoping_point = [0, 0]
+    def calculate_stopping_point(self, from_pos, to_pos, distance):
+        stopping_point = [0, 0]
         dx = to_pos[0] - from_pos[0]
         dy = to_pos[1] - from_pos[1]
-        angle = math.atan(abs(dx/dy))
-        x = math.sin(angle) * distance
-        y = math.cos(angle) * distance
+        angle = math.atan(abs(dy/dx))
+        x = math.cos(angle) * distance
+        y = math.sin(angle) * distance
         if to_pos[0] - from_pos[0] > 0:
-            stoping_point[0] = int(to_pos[0] - x)
+            stopping_point[0] = int(to_pos[0] - x)
         else:
-            stoping_point[0] = int(to_pos[0] + x)
+            stopping_point[0] = int(to_pos[0] + x)
         if to_pos[1] - from_pos[1] > 0:
-            stoping_point[1] = int(to_pos[1] - y)
+            stopping_point[1] = int(to_pos[1] - y)
         else:
-            stoping_point[1] = int(to_pos[1] + y)
-        return stoping_point, angle / (2 * math.pi) * 360
+            stopping_point[1] = int(to_pos[1] + y)
+        return stopping_point, angle / (2 * math.pi) * 360
 
     def send_task_command(self, msg_id, command, blocking=False):  # TODO: Not tested
         can_msg = {
@@ -244,12 +250,12 @@ class Main():
                 'command': self.game_tasks['stand'].command['ready collect'],
             }
             self.can_socket.send(can_msg)
-            point, angle = self.calculate_stoping_point(starting_point, position_stand1, 170)
+            point, angle = self.calculate_stopping_point(starting_point, position_stand1, 170)
             self.send_path([], point, angle, True)
             self.wait_for_task(can.MsgTypes.Stands_Status.value, 0)
-            point, angle = self.calculate_stoping_point(position_stand1, position_stand2, 170)
+            point, angle = self.calculate_stopping_point(position_stand1, position_stand2, 170)
             self.send_path([], point, angle, True)
-            self.send_path([], (1500, 1000), 18000, True)
+            self.send_path([], (1500, 1000), 180, True)
             self.wait_for_arrival()
             can_msg = {
                 'type': can.MsgTypes.Stands_Command.value,
