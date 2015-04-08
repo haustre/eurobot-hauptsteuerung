@@ -45,7 +45,8 @@ class Main():
 
         self.game_tasks = {'clapper': game_logic.ClapperTask(self.robots, self.strategy['side'], self.can_socket),
                            'stair': game_logic.StairTask(self.robots, self.strategy['side'], self.can_socket),
-                           'stand': game_logic.StandsTask(self.robots, self.strategy['side'], self.can_socket)
+                           'stand': game_logic.StandsTask(self.robots, self.strategy['side'], self.can_socket),
+                           'cup': game_logic.CupTask(self.robots, self.strategy['side'], self.can_socket)
                            }
         self.run()
 
@@ -109,7 +110,7 @@ class Main():
         if False:
             (x, y), angle = self.game_tasks['clapper'].goto_task(1)
             path, path_len = self.route_finder.calculate_path((x, y))
-            self.send_path(path, (x, y), angle)
+            self.can_socket.send_path(path, (x, y), angle)
             time.sleep(15)
             self.game_tasks['clapper'].do_task(1)
         if False:
@@ -131,7 +132,7 @@ class Main():
                 for i in range(10):
                     path, path_len = self.route_finder.calculate_path(point)
                     if path_len < 999999999999:     # TODO: define max
-                        self.send_path(path, point, 0)
+                        self.can_socket.send_path(path, point, 0)
                     elif False:
                         can_msg = {
                             'type': can.MsgTypes.Emergency_Stop.value,
@@ -148,16 +149,6 @@ class Main():
             peripherie_msg = peripherie_queue.get()
             if peripherie_msg['key_inserted'] == 0:
                 game_started = True
-        self.can_socket.remove_queue(queue_number)
-
-    def wait_for_arrival(self,):    # TODO: add timeout
-        can_queue = queue.Queue()
-        queue_number = self.can_socket.create_queue(can.MsgTypes.Drive_Status.value, can_queue)
-        arrived = False
-        while arrived is False:
-            can_msg = can_queue.get()
-            if can_msg['status'] == 0:
-                arrived = True
         self.can_socket.remove_queue(queue_number)
 
     def periphery_input(self, can_msg):
@@ -181,82 +172,13 @@ class Main():
             print("Game End")
             self.reset = True
 
-    def send_path(self, path, destination, angle, blocking=False):
-        can_msg = {  # TODO: add angle, speed
-            'type': can.MsgTypes.Goto_Position.value,
-            'x_position': int(destination[0]),
-            'y_position': int(destination[1]),
-            'angle': int((abs(angle) % 360000)*100),
-            'speed': self.speed,
-            'path_length': len(path),
-        }
-        self.can_socket.send(can_msg)
-        time.sleep(0.002)
-        if len(path) > 0:
-            for point in path:
-                can_msg = {
-                    'type': can.MsgTypes.Path.value,
-                    'x': point[0],
-                    'y': point[1],
-                    'speed': self.speed
-                }
-                self.can_socket.send(can_msg)
-        if blocking:   # TODO: add timeout
-            self.wait_for_arrival()
-
-    def calculate_stopping_point(self, from_pos, to_pos, distance):
-        stopping_point = [0, 0]
-        dx = to_pos[0] - from_pos[0]
-        dy = to_pos[1] - from_pos[1]
-        angle = math.atan(abs(dy/dx))
-        x = math.cos(angle) * distance
-        y = math.sin(angle) * distance
-        if to_pos[0] - from_pos[0] > 0:
-            stopping_point[0] = int(to_pos[0] - x)
-        else:
-            stopping_point[0] = int(to_pos[0] + x)
-        if to_pos[1] - from_pos[1] > 0:
-            stopping_point[1] = int(to_pos[1] - y)
-        else:
-            stopping_point[1] = int(to_pos[1] + y)
-        return stopping_point, angle / (2 * math.pi) * 360
-
-    def send_task_command(self, msg_id, command, blocking=False):  # TODO: Not tested
-        can_msg = {
-            'type': msg_id,
-            'command': command,
-        }
-        self.can_socket.send(can_msg)
-        if blocking:
-            self.wait_for_task(msg_id, 0)
-
-    def wait_for_task(self, msg_id, value):
-        can_queue = queue.Queue()
-        queue_number = self.can_socket.create_queue(msg_id, can_queue)
-        finished = False
-        while finished is False:
-            can_msg = can_queue.get()
-            if can_msg['state'] == value:
-                finished = True
-        self.can_socket.remove_queue(queue_number)
-
     def strategy_start(self):
         if self.strategy['strategy'] == 0:
-            starting_point = self.robots['me'].get_position()
-            position_stand1 = self.game_tasks['stand'].my_game_elements[5]['position']
-            position_stand2 = self.game_tasks['stand'].my_game_elements[6]['position']
-            can_msg = {
-                'type': can.MsgTypes.Stands_Command.value,
-                'command': self.game_tasks['stand'].command['ready collect'],
-            }
-            self.can_socket.send(can_msg)
-            point, angle = self.calculate_stopping_point(starting_point, position_stand1, 170)
-            self.send_path([], point, angle, True)
-            self.wait_for_task(can.MsgTypes.Stands_Status.value, 0)
-            point, angle = self.calculate_stopping_point(position_stand1, position_stand2, 170)
-            self.send_path([], point, angle, True)
-            self.send_path([], (1500, 1000), 180, True)
-            self.wait_for_arrival()
+            self.game_tasks['stand'].do_task(5)
+            self.game_tasks['stand'].do_task(6)
+            self.game_tasks['cup'].do_task(0)
+            #self.game_tasks['stand'].do_task(1)
+            self.can_socket.send_path([], (1500, 1000), 180, True)
             can_msg = {
                 'type': can.MsgTypes.Stands_Command.value,
                 'command': self.game_tasks['stand'].command['open case'],

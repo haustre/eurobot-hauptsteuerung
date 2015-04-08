@@ -99,6 +99,25 @@ class Task():
     def can_status(self, can_msg):
         self.collected = can_msg['collected_pieces']
 
+    def send_task_command(self, msg_id, command, blocking=False):  # TODO: Not tested
+        can_msg = {
+            'type': msg_id,
+            'command': command,
+        }
+        self.can_socket.send(can_msg)
+        if blocking:
+            self.wait_for_task(msg_id, 0)
+
+    def wait_for_task(self, msg_id, value):
+        can_queue = queue.Queue()
+        queue_number = self.can_socket.create_queue(msg_id, can_queue)
+        finished = False
+        while finished is False:
+            can_msg = can_queue.get()
+            if can_msg['state'] == value:
+                finished = True
+        self.can_socket.remove_queue(queue_number)
+
 
 class StairTask(Task):
     def __init__(self, robots, my_color, can_socket):
@@ -176,6 +195,7 @@ class StairTask(Task):
 class StandsTask(Task):
     def __init__(self, robots, my_color, can_socket):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value)
+        self.distance_to_stand = 200
         self.points_game_element = 3
         self.command = {'blocked': 0, 'ready collect': 1, 'ready platform': 2, 'open case': 3}
         stands_left = [{'position': (90, 200)},
@@ -197,18 +217,110 @@ class StandsTask(Task):
             stand['position'] = (3000-x, y)
         if my_color is 'left':
             self.my_game_elements = stands_left
-            self.enemy_stands = stands_right
+            self.enemy_game_elements = stands_right
         elif my_color is 'right':
             self.my_game_elements = stands_right
-            self.enemy_stands = stands_left
+            self.enemy_game_elements = stands_left
         else:
             raise Exception("Unknown team color")
 
-    def goto_task(self, clapper_number):
-        return self.my_game_elements[clapper_number]['position'], self.my_game_elements[clapper_number]['angle']
+    def goto_task(self, object_number):
+        return self.my_game_elements[object_number]['position'], self.my_game_elements[object_number]['angle']
 
-    def do_task(self,):
-        pass
+    def do_task(self, object_number):
+        starting_point = self.robots['me'].get_position()
+        stand_point = self.my_game_elements[object_number]['position']
+        can_msg = {
+            'type': can.MsgTypes.Stands_Command.value,
+            'command': self.command['ready collect'],
+        }
+        self.can_socket.send(can_msg)
+        point1, _ = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand + 25)
+        point2, angle = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand - 25)
+        self.can_socket.send_path([point1], point2, angle, path_speed=100, end_speed=10, blocking=True)
+        #self.wait_for_task(can.MsgTypes.Stands_Status.value, 0)
+        can_msg = {
+            'type': can.MsgTypes.Stands_Command.value,
+            'command': self.command['blocked'],
+        }
+        self.can_socket.send(can_msg)
+
+    def calculate_stopping_point(self, from_pos, to_pos, distance):
+        stopping_point = [0, 0]
+        dx = to_pos[0] - from_pos[0]
+        dy = to_pos[1] - from_pos[1]
+        angle = math.atan(dy/dx)
+        x = math.cos(angle) * distance
+        y = math.sin(angle) * distance
+        stopping_point[0] = int(to_pos[0] - x)
+        stopping_point[1] = int(to_pos[1] - y)
+        return stopping_point, angle / (2 * math.pi) * 360
+
+
+class CupTask(Task):
+    def __init__(self, robots, my_color, can_socket):
+        super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value)
+        self.my_color = my_color
+        self.distance = 200
+        self.shift = 100
+        self.points_game_element = 3
+        self.free_arms = {'right': True, 'left': True}
+        self.command = {'blocked': 0, 'ready collect': 1, 'open case': 2}
+        cups_left = [{'position': (250, 1750)},
+                     {'position': (910, 830)},
+                     {'position': (1500, 1650)},
+                     {'position': (2090, 830)},
+                     {'position': (2750, 1750)}
+                     ]
+
+        for stand in cups_left:
+            stand['moved'] = False
+        self.my_game_elements = cups_left
+        self.enemy_game_elements = None
+
+    def goto_task(self, object_number):
+        return self.my_game_elements[object_number]['position']
+
+    def do_task(self, object_number):
+        starting_point = self.robots['me'].get_position()
+        stand_point = self.my_game_elements[object_number]['position']
+        can_msg = {
+            'type': can.MsgTypes.Cup_Command.value,
+            'command': self.command['ready collect'],
+        }
+        self.can_socket.send(can_msg)
+        point1, point2, angle = self.calculate_stopping_points(starting_point, stand_point, self.distance, self.shift)
+        self.can_socket.send_path([point1], point2, angle, path_speed=100, end_speed=10, blocking=True)
+        #self.wait_for_task(can.MsgTypes.Stands_Status.value, 0)
+        can_msg = {
+            'type': can.MsgTypes.Cup_Command.value,
+            'command': self.command['blocked'],
+        }
+        self.can_socket.send(can_msg)
+
+    def calculate_stopping_points(self, from_pos, to_pos, distance, shift):
+        point1 = [0, 0]
+        point2 = [0, 0]
+
+        dx = to_pos[0] - from_pos[0]
+        dy = to_pos[1] - from_pos[1]
+        angle = math.atan(dy/dx)
+        x = math.cos(angle) * distance
+        y = math.sin(angle) * distance
+        point1[0] = int(to_pos[0] - x)
+        point1[1] = int(to_pos[1] - y)
+
+        x = math.cos(angle-math.pi/2) * shift
+        y = math.sin(angle-math.pi/2) * shift
+        point1[0] = int(point1[0] - x)
+        point1[1] = int(point1[1] - y)
+
+        x = math.cos(angle) * 50
+        y = math.sin(angle) * 50
+        point2[0] = int(point1[0] + x)
+        point2[1] = int(point1[1] + y)
+
+        return point1, point2, angle / (2 * math.pi) * 360
 
 
 class ClapperTask(Task):

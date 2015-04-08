@@ -11,6 +11,7 @@ import socket
 import struct
 import threading
 import queue
+import time
 from enum import Enum
 
 
@@ -111,6 +112,39 @@ class Can(object):
             can_id, can_msg = self.queue_send.get()
             frame = self._build_can_frame(can_id, can_msg)
             self.socket.send(frame)
+
+    def send_path(self, path, destination, angle, path_speed=25, end_speed=25, blocking=False):
+        can_msg = {
+            'type': MsgTypes.Goto_Position.value,
+            'x_position': int(destination[0]),
+            'y_position': int(destination[1]),
+            'angle': int((abs(angle) % 360000)*100),
+            'speed': end_speed,
+            'path_length': len(path),
+        }
+        self.send(can_msg)
+        time.sleep(0.002)
+        if len(path) > 0:
+            for point in path:
+                can_msg = {
+                    'type': MsgTypes.Path.value,
+                    'x': point[0],
+                    'y': point[1],
+                    'speed': path_speed
+                }
+                self.send(can_msg)
+        if blocking:   # TODO: add timeout
+            self.wait_for_arrival()
+
+    def wait_for_arrival(self,):    # TODO: add timeout
+        can_queue = queue.Queue()
+        queue_number = self.create_queue(MsgTypes.Drive_Status.value, can_queue)
+        arrived = False
+        while arrived is False:
+            can_msg = can_queue.get()
+            if can_msg['status'] == 0:
+                arrived = True
+        self.remove_queue(queue_number)
 
 
 def _pack(msg_frame, sender):
