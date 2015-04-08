@@ -153,7 +153,10 @@ def unpack(can_id, can_msg):
     sender_mask = 0b00000000111
     sender = MsgSender(can_id & sender_mask).value
     encoding, dictionary = MsgEncoding[MsgTypes(type_nr).value]
-    data = struct.unpack(encoding, can_msg)
+    try:
+        data = struct.unpack(encoding, can_msg)
+    except struct.error:
+        raise Exception("CAN message encoding wrong:" + encoding + ": " + str(can_msg))
     msg_frame = {}
     for i, line in enumerate(reversed(data)):
         if not isinstance(dictionary[i], str):
@@ -246,7 +249,7 @@ EncodingTypes = {
                     ('front_left_correct', 'front_middle_correct', 'front_right_correct', ),
                     ('sensor1', 'sensor2', 'sensor3', 'sensor4'))),
     'goto_position':
-        ('!BBHHH', ('x_position', 'y_position', 'angle', 'speed', 'path_length')),
+        ('!BbHHH', ('x_position', 'y_position', 'angle', 'speed', 'path_length')),
     'drive_status':
         ('!BB', (('status'), 'time_to_destination')),
     'task_command':
@@ -265,7 +268,7 @@ EncodingTypes = {
     'Board_Status':
         ('!BB', (('config_complete'), 'error_code')),
     'Path':
-        ('!BHH', ('x', 'y', 'speed'))
+        ('!bHH', ('x', 'y', 'speed'))
 }
 
 # the list contains which message type is encoded with which protocol
