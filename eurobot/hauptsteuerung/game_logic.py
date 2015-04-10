@@ -250,7 +250,7 @@ class StandsTask(Task):
         stopping_point = [0, 0]
         dx = to_pos[0] - from_pos[0]
         dy = to_pos[1] - from_pos[1]
-        angle = math.atan(dy/dx)
+        angle = math.atan2(dy, dx)
         x = math.cos(angle) * distance
         y = math.sin(angle) * distance
         stopping_point[0] = int(to_pos[0] - x)
@@ -305,7 +305,7 @@ class CupTask(Task):
 
         dx = to_pos[0] - from_pos[0]
         dy = to_pos[1] - from_pos[1]
-        angle = math.atan(dy/dx)
+        angle = math.atan2(dy, dx)
         x = math.cos(angle) * distance
         y = math.sin(angle) * distance
         point1[0] = int(to_pos[0] - x)
