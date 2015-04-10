@@ -22,7 +22,6 @@ from hauptsteuerung.robot import PositionMyRobot, PositionOtherRobot
 class Main():
     def __init__(self):
         """ Main programm running on Robot"""
-        self.speed = 25
         hostname = socket.gethostname()
         if len(sys.argv) == 3:
             can_connection = sys.argv[1]
@@ -39,7 +38,7 @@ class Main():
         self.reset = False
         self.strategy = {
             'robot_small': False, 'robot_big': True, 'enemy_small': False, 'enemy_big': False,
-            'robot_name': hostname, 'side': 'left', 'strategy': 0
+            'robot_name': hostname, 'side': 'right', 'strategy': 0
         }
         self.robots = {'me': None, 'friendly robot': None, 'enemy1': None, 'enemy2': None}
 
@@ -97,49 +96,19 @@ class Main():
         self.can_socket.create_interrupt(can.MsgTypes.Peripherie_inputs.value, self.periphery_input)
         self.countdown.set_interrupt(self.game_end, 'game_end', 2)
         #self.enemy_simulation.start()
-        can_msg = {  # TODO: create function for each starting point
-            'type': can.MsgTypes.Goto_Position.value,
-            'x_position': 600,
-            'y_position': 1000,
-            'angle': 0,
-            'speed': 25,
-            'path_length': 0,
-        }
-        #self.can_socket.send(can_msg)
-        #self.wait_for_arrival()
         if False:
-            (x, y), angle = self.game_tasks['clapper'].goto_task(1)
-            path, path_len = self.route_finder.calculate_path((x, y))
-            self.can_socket.send_path(path, (x, y), angle)
-            time.sleep(15)
-            self.game_tasks['clapper'].do_task(1)
+            arrived = self.can_socket.send_path([], (1000, 1000), 180, end_speed=70, blocking=True)
+            print(arrived)
         if False:
-            can_msg = {
-                'type': can.MsgTypes.Goto_Position.value,
-                'x_position': 2045,
-                'y_position': 1460,
-                'angle': 0,
-                'speed': 25,
-                'path_length': 0,
-            }
-            self.can_socket.send(can_msg)
-        if True:
             self.strategy_start()
+        if True:
+            while self.reset is False:
+                points = [(900, 1600), (2100, 900), (900, 900), (2100, 1600)]
+                for point in points:
+                    for i in range(1):
+                        #path, path_len = self.route_finder.calculate_path(point)
+                        arrived = self.can_socket.send_path([], point, 180, end_speed=30, blocking=True)
         time.sleep(9999999)
-        while self.reset is False:
-            points = [(990, 1210), (2000, 1200)]
-            for point in points:
-                for i in range(10):
-                    path, path_len = self.route_finder.calculate_path(point)
-                    if path_len < 999999999999:     # TODO: define max
-                        self.can_socket.send_path(path, point, 0)
-                    elif False:
-                        can_msg = {
-                            'type': can.MsgTypes.Emergency_Stop.value,
-                            'code': 0
-                        }
-                        self.can_socket.send(can_msg)
-                    time.sleep(0.2)
 
     def wait_for_game_start(self):
         peripherie_queue = queue.Queue()
@@ -173,23 +142,32 @@ class Main():
             self.reset = True
 
     def strategy_start(self):
-        if self.strategy['strategy'] == 0:
-            self.game_tasks['stand'].do_task(5)
-            self.game_tasks['stand'].do_task(6)
-            self.game_tasks['cup'].do_task(0)
-            #self.game_tasks['stand'].do_task(1)
-            self.can_socket.send_path([], (1500, 1000), 180, True)
-            can_msg = {
-                'type': can.MsgTypes.Stands_Command.value,
-                'command': self.game_tasks['stand'].command['open case'],
-            }
-            self.can_socket.send(can_msg)
+        if self.strategy['robot_name'] == 'Roboter-gross':
+            if self.strategy['strategy'] == 0:
+                self.game_tasks['stand'].do_task(5)
+                self.game_tasks['stand'].do_task(6)
+                self.game_tasks['stand'].do_task(1)
+                #self.game_tasks['cup'].do_task(0)
+                #self.game_tasks['stand'].do_task(1)
+                self.can_socket.send_path([], (1500, 1000), 180, True)
+                can_msg = {
+                    'type': can.MsgTypes.Stands_Command.value,
+                    'command': self.game_tasks['stand'].command['open case'],
+                }
+                self.can_socket.send(can_msg)
 
-        elif self.strategy['strategy'] == 1:
-            pass
-        elif self.strategy['strategy'] == 2:
-            pass
+            elif self.strategy['strategy'] == 1:
+                raise Exception('Strategy not programmed')
+            elif self.strategy['strategy'] == 2:
+                raise Exception('Strategy not programmed')
 
+        if self.strategy['robot_name'] == 'Roboter-klein':
+            if self.strategy['strategy'] == 0:
+                self.game_tasks['stair'].do_task()
+            elif self.strategy['strategy'] == 1:
+                raise Exception('Strategy not programmed')
+            elif self.strategy['strategy'] == 2:
+                raise Exception('Strategy not programmed')
 if __name__ == "__main__":
     while True:
         main_program = Main()

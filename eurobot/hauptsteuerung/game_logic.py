@@ -154,21 +154,22 @@ class StairTask(Task):
 
     def do_task(self):
         self._send_command(self.climbing_command['bottom'])
-        time.sleep(10)
-        self._goto_position('beginning')
+        self.can_socket.send_path([], self.my_path['bottom'][0:1], self.my_path['bottom'][2], blocking=True)
         self._send_command(self.climbing_command['middle'])
-        # TODO: drive to the top
-        self._goto_position('carpet 1')
+        self.can_socket.send_path([], self.my_path['beginning'][0:1], self.my_path['beginning'][2], blocking=True)
+        self._send_command(self.climbing_command['top'])
+        self.can_socket.send_path([], self.my_path['top'][0:1], self.my_path['top'][2], blocking=True)
+        self.can_socket.send_path([], self.my_path['carpet 1'][0:1], self.my_path['carpet 1'][2], blocking=True)
         self._send_command(self.my_path['fire 1'])
-        self._goto_position('carpet 2')
+        self.can_socket.send_path([], self.my_path['carpet 2'][0:1], self.my_path['carpet 2'][2], blocking=True)
         self._send_command(self.my_path['fire 2'])
 
     def _goto_position(self, waypoint):
         can_msg = {
             'type': can.MsgTypes.Goto_Position.value,
             'x_position': self.my_path[waypoint][0],
-            'y_position': self.my_path['waypoint'][1],
-            'angle': self.my_path['waypoint'][3],
+            'y_position': self.my_path[waypoint][1],
+            'angle': self.my_path[waypoint][3],
             'speed': 25,    # TODO: check
             'path_length': 0,
         }
@@ -235,9 +236,9 @@ class StandsTask(Task):
             'command': self.command['ready collect'],
         }
         self.can_socket.send(can_msg)
-        point1, _ = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand + 25)
-        point2, angle = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand - 25)
-        self.can_socket.send_path([point1], point2, angle, path_speed=100, end_speed=10, blocking=True)
+        point1, _ = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand + 60)
+        point2, angle = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand - 30)
+        self.can_socket.send_path([point1], point2, angle, path_speed=70, end_speed=10, blocking=True)
         #self.wait_for_task(can.MsgTypes.Stands_Status.value, 0)
         can_msg = {
             'type': can.MsgTypes.Stands_Command.value,
@@ -290,7 +291,7 @@ class CupTask(Task):
         }
         self.can_socket.send(can_msg)
         point1, point2, angle = self.calculate_stopping_points(starting_point, stand_point, self.distance, self.shift)
-        self.can_socket.send_path([point1], point2, angle, path_speed=100, end_speed=10, blocking=True)
+        self.can_socket.send_path([point1], point2, angle, path_speed=20, end_speed=10, blocking=True)
         #self.wait_for_task(can.MsgTypes.Stands_Status.value, 0)
         can_msg = {
             'type': can.MsgTypes.Cup_Command.value,
