@@ -14,9 +14,9 @@ import math
 import numpy as np
 import subprocess
 from libraries import can
+from hauptsteuerung import drive
 from hauptsteuerung import debug
 from hauptsteuerung import game_logic
-from hauptsteuerung import route_finding
 from hauptsteuerung.robot import PositionMyRobot, PositionOtherRobot
 
 
@@ -34,7 +34,7 @@ class Main():
         self.can_socket = can.Can(can_connection, can.MsgSender.Hauptsteuerung)
         self.countdown = game_logic.Countdown(self.can_socket)
         self.debugger = debug.LaptopCommunication(self.can_socket)
-        self.route_finder = route_finding.RouteFinding(self.can_socket)
+        self.drive = drive.Drive(self.can_socket)
         self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
         self.reset = False
         subprocess.Popen(['software/robo_gui'])
@@ -43,11 +43,12 @@ class Main():
         self.strategy['robot_name'] = hostname
         print(self.strategy)
         self.robots = {'me': None, 'friendly robot': None, 'enemy1': None, 'enemy2': None}
-        self.game_tasks = {'clapper': game_logic.ClapperTask(self.robots, self.strategy['side'], self.can_socket),
-                           'stair': game_logic.StairTask(self.robots, self.strategy['side'], self.can_socket),
-                           'stand': game_logic.StandsTask(self.robots, self.strategy['side'], self.can_socket),
-                           'cup': game_logic.CupTask(self.robots, self.strategy['side'], self.can_socket)
-                           }
+        self.game_tasks = \
+            {'clapper': game_logic.ClapperTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
+             'stair': game_logic.StairTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
+             'stand': game_logic.StandsTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
+             'cup': game_logic.CupTask(self.robots, self.strategy['side'], self.can_socket, self.drive)
+             }
         self.run()
 
     def read_config(self, file_name):
@@ -110,10 +111,10 @@ class Main():
             self.robots['enemy1'] = PositionOtherRobot(self.can_socket, can.MsgTypes.Position_Enemy_small.value)
         if self.strategy['robot_big']:
             self.robots['enemy2'] = PositionOtherRobot(self.can_socket, can.MsgTypes.Position_Enemy_big.value)
-        self.route_finder.add_my_robot(self.robots['me'])
+        self.drive.add_my_robot(self.robots['me'])
         for name, robot in self.robots.items():
             if robot is not None and name != 'me':
-                self.route_finder.add_robot(robot)
+                self.drive.add_robot(robot)
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
         self.countdown.start()
         self.can_socket.create_interrupt(can.MsgTypes.Peripherie_inputs.value, self.periphery_input)
@@ -156,12 +157,14 @@ class Main():
     def strategy_start(self):
         if self.strategy['robot_name'] == 'Roboter-gross':
             if self.strategy['strategy'] == 'A':
+                self.drive.set_close_range_detection(True)
+                self.drive.set_speed(50)
                 self.game_tasks['stand'].do_task(5)
                 self.game_tasks['stand'].do_task(6)
                 self.game_tasks['stand'].do_task(1)
                 #self.game_tasks['cup'].do_task(0)
                 #self.game_tasks['stand'].do_task(1)
-                self.can_socket.send_path([], (1500, 1000), 180, True)
+                self.drive.drive_path([], (1500, 1000, 180))
                 can_msg = {
                     'type': can.MsgTypes.Stands_Command.value,
                     'command': self.game_tasks['stand'].command['open case'],
@@ -171,17 +174,21 @@ class Main():
             elif self.strategy['strategy'] == 'B':
                 raise Exception('Strategy not programmed')
             elif self.strategy['strategy'] == 'C':
+                self.drive.set_close_range_detection(True)
+                self.drive.set_speed(50)
                 while self.reset is False:
                     points = [(900, 1600), (2100, 900), (900, 900), (2100, 1600)]
                     for point in points:
                         for i in range(1):
-                            #path, path_len = self.route_finder.calculate_path(point)
-                            arrived = self.can_socket.send_path([], point, 180, end_speed=30, blocking=True)
+                            self.drive.drive_path([], (point, 180))
 
         if self.strategy['robot_name'] == 'Roboter-klein':
             if self.strategy['strategy'] == 'A':
+                self.drive.set_close_range_detection(True)
+                self.drive.set_speed(100)
                 point = self.game_tasks['stair'].goto_task()
-                self.can_socket.send_path([], point, 270, blocking=True)
+                self.drive.drive_path([], (point, 270))
+                self.drive.set_close_range_detection(False)
                 self.game_tasks['stair'].do_task()
             elif self.strategy['strategy'] == 'B':
                 raise Exception('Strategy not programmed')

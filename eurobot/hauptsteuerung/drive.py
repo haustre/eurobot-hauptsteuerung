@@ -8,14 +8,51 @@ __license__ = "GPLv3"
 import time
 import copy
 import queue
+import math
 from libraries import can
+from hauptsteuerung import route_finding
 
 
 class Drive():
     def __init__(self, can_socket):
+        self.route_finder = route_finding.RouteFinding(self.can_socket)
         self.can_socket = can_socket
+        self.speed = 3
+        self.close_range_detection = True
+        self.my_robot = None
+        self.robots = []
 
-    def send_path(self, path, destination, angle, path_speed=25, end_speed=25, blocking=True, close_range=False):
+    def add_my_robot(self, robot):
+        self.my_robot = robot
+        self.route_finder.add_my_robot(robot)
+
+    def add_robot(self, robot):
+        self.robots.append(robot)
+        self.route_finder.add_robot(robot)
+
+    def set_speed(self, speed):
+        self.speed = speed
+
+    def set_close_range_detection(self, activate):
+        self.close_range_detection = activate
+
+    def drive_route(self, destination, timeout=15):
+        starting_time = time.time()
+        arrived = False
+        while arrived is False:
+            route = self.route_finder.calculate_path(destination)
+            arrived = self.drive_path([route], destination)
+            if time.time() - starting_time > timeout:
+                return False
+            time.sleep(0.5)
+        return True
+
+    def drive_path(self, path, destination, path_speed=None, end_speed=None, blocking=True):
+        if end_speed is None:
+            end_speed = self.speed
+        if path_speed is None:
+            path_speed = self.speed
+        x, y, angle = destination
         in_save_zone = True
         wrong_point = None
         filtered_path = copy.copy(path)
@@ -25,22 +62,22 @@ class Drive():
             if save_zone[0][0] > point[0] > save_zone[0][1] or save_zone[1][0] > point[1] > save_zone[1][1]:
                 in_save_zone = False
                 wrong_point = point
-        if save_zone[0][0] > destination[0] > save_zone[0][1] or save_zone[1][0] > destination[1] > save_zone[1][1]:
+        if save_zone[0][0] > x > save_zone[0][1] or save_zone[1][0] > y > save_zone[1][1]:
             in_save_zone = False
-            wrong_point = destination
+            wrong_point = x, y
         if in_save_zone:
             can_msg = {
                 'type': can.MsgTypes.Goto_Position.value,
-                'x_position': int(destination[0]),
-                'y_position': int(destination[1]),
+                'x_position': int(x),
+                'y_position': int(y),
                 'angle': int((abs(angle) % 360000)*100),
                 'speed': end_speed,
-                'path_length': len(path),
+                'path_length': len(filtered_path),
             }
             self.can_socket.send(can_msg)
             time.sleep(0.002)
-            if len(path) > 0:
-                for point in path:
+            if len(filtered_path) > 0:
+                for point in filtered_path:
                     can_msg = {
                         'type': can.MsgTypes.Path.value,
                         'x': point[0],
@@ -49,7 +86,7 @@ class Drive():
                     }
                     self.can_socket.send(can_msg)
             if blocking:   # TODO: add timeout
-                self.wait_for_arrival(close_range, path, speed=max(path_speed, end_speed))
+                return self.wait_for_arrival(path, speed=max(path_speed, end_speed))
         else:
             can_msg = {
                 'type': can.MsgTypes.Emergency_Stop.value,
@@ -57,6 +94,7 @@ class Drive():
             }
             self.can_socket.send(can_msg)
             raise Exception('Coordinates outside the table:' + wrong_point)
+        return True
 
     def filter_path(self, path):
         if len(path) > 3:
@@ -71,7 +109,7 @@ class Drive():
             for index in reversed(sorted(list(set(points_to_delete)))):
                 del path[index]
 
-    def wait_for_arrival(self, close_range, path, speed=100):    # TODO: add timeout
+    def wait_for_arrival(self, path, speed=100):    # TODO: add timeout
         break_distance = 250 + (300 / 100 * speed)  # TODO: not tested
         drive_queue = queue.Queue()
         close_range_queue = queue.Queue()
@@ -81,17 +119,17 @@ class Drive():
         emergency = False
         while arrived is False and emergency is False:
             try:
-                close_range_msg = drive_queue.get_nowait()
-                if close_range_msg['status'] == 0:
+                drive_msg = drive_queue.get_nowait()
+                if drive_msg['status'] == 0:
                     arrived = True
             except queue.Empty:
                 pass
-            if close_range:
+            if self.close_range_detection:
                 try:
-                    close_range_msg = close_range_queue.get_nowait()
-                    if ((close_range_msg['front_middle_correct'] and close_range_msg['distance_front_middle'] < break_distance) or
-                       (close_range_msg['front_left_correct'] and close_range_msg['distance_front_left'] < break_distance) or
-                       (close_range_msg['front_right_correct'] and close_range_msg['distance_front_right'] < break_distance)):
+                    range_msg = close_range_queue.get_nowait()
+                    if ((range_msg['front_middle_correct'] and range_msg['distance_front_middle'] < break_distance) or
+                       (range_msg['front_left_correct'] and range_msg['distance_front_left'] < break_distance) or
+                       (range_msg['front_right_correct'] and range_msg['distance_front_right'] < break_distance)):
                         emergency = True
                         can_msg = {
                             'type': can.MsgTypes.Emergency_Stop.value,
@@ -100,7 +138,18 @@ class Drive():
                         self.can_socket.send(can_msg)
                 except queue.Empty:
                     pass
-            time.sleep(0.001)
+            for robot in self.robots:
+                position = robot.get_position()
+                if position:
+                    for point in path:
+                        if math.sqrt((position[0] - point[0])**2 + (position[1] - point[1])**2) < 500:
+                            emergency = True
+                            can_msg = {
+                                'type': can.MsgTypes.Emergency_Stop.value,
+                                'code': 0,
+                            }
+                            self.can_socket.send(can_msg)
+            time.sleep(0.003)
         self.can_socket.remove_queue(close_range_queue_number)
         self.can_socket.remove_queue(drive_queue_number)
         if emergency:

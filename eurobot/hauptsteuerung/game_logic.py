@@ -62,7 +62,8 @@ class Countdown():
 
 
 class Task():
-    def __init__(self, robots, can_socket, can_id):
+    def __init__(self, robots, can_socket, can_id, drive):
+        self.drive = drive
         self.robots = robots
         self.can_socket = can_socket
         self.can_socket.create_interrupt(can_id, self.can_command)
@@ -120,8 +121,8 @@ class Task():
 
 
 class StairTask(Task):
-    def __init__(self, robots, my_color, can_socket):
-        super().__init__(robots, can_socket, can.MsgTypes.Climbing_Command.value)
+    def __init__(self, robots, my_color, can_socket, drive):
+        super().__init__(robots, can_socket, can.MsgTypes.Climbing_Command.value, drive)
         self.climbing_command = {'up': 0, 'bottom': 1, 'middle': 2, 'top': 3}
         self.carpet_command = {'fire right': 0, 'fire left': 1}
         path_left = {'in_front': (1250, 1080, 270),
@@ -134,12 +135,13 @@ class StairTask(Task):
                      'fire 2': self.carpet_command['fire left']
                      }
 
-        path_right = {'bottom': (3000 - 1200, 800, 270),
-                      'beginning': (3000 - 1200, 600, 270),
-                      'top': (3000 - 1200, 200, 270),
+        path_right = {'in_front': (3000 - 1250, 1080, 270),
+                      'bottom': (3000 - 1250, 700, 270),
+                      #'beginning': (3000 - 1200, 600, 270),
+                      'top': (3000 - 1250, 200, 270),
                       'carpet 1': (3000 - 1100, 200, 290),
                       'fire 1': self.carpet_command['fire left'],
-                      'carpet 2': (3000 - 1370, 200, 250),
+                      'carpet 2': (3000 - 1400, 200, 250),
                       'fire 2': self.carpet_command['fire right']
                       }
 
@@ -154,16 +156,14 @@ class StairTask(Task):
         return self.my_path['in_front']
 
     def do_task(self):
-        speed = 50
-        self._send_command(self.climbing_command['bottom'])
-        time.sleep(3)   # TODO: wait for can message
-        self.can_socket.send_path([], self.my_path['bottom'][0:2], self.my_path['bottom'][2], path_speed=speed, end_speed=speed, blocking=True)
-        self._send_command(self.climbing_command['top'])
-        self.can_socket.send_path([], self.my_path['top'][0:2], self.my_path['top'][2], path_speed=speed, end_speed=speed,blocking=True)
-        self.can_socket.send_path([], self.my_path['carpet 1'][0:2], self.my_path['carpet 1'][2], path_speed=speed, end_speed=speed,blocking=True)
-        self._send_command(self.my_path['fire 1'])
-        self.can_socket.send_path([], self.my_path['carpet 2'][0:2], self.my_path['carpet 2'][2], path_speed=speed, end_speed=speed,blocking=True)
-        self._send_command(self.my_path['fire 2'])
+        self.drive.drive_path([], self.my_path['bottom'], blocking=False)  # TODO: Danger no close range detection
+        self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['bottom'], blocking=True)
+        self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['top'])
+        self.drive.drive_path([], self.my_path['top'])
+        self.drive.drive_path([], self.my_path['carpet 1'])
+        self.send_task_command(can.MsgTypes.Carpet_Command.value, self.my_path['fire 1'], blocking=True)
+        self.drive.drive_path([], self.my_path['carpet 2'])
+        self.send_task_command(can.MsgTypes.Carpet_Command.value, self.my_path['fire 2'], blocking=True)
 
     def _goto_position(self, waypoint):
         can_msg = {
@@ -195,8 +195,8 @@ class StairTask(Task):
 
 
 class StandsTask(Task):
-    def __init__(self, robots, my_color, can_socket):
-        super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value)
+    def __init__(self, robots, my_color, can_socket, drive):
+        super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
         self.distance_to_stand = 200
         self.points_game_element = 3
         self.command = {'blocked': 0, 'ready collect': 1, 'ready platform': 2, 'open case': 3}
@@ -239,7 +239,7 @@ class StandsTask(Task):
         self.can_socket.send(can_msg)
         point1, _ = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand + 60)
         point2, angle = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand - 30)
-        self.can_socket.send_path([point1], point2, angle, path_speed=70, end_speed=10, blocking=True)
+        self.drive.drive_path([point1], (point2, angle),  end_speed=10)
         #self.wait_for_task(can.MsgTypes.Stands_Status.value, 0)
         can_msg = {
             'type': can.MsgTypes.Stands_Command.value,
@@ -260,8 +260,8 @@ class StandsTask(Task):
 
 
 class CupTask(Task):
-    def __init__(self, robots, my_color, can_socket):
-        super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value)
+    def __init__(self, robots, my_color, can_socket, drive):
+        super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
         self.my_color = my_color
         self.distance = 200
         self.shift = 100
@@ -292,7 +292,7 @@ class CupTask(Task):
         }
         self.can_socket.send(can_msg)
         point1, point2, angle = self.calculate_stopping_points(starting_point, stand_point, self.distance, self.shift)
-        self.can_socket.send_path([point1], point2, angle, path_speed=20, end_speed=10, blocking=True)
+        self.drive.drive_path([point1], (point2, angle), end_speed=10)
         #self.wait_for_task(can.MsgTypes.Stands_Status.value, 0)
         can_msg = {
             'type': can.MsgTypes.Cup_Command.value,
@@ -326,8 +326,8 @@ class CupTask(Task):
 
 
 class ClapperTask(Task):
-    def __init__(self, robots, my_color, can_socket):
-        super().__init__(robots, can_socket, can.MsgTypes.Clapper_Command.value)
+    def __init__(self, robots, my_color, can_socket, drive):
+        super().__init__(robots, can_socket, can.MsgTypes.Clapper_Command.value, drive)
         self.points_game_element = 5
         self.movable = False
         y_pos = 1740
