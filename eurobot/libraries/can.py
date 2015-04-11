@@ -113,7 +113,7 @@ class Can(object):
             frame = self._build_can_frame(can_id, can_msg)
             self.socket.send(frame)
 
-    def send_path(self, path, destination, angle, path_speed=25, end_speed=25, blocking=True):
+    def send_path(self, path, destination, angle, path_speed=25, end_speed=25, blocking=True, close_range=False):
         in_save_zone = True
         wrong_point = None
         save_zone = [[300, 2700], [300, 2700]]
@@ -145,7 +145,7 @@ class Can(object):
                     }
                     self.send(can_msg)
             if blocking:   # TODO: add timeout
-                self.wait_for_arrival(speed=max(path_speed, end_speed))
+                self.wait_for_arrival(close_range, speed=max(path_speed, end_speed))
         else:
             can_msg = {
                 'type': MsgTypes.Emergency_Stop.value,
@@ -154,7 +154,7 @@ class Can(object):
             self.send(can_msg)
             raise Exception('Coordinates outside the table:' + wrong_point)
 
-    def wait_for_arrival(self, speed=100):    # TODO: add timeout
+    def wait_for_arrival(self, close_range, speed=100):    # TODO: add timeout
         break_distance = 250 + (300 / 100 * speed)  # TODO: not tested
         drive_queue = queue.Queue()
         close_range_queue = queue.Queue()
@@ -169,19 +169,20 @@ class Can(object):
                     arrived = True
             except queue.Empty:
                 pass
-            try:
-                close_range_msg = close_range_queue.get_nowait()
-                if ((close_range_msg['front_middle_correct'] and close_range_msg['distance_front_middle'] < break_distance) or
-                   (close_range_msg['front_left_correct'] and close_range_msg['distance_front_left'] < break_distance) or
-                   (close_range_msg['front_right_correct'] and close_range_msg['distance_front_right'] < break_distance)):
-                    emergency = True
-                    can_msg = {
-                        'type': MsgTypes.Emergency_Stop.value,
-                        'code': 0,
-                    }
-                    self.send(can_msg)
-            except queue.Empty:
-                pass
+            if close_range:
+                try:
+                    close_range_msg = close_range_queue.get_nowait()
+                    if ((close_range_msg['front_middle_correct'] and close_range_msg['distance_front_middle'] < break_distance) or
+                       (close_range_msg['front_left_correct'] and close_range_msg['distance_front_left'] < break_distance) or
+                       (close_range_msg['front_right_correct'] and close_range_msg['distance_front_right'] < break_distance)):
+                        emergency = True
+                        can_msg = {
+                            'type': MsgTypes.Emergency_Stop.value,
+                            'code': 0,
+                        }
+                        self.send(can_msg)
+                except queue.Empty:
+                    pass
             time.sleep(0.001)
         self.remove_queue(close_range_queue_number)
         self.remove_queue(drive_queue_number)
@@ -373,7 +374,11 @@ MsgEncoding = {
     MsgTypes.Debug_Drive.value: EncodingTypes['debug_drive'],
     MsgTypes.Configuration.value: EncodingTypes['configuration'],
     MsgTypes.Board_Status.value: EncodingTypes['Board_Status'],
-    MsgTypes.Path.value: EncodingTypes['Path']
+    MsgTypes.Path.value: EncodingTypes['Path'],
+    MsgTypes.Carpet_Command.value: EncodingTypes['task_command'],
+    MsgTypes.Carpet_Status.value: EncodingTypes['task_status'],
+    MsgTypes.Climbing_Command.value: EncodingTypes['task_command'],
+    MsgTypes.Climbing_Status.value: EncodingTypes['task_status']
 }
 
 # Colors used in can table (Red, Green, Blue) 0-255

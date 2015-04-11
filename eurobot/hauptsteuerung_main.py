@@ -119,19 +119,8 @@ class Main():
         self.can_socket.create_interrupt(can.MsgTypes.Peripherie_inputs.value, self.periphery_input)
         self.countdown.set_interrupt(self.game_end, 'game_end', 2)
         #self.enemy_simulation.start()
-        if False:
-            arrived = self.can_socket.send_path([], (1000, 1000), 180, end_speed=70, blocking=True)
-            print(arrived)
-        if False:
-            self.strategy_start()
-        if True:
-            while self.reset is False:
-                points = [(900, 1600), (2100, 900), (900, 900), (2100, 1600)]
-                for point in points:
-                    for i in range(1):
-                        #path, path_len = self.route_finder.calculate_path(point)
-                        arrived = self.can_socket.send_path([], point, 180, end_speed=30, blocking=True)
-        time.sleep(9999999)
+        self.strategy_start()
+        print("Programm End")
 
     def wait_for_game_start(self):
         peripherie_queue = queue.Queue()
@@ -182,10 +171,17 @@ class Main():
             elif self.strategy['strategy'] == 'B':
                 raise Exception('Strategy not programmed')
             elif self.strategy['strategy'] == 'C':
-                raise Exception('Strategy not programmed')
+                while self.reset is False:
+                    points = [(900, 1600), (2100, 900), (900, 900), (2100, 1600)]
+                    for point in points:
+                        for i in range(1):
+                            #path, path_len = self.route_finder.calculate_path(point)
+                            arrived = self.can_socket.send_path([], point, 180, end_speed=30, blocking=True)
 
         if self.strategy['robot_name'] == 'Roboter-klein':
             if self.strategy['strategy'] == 'A':
+                point = self.game_tasks['stair'].goto_task()
+                self.can_socket.send_path([], point, 270, blocking=True)
                 self.game_tasks['stair'].do_task()
             elif self.strategy['strategy'] == 'B':
                 raise Exception('Strategy not programmed')

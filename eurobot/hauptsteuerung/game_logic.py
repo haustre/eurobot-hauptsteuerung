@@ -154,14 +154,14 @@ class StairTask(Task):
 
     def do_task(self):
         self._send_command(self.climbing_command['bottom'])
-        self.can_socket.send_path([], self.my_path['bottom'][0:1], self.my_path['bottom'][2], blocking=True)
+        self.can_socket.send_path([], self.my_path['bottom'][0:2], self.my_path['bottom'][2], blocking=True)
         self._send_command(self.climbing_command['middle'])
-        self.can_socket.send_path([], self.my_path['beginning'][0:1], self.my_path['beginning'][2], blocking=True)
+        self.can_socket.send_path([], self.my_path['beginning'][0:2], self.my_path['beginning'][2], blocking=True)
         self._send_command(self.climbing_command['top'])
-        self.can_socket.send_path([], self.my_path['top'][0:1], self.my_path['top'][2], blocking=True)
-        self.can_socket.send_path([], self.my_path['carpet 1'][0:1], self.my_path['carpet 1'][2], blocking=True)
+        self.can_socket.send_path([], self.my_path['top'][0:2], self.my_path['top'][2], blocking=True)
+        self.can_socket.send_path([], self.my_path['carpet 1'][0:2], self.my_path['carpet 1'][2], blocking=True)
         self._send_command(self.my_path['fire 1'])
-        self.can_socket.send_path([], self.my_path['carpet 2'][0:1], self.my_path['carpet 2'][2], blocking=True)
+        self.can_socket.send_path([], self.my_path['carpet 2'][0:2], self.my_path['carpet 2'][2], blocking=True)
         self._send_command(self.my_path['fire 2'])
 
     def _goto_position(self, waypoint):
