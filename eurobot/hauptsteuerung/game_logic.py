@@ -142,9 +142,9 @@ class StairTask(Task):
                       'fire 2': self.carpet_command['fire right']
                       }
 
-        if my_color is 'left':
+        if my_color == 'left':
             self.my_path = path_left
-        elif my_color is 'right':
+        elif my_color == 'right':
             self.my_path = path_right
         else:
             raise Exception("Unknown team color")
@@ -216,10 +216,10 @@ class StandsTask(Task):
         for stand in stands_right:
             x, y = stand['position']
             stand['position'] = (3000-x, y)
-        if my_color is 'left':
+        if my_color == 'left':
             self.my_game_elements = stands_left
             self.enemy_game_elements = stands_right
-        elif my_color is 'right':
+        elif my_color == 'right':
             self.my_game_elements = stands_right
             self.enemy_game_elements = stands_left
         else:
@@ -346,10 +346,10 @@ class ClapperTask(Task):
         for clapper in clapper_right:
             clapper['moved'] = False
 
-        if my_color is 'left':
+        if my_color == 'left':
             self.my_game_elements = clapper_left
             self.enemy_game_elements = clapper_right
-        elif my_color is 'right':
+        elif my_color == 'right':
             self.my_game_elements = clapper_right
             self.enemy_game_elements = clapper_left
         else:

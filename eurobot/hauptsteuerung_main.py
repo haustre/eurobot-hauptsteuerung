@@ -12,6 +12,7 @@ import threading
 import queue
 import math
 import numpy as np
+import subprocess
 from libraries import can
 from hauptsteuerung import debug
 from hauptsteuerung import game_logic
@@ -36,18 +37,40 @@ class Main():
         self.route_finder = route_finding.RouteFinding(self.can_socket)
         self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
         self.reset = False
-        self.strategy = {
-            'robot_small': False, 'robot_big': True, 'enemy_small': False, 'enemy_big': False,
-            'robot_name': hostname, 'side': 'right', 'strategy': 0
-        }
+        subprocess.Popen(['software/robo_gui'])
+        time.sleep(1)   # TODO: delete file
+        self. strategy = self.read_config('/root/gui_config')
+        self.strategy['robot_name'] = hostname
+        print(self.strategy)
         self.robots = {'me': None, 'friendly robot': None, 'enemy1': None, 'enemy2': None}
-
         self.game_tasks = {'clapper': game_logic.ClapperTask(self.robots, self.strategy['side'], self.can_socket),
                            'stair': game_logic.StairTask(self.robots, self.strategy['side'], self.can_socket),
                            'stand': game_logic.StandsTask(self.robots, self.strategy['side'], self.can_socket),
                            'cup': game_logic.CupTask(self.robots, self.strategy['side'], self.can_socket)
                            }
         self.run()
+
+    def read_config(self, file_name):
+        while True:
+            strategy = {}
+            try:
+                with open(file_name) as f:
+                    file_content = f.readlines()
+            except FileNotFoundError:
+                print('Configuration not found')
+            if len(file_content) == 7:
+                complete = file_content[6].strip().strip('complete: ')
+                if complete == 'yes':
+                    strategy['side'] = file_content[0].strip().strip('side: ')
+                    strategy['strategy'] = file_content[1].strip().strip('strategy: ')
+                    strategy['enemy_small'] = file_content[2].strip().strip('enemy small: ')
+                    strategy['enemy_big'] = file_content[3].strip().strip('enemy big: ')
+                    strategy['robot_small'] = file_content[4].strip().strip('own_robot_small: ')
+                    strategy['robot_big'] = file_content[5].strip().strip('own_robot_big: ')
+                    return strategy
+            else:
+                print('Configuration not finished')
+                time.sleep(2)
 
     def run(self):
         self.debugger.start()
@@ -72,12 +95,12 @@ class Main():
         }
         self.can_socket.send(can_msg)
         if self.strategy['robot_name'] == 'Roboter-klein':
-            print("Robot small")
+            #print("Robot small")
             self.robots['me'] = PositionMyRobot(self.can_socket, can.MsgTypes.Position_Robot_small.value)
             if self.strategy['robot_big']:
                 self.robots['friendly robot'] = PositionOtherRobot(self.can_socket, can.MsgTypes.Position_Robot_big.value)
         elif self.strategy['robot_name'] == 'Roboter-gross':
-            print("Robot big")
+            #print("Robot big")
             self.robots['me'] = PositionMyRobot(self.can_socket, can.MsgTypes.Position_Robot_big.value)
             if self.strategy['robot_small']:
                 self.robots['friendly robot'] = PositionOtherRobot(self.can_socket, can.MsgTypes.Position_Robot_small.value)
@@ -143,7 +166,7 @@ class Main():
 
     def strategy_start(self):
         if self.strategy['robot_name'] == 'Roboter-gross':
-            if self.strategy['strategy'] == 0:
+            if self.strategy['strategy'] == 'A':
                 self.game_tasks['stand'].do_task(5)
                 self.game_tasks['stand'].do_task(6)
                 self.game_tasks['stand'].do_task(1)
@@ -156,17 +179,17 @@ class Main():
                 }
                 self.can_socket.send(can_msg)
 
-            elif self.strategy['strategy'] == 1:
+            elif self.strategy['strategy'] == 'B':
                 raise Exception('Strategy not programmed')
-            elif self.strategy['strategy'] == 2:
+            elif self.strategy['strategy'] == 'C':
                 raise Exception('Strategy not programmed')
 
         if self.strategy['robot_name'] == 'Roboter-klein':
-            if self.strategy['strategy'] == 0:
+            if self.strategy['strategy'] == 'A':
                 self.game_tasks['stair'].do_task()
-            elif self.strategy['strategy'] == 1:
+            elif self.strategy['strategy'] == 'B':
                 raise Exception('Strategy not programmed')
-            elif self.strategy['strategy'] == 2:
+            elif self.strategy['strategy'] == 'C':
                 raise Exception('Strategy not programmed')
 if __name__ == "__main__":
     while True:
