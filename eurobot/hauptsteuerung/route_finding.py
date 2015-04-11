@@ -68,17 +68,6 @@ class RouteFinding():
         for i, point in enumerate(path):
             if abs(point[0] - x) < 200 or abs(point[1] - y) < 200:
                 del path[i]
-        if len(path) > 3:
-            points_to_delete = []
-            for i in range(len(path)-2):
-                for dir in (0, 1):
-                    if ((path[i][dir] == path[i+1][dir] and path[i+1][dir] == path[i+2][dir]) or
-                            (path[i][0] - path[i+1][0] == path[i+1][0] - path[i+2][0]) and
-                            (path[i][1] - path[i+1][1] == path[i+1][1] - path[i+2][1])):
-                        points_to_delete.append(i+1)
-            print(len(path), set(points_to_delete))
-            for index in reversed(sorted(list(set(points_to_delete)))):
-                del path[index]
 
     def can_close_range_detection(self, can_msg):
         if self.my_robot:

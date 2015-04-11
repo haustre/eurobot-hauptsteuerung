@@ -124,12 +124,13 @@ class StairTask(Task):
         super().__init__(robots, can_socket, can.MsgTypes.Climbing_Command.value)
         self.climbing_command = {'up': 0, 'bottom': 1, 'middle': 2, 'top': 3}
         self.carpet_command = {'fire right': 0, 'fire left': 1}
-        path_left = {'bottom': (1200, 800, 270),
-                     'beginning': (1200, 600, 270),
-                     'top': (1200, 200, 270),
+        path_left = {'in_front': (1250, 1080, 270),
+                     'bottom': (1250, 700, 270),
+                     #'beginning': (1200, 600, 270),
+                     'top': (1250, 200, 270),
                      'carpet 1': (1100, 200, 290),
                      'fire 1': self.carpet_command['fire right'],
-                     'carpet 2': (1370, 200, 250),
+                     'carpet 2': (1400, 200, 250),
                      'fire 2': self.carpet_command['fire left']
                      }
 
@@ -150,18 +151,18 @@ class StairTask(Task):
             raise Exception("Unknown team color")
 
     def goto_task(self):
-        return self.my_path['bottom']
+        return self.my_path['in_front']
 
     def do_task(self):
+        speed = 50
         self._send_command(self.climbing_command['bottom'])
-        self.can_socket.send_path([], self.my_path['bottom'][0:2], self.my_path['bottom'][2], blocking=True)
-        self._send_command(self.climbing_command['middle'])
-        self.can_socket.send_path([], self.my_path['beginning'][0:2], self.my_path['beginning'][2], blocking=True)
+        time.sleep(3)   # TODO: wait for can message
+        self.can_socket.send_path([], self.my_path['bottom'][0:2], self.my_path['bottom'][2], path_speed=speed, end_speed=speed, blocking=True)
         self._send_command(self.climbing_command['top'])
-        self.can_socket.send_path([], self.my_path['top'][0:2], self.my_path['top'][2], blocking=True)
-        self.can_socket.send_path([], self.my_path['carpet 1'][0:2], self.my_path['carpet 1'][2], blocking=True)
+        self.can_socket.send_path([], self.my_path['top'][0:2], self.my_path['top'][2], path_speed=speed, end_speed=speed,blocking=True)
+        self.can_socket.send_path([], self.my_path['carpet 1'][0:2], self.my_path['carpet 1'][2], path_speed=speed, end_speed=speed,blocking=True)
         self._send_command(self.my_path['fire 1'])
-        self.can_socket.send_path([], self.my_path['carpet 2'][0:2], self.my_path['carpet 2'][2], blocking=True)
+        self.can_socket.send_path([], self.my_path['carpet 2'][0:2], self.my_path['carpet 2'][2], path_speed=speed, end_speed=speed,blocking=True)
         self._send_command(self.my_path['fire 2'])
 
     def _goto_position(self, waypoint):
