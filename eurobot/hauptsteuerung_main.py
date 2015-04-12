@@ -97,12 +97,12 @@ class Main():
         self.can_socket.send(can_msg)
         if self.strategy['robot_name'] == 'Roboter-klein':
             #print("Robot small")
-            self.robots['me'] = PositionMyRobot(self.can_socket, can.MsgTypes.Position_Robot_small.value)
+            self.robots['me'] = PositionMyRobot(self.can_socket, can.MsgTypes.Position_Robot_small.value, self.strategy['robot_name'])
             if self.strategy['robot_big']:
                 self.robots['friendly robot'] = PositionOtherRobot(self.can_socket, can.MsgTypes.Position_Robot_big.value)
         elif self.strategy['robot_name'] == 'Roboter-gross':
             #print("Robot big")
-            self.robots['me'] = PositionMyRobot(self.can_socket, can.MsgTypes.Position_Robot_big.value)
+            self.robots['me'] = PositionMyRobot(self.can_socket, can.MsgTypes.Position_Robot_big.value, self.strategy['robot_name'])
             if self.strategy['robot_small']:
                 self.robots['friendly robot'] = PositionOtherRobot(self.can_socket, can.MsgTypes.Position_Robot_small.value)
         else:
@@ -157,10 +157,12 @@ class Main():
     def strategy_start(self):
         if self.strategy['robot_name'] == 'Roboter-gross':
             if self.strategy['strategy'] == 'A':
-                self.drive.set_close_range_detection(True)
-                self.drive.set_speed(50)
+                self.drive.set_close_range_detection(False)
+                self.drive.set_enemy_detection(False)
+                self.drive.set_speed(15)
                 self.game_tasks['stand'].do_task(5)
                 self.game_tasks['stand'].do_task(6)
+                self.drive.drive_path([], (290, 1460, 180))
                 self.game_tasks['stand'].do_task(1)
                 #self.game_tasks['cup'].do_task(0)
                 #self.game_tasks['stand'].do_task(1)
@@ -184,11 +186,13 @@ class Main():
 
         if self.strategy['robot_name'] == 'Roboter-klein':
             if self.strategy['strategy'] == 'A':
-                self.drive.set_close_range_detection(True)
+                self.drive.set_close_range_detection(False)
+                self.drive.set_enemy_detection(False)
                 self.drive.set_speed(100)
                 point = self.game_tasks['stair'].goto_task()
-                self.drive.drive_path([], (point, 270))
+                self.drive.drive_path([], point)
                 self.drive.set_close_range_detection(False)
+                self.drive.set_speed(60)
                 self.game_tasks['stair'].do_task()
             elif self.strategy['strategy'] == 'B':
                 raise Exception('Strategy not programmed')

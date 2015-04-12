@@ -107,15 +107,15 @@ class Task():
         }
         self.can_socket.send(can_msg)
         if blocking:
-            self.wait_for_task(msg_id, 0)
+            self.wait_for_task(msg_id+1)
 
-    def wait_for_task(self, msg_id, value):
+    def wait_for_task(self, msg_id):
         can_queue = queue.Queue()
         queue_number = self.can_socket.create_queue(msg_id, can_queue)
         finished = False
         while finished is False:
             can_msg = can_queue.get()
-            if can_msg['state'] == value:
+            if can_msg['state'] < 2:
                 finished = True
         self.can_socket.remove_queue(queue_number)
 
@@ -127,23 +127,22 @@ class StairTask(Task):
         self.carpet_command = {'fire right': 0, 'fire left': 1}
         path_left = {'in_front': (1250, 1080, 270),
                      'bottom': (1250, 700, 270),
-                     #'beginning': (1200, 600, 270),
-                     'top': (1250, 200, 270),
-                     'carpet 1': (1100, 200, 290),
-                     'fire 1': self.carpet_command['fire right'],
-                     'carpet 2': (1400, 200, 250),
-                     'fire 2': self.carpet_command['fire left']
+                     'beginning': (1200, 650, 270),
+                     'top': (1250, 150, 270),
+                     'carpet 1': (1080, 200, 180),
+                     'fire 1': self.carpet_command['fire left'],
+                     'turning point': (1250, 200, 270),
+                     'carpet 2': (1400, 200, 0),
+                     'fire 2': self.carpet_command['fire right']
                      }
-
-        path_right = {'in_front': (3000 - 1250, 1080, 270),
-                      'bottom': (3000 - 1250, 700, 270),
-                      #'beginning': (3000 - 1200, 600, 270),
-                      'top': (3000 - 1250, 200, 270),
-                      'carpet 1': (3000 - 1100, 200, 290),
-                      'fire 1': self.carpet_command['fire left'],
-                      'carpet 2': (3000 - 1400, 200, 250),
-                      'fire 2': self.carpet_command['fire right']
-                      }
+        path_right = {}
+        for key, value in path_left.items():
+            if type(value) is not int:
+                path_right[key] = 3000 - value[0], value[1], value[2]
+            elif value == 1:
+                path_right[key] = 0
+            elif value == 0:
+                path_right[key] = 1
 
         if my_color == 'left':
             self.my_path = path_left
@@ -158,10 +157,13 @@ class StairTask(Task):
     def do_task(self):
         self.drive.drive_path([], self.my_path['bottom'], blocking=False)  # TODO: Danger no close range detection
         self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['bottom'], blocking=True)
-        self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['top'])
+        self.drive.drive_path([], self.my_path['beginning'], end_speed=30)  # TODO: Danger no close range detection
+        threading.Timer(0.5, self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['top'])).start()
         self.drive.drive_path([], self.my_path['top'])
+        self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['up'], blocking=True)
         self.drive.drive_path([], self.my_path['carpet 1'])
         self.send_task_command(can.MsgTypes.Carpet_Command.value, self.my_path['fire 1'], blocking=True)
+        self.drive.drive_path([], self.my_path['top'], end_speed=(-self.drive.speed))
         self.drive.drive_path([], self.my_path['carpet 2'])
         self.send_task_command(can.MsgTypes.Carpet_Command.value, self.my_path['fire 2'], blocking=True)
 
@@ -237,15 +239,18 @@ class StandsTask(Task):
             'command': self.command['ready collect'],
         }
         self.can_socket.send(can_msg)
-        point1, _ = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand + 60)
-        point2, angle = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand - 30)
-        self.drive.drive_path([point1], (point2, angle),  end_speed=10)
+        point1 = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand + 30)
+        point3 = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand + 40)
+        point2 = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand - 50)
+        time.sleep(0.7)
+        self.drive.drive_path([[point3[0:2], point1[0:2]]], point2,  end_speed=10)
+        #  TODO: block if not not needed
         #self.wait_for_task(can.MsgTypes.Stands_Status.value, 0)
-        can_msg = {
-            'type': can.MsgTypes.Stands_Command.value,
-            'command': self.command['blocked'],
-        }
-        self.can_socket.send(can_msg)
+        #can_msg = {
+        #    'type': can.MsgTypes.Stands_Command.value,
+        #    'command': self.command['blocked'],
+        #}
+        #self.can_socket.send(can_msg)
 
     def calculate_stopping_point(self, from_pos, to_pos, distance):
         stopping_point = [0, 0]
@@ -256,7 +261,7 @@ class StandsTask(Task):
         y = math.sin(angle) * distance
         stopping_point[0] = int(to_pos[0] - x)
         stopping_point[1] = int(to_pos[1] - y)
-        return stopping_point, angle / (2 * math.pi) * 360
+        return stopping_point[0], stopping_point[1], angle / (2 * math.pi) * 360
 
 
 class CupTask(Task):

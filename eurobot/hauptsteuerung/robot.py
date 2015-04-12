@@ -52,8 +52,9 @@ class RobotPosition():
 
 
 class PositionMyRobot(RobotPosition):
-    def __init__(self, can_socket, msg_type, size=20):
+    def __init__(self, can_socket, msg_type, name, size=20):
         super().__init__(can_socket, msg_type, size)
+        self.name = name
 
 
 class PositionOtherRobot(RobotPosition):

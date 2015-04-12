@@ -15,10 +15,11 @@ from hauptsteuerung import route_finding
 
 class Drive():
     def __init__(self, can_socket):
-        self.route_finder = route_finding.RouteFinding(self.can_socket)
         self.can_socket = can_socket
+        self.route_finder = route_finding.RouteFinding(self.can_socket)
         self.speed = 3
         self.close_range_detection = True
+        self.enemy_detection = True
         self.my_robot = None
         self.robots = []
 
@@ -35,6 +36,9 @@ class Drive():
 
     def set_close_range_detection(self, activate):
         self.close_range_detection = activate
+
+    def set_enemy_detection(self, activate):
+        self.enemy_detection = activate
 
     def drive_route(self, destination, timeout=15):
         starting_time = time.time()
@@ -110,6 +114,7 @@ class Drive():
                 del path[index]
 
     def wait_for_arrival(self, path, speed=100):    # TODO: add timeout
+        robot_big = self.my_robot.name == 'Roboter-gross'
         break_distance = 250 + (300 / 100 * speed)  # TODO: not tested
         drive_queue = queue.Queue()
         close_range_queue = queue.Queue()
@@ -128,7 +133,7 @@ class Drive():
                 try:
                     range_msg = close_range_queue.get_nowait()
                     if ((range_msg['front_middle_correct'] and range_msg['distance_front_middle'] < break_distance) or
-                       (range_msg['front_left_correct'] and range_msg['distance_front_left'] < break_distance) or
+                       (range_msg['front_left_correct'] and range_msg['distance_front_left'] < break_distance) and robot_big or
                        (range_msg['front_right_correct'] and range_msg['distance_front_right'] < break_distance)):
                         emergency = True
                         can_msg = {
@@ -138,17 +143,18 @@ class Drive():
                         self.can_socket.send(can_msg)
                 except queue.Empty:
                     pass
-            for robot in self.robots:
-                position = robot.get_position()
-                if position:
-                    for point in path:
-                        if math.sqrt((position[0] - point[0])**2 + (position[1] - point[1])**2) < 500:
-                            emergency = True
-                            can_msg = {
-                                'type': can.MsgTypes.Emergency_Stop.value,
-                                'code': 0,
-                            }
-                            self.can_socket.send(can_msg)
+            if self.enemy_detection:
+                for robot in self.robots:
+                    position = robot.get_position()
+                    if position:
+                        for point in path:
+                            if math.sqrt((position[0] - point[0])**2 + (position[1] - point[1])**2) < 500:
+                                emergency = True
+                                can_msg = {
+                                    'type': can.MsgTypes.Emergency_Stop.value,
+                                    'code': 0,
+                                }
+                                self.can_socket.send(can_msg)
             time.sleep(0.003)
         self.can_socket.remove_queue(close_range_queue_number)
         self.can_socket.remove_queue(drive_queue_number)
