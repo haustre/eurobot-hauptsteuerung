@@ -23,10 +23,10 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         self.path_length = 0
         self.path = []
         self.goto = (0, 0)
-        self.robot_big = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.robot1_pixmap}
-        self.robot_small = {'x_position': 1500, 'y_position': 1000, 'diameter': 200, 'angle': 0, 'pixmap': self.robot1_pixmap}
-        self.enemy_big = {'x_position': 1500, 'y_position': 1000, 'diameter': 300, 'angle': 0, 'pixmap': self.enemy1_pixmap}
-        self.enemy_small = {'x_position': 1500, 'y_position': 1000, 'diameter': 200, 'angle': 0, 'pixmap': self.enemy1_pixmap}
+        self.robot_big = {'x_position': 0, 'y_position': 0, 'diameter': 300, 'angle': 0, 'pixmap': self.robot1_pixmap}
+        self.robot_small = {'x_position': 0, 'y_position': 0, 'diameter': 200, 'angle': 0, 'pixmap': self.robot1_pixmap}
+        self.enemy_big = {'x_position': 0, 'y_position': 0, 'diameter': 300, 'angle': 0, 'pixmap': self.enemy1_pixmap}
+        self.enemy_small = {'x_position': 0, 'y_position': 0, 'diameter': 200, 'angle': 0, 'pixmap': self.enemy1_pixmap}
 
     def paintEvent(self, event):
         """ Overrides method: :py:func:`QtGui.paintEvent`

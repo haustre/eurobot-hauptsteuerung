@@ -71,4 +71,4 @@ class PositionOtherRobot(RobotPosition):
                 self.angle = None
             if now - self.last_angle_update > 0.1:
                 self.position = None
-            time.sleep(0.03)
+            time.sleep(0.5)    # TODO: set correct time

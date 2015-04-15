@@ -44,8 +44,8 @@ class Drive():
         starting_time = time.time()
         arrived = False
         while arrived is False:
-            route = self.route_finder.calculate_path(destination)
-            arrived = self.drive_path([route], destination)
+            route, path_len = self.route_finder.calculate_path(destination)
+            arrived = self.drive_path(route, destination)
             if time.time() - starting_time > timeout:
                 return False
             time.sleep(0.5)
@@ -109,7 +109,7 @@ class Drive():
                             (path[i][0] - path[i+1][0] == path[i+1][0] - path[i+2][0]) and
                             (path[i][1] - path[i+1][1] == path[i+1][1] - path[i+2][1])):
                         points_to_delete.append(i+1)
-            print(len(path), set(points_to_delete))
+            #print(len(path), set(points_to_delete))
             for index in reversed(sorted(list(set(points_to_delete)))):
                 del path[index]
 
@@ -148,7 +148,7 @@ class Drive():
                     position = robot.get_position()
                     if position:
                         for point in path:
-                            if math.sqrt((position[0] - point[0])**2 + (position[1] - point[1])**2) < 500:
+                            if math.sqrt((position[0] - point[0])**2 + (position[1] - point[1])**2) < 200:
                                 emergency = True
                                 can_msg = {
                                     'type': can.MsgTypes.Emergency_Stop.value,

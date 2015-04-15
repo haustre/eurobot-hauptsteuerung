@@ -100,7 +100,7 @@ class Task():
     def can_status(self, can_msg):
         self.collected = can_msg['collected_pieces']
 
-    def send_task_command(self, msg_id, command, blocking=False):  # TODO: Not tested
+    def send_task_command(self, msg_id, command, blocking=False):
         can_msg = {
             'type': msg_id,
             'command': command,
@@ -128,7 +128,7 @@ class StairTask(Task):
         path_left = {'in_front': (1250, 1080, 270),
                      'bottom': (1250, 700, 270),
                      'beginning': (1200, 650, 270),
-                     'top': (1250, 150, 270),
+                     'top': (1250, 190, 270),
                      'carpet 1': (1080, 200, 180),
                      'fire 1': self.carpet_command['fire left'],
                      'turning point': (1250, 200, 270),
@@ -240,10 +240,9 @@ class StandsTask(Task):
         }
         self.can_socket.send(can_msg)
         point1 = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand + 30)
-        point3 = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand + 40)
         point2 = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand - 50)
+        self.drive.drive_path([point1[0:2]], point2,  end_speed=10)
         time.sleep(0.7)
-        self.drive.drive_path([[point3[0:2], point1[0:2]]], point2,  end_speed=10)
         #  TODO: block if not not needed
         #self.wait_for_task(can.MsgTypes.Stands_Status.value, 0)
         #can_msg = {
@@ -391,3 +390,49 @@ class ClapperTask(Task):
         }
         self.can_socket.send(can_msg)
         time.sleep(0.2)
+
+
+class PopcornTask(Task):
+    def __init__(self, robots, my_color, can_socket, drive):
+        super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
+        self.points_game_element = 3
+        self.command = {'ready collect': 0, 'open case': 1, }
+        popcorn_left = [{'position': (300, 400, 90), 'end_position': (300, 180, 90)},
+                        {'position': (600, 400, 90), 'end_position': (600, 180, 90)}
+                        ]
+
+        for popcorn in popcorn_left:
+            popcorn['moved'] = False
+
+        popcorn_right = copy.deepcopy(popcorn_left)
+        for popcorn in popcorn_right:
+            x, y, angle = popcorn['position']
+            popcorn['position'] = (3000-x, y, angle)
+            x, y, angle = popcorn['end_position']
+            popcorn['end_position'] = (3000-x, y, angle)
+        if my_color == 'left':
+            self.my_game_elements = popcorn_left
+            self.enemy_game_elements = popcorn_right
+        elif my_color == 'right':
+            self.my_game_elements = popcorn_right
+            self.enemy_game_elements = popcorn_left
+        else:
+            raise Exception("Unknown team color")
+
+    def goto_task(self, object_number):
+        if object_number < 2:
+            return self.my_game_elements[object_number]['position']
+        else:
+            object_number -= 2
+            return self.enemy_game_elements[object_number]['position']
+
+    def do_task(self, object_number):
+        if object_number < 2:
+            self.drive.drive_path([], self.my_game_elements[object_number]['end_position'],  end_speed=-5)
+            self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['ready collect'], blocking=True)
+            self.drive.drive_path([], self.my_game_elements[object_number]['position'],  end_speed=5)
+        else:
+            object_number -= 2
+            self.drive.drive_path([], self.enemy_game_elements[object_number]['end_position'],  end_speed=-5)
+            self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['ready collect'], blocking=True)
+            self.drive.drive_path([], self.enemy_game_elements[object_number]['position'],  end_speed=5)

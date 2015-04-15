@@ -31,13 +31,13 @@ class Main():
             can_connection = 'can0'
             if not (hostname == 'Roboter-klein' or hostname == 'Roboter-gross'):
                 raise Exception('Wrong Hostname\nSet Hostname to "Roboter-klein" or "Roboter-gross"')
+        subprocess.Popen(['software/robo_gui'])
         self.can_socket = can.Can(can_connection, can.MsgSender.Hauptsteuerung)
         self.countdown = game_logic.Countdown(self.can_socket)
         self.debugger = debug.LaptopCommunication(self.can_socket)
         self.drive = drive.Drive(self.can_socket)
         self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
         self.reset = False
-        subprocess.Popen(['software/robo_gui'])
         time.sleep(1)   # TODO: delete file
         self. strategy = self.read_config('/root/gui_config')
         self.strategy['robot_name'] = hostname
@@ -47,7 +47,8 @@ class Main():
             {'clapper': game_logic.ClapperTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
              'stair': game_logic.StairTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
              'stand': game_logic.StandsTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
-             'cup': game_logic.CupTask(self.robots, self.strategy['side'], self.can_socket, self.drive)
+             'cup': game_logic.CupTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
+             'popcorn': game_logic.PopcornTask(self.robots, self.strategy['side'], self.can_socket, self.drive)
              }
         self.run()
 
@@ -174,15 +175,34 @@ class Main():
                 self.can_socket.send(can_msg)
 
             elif self.strategy['strategy'] == 'B':
-                raise Exception('Strategy not programmed')
-            elif self.strategy['strategy'] == 'C':
-                self.drive.set_close_range_detection(True)
-                self.drive.set_speed(50)
+                self.drive.set_close_range_detection(False)
+                self.drive.set_enemy_detection(True)
+                self.drive.set_speed(15)
+                self.drive.drive_path([], (500, 1000, 0))
+                self.drive.set_speed(-15)
+                points = [(400, 400, 0), (2600, 400, 180)]
                 while self.reset is False:
-                    points = [(900, 1600), (2100, 900), (900, 900), (2100, 1600)]
                     for point in points:
-                        for i in range(1):
-                            self.drive.drive_path([], (point, 180))
+                        self.drive.drive_route(point)
+            elif self.strategy['strategy'] == 'C':
+                if False:
+                    self.drive.set_close_range_detection(True)
+                    self.drive.set_speed(50)
+                    while self.reset is False:
+                        points = [(900, 1600), (2100, 900), (900, 900), (2100, 1600)]
+                        for point in points:
+                            for i in range(1):
+                                self.drive.drive_path([], (point, 180))
+                if True:
+                    self.drive.set_close_range_detection(False)
+                    self.drive.set_enemy_detection(False)
+                    self.drive.set_speed(15)
+                    self.drive.drive_path([], (1000, 1000, 0))
+                    point = self.game_tasks['popcorn'].goto_task(3)
+                    self.drive.drive_route(point)
+                    #self.drive.drive_path([], point)
+                    self.game_tasks['popcorn'].do_task(3)
+                    self.drive.drive_route((2600, 400, 180))
 
         if self.strategy['robot_name'] == 'Roboter-klein':
             if self.strategy['strategy'] == 'A':

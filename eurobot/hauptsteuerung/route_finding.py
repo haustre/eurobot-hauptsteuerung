@@ -17,7 +17,7 @@ class RouteFinding():
     def __init__(self, can_socket):
         self.resolution = 40
         self.table_size = 2000
-        self.robot_size = 20
+        self.robot_size = 16
         self.scale = self.table_size / self.resolution
         self.robot_weight = self._make_robot(self.robot_size)
         self.table = self._make_table(self.resolution)
@@ -35,6 +35,7 @@ class RouteFinding():
         self.robots.append(robot)
 
     def calculate_path(self, target):
+        target = target[0:2]    # remove angle
         robot_position_unknown = False
         gamefield = np.copy(self.table)
         for robot in self.robots:
@@ -117,7 +118,7 @@ class RouteFinding():
         :param size: size of the robot
         :return: weight array of the robot
         """
-        scale = 1/(size/50)
+        scale = 1/(size/self.resolution)
         x = np.arange(0, size, 1, float)
         y = x[:, np.newaxis]
         x0 = y0 = size // 2
@@ -150,7 +151,7 @@ class RouteFinding():
         array[int((1211-50) * pixel_per_mm):int(1233 * pixel_per_mm), int(2600 * pixel_per_mm):int(3000 * pixel_per_mm)] = weight
 
         array[int(1800 * pixel_per_mm):int(2000 * pixel_per_mm), int(1100 * pixel_per_mm):int(1900 * pixel_per_mm)] = weight
-        array = morphology.grey_dilation(array, size=(8, 8))
+        array = morphology.grey_dilation(array, size=(9, 9))
         return array
 
     def _create_graph(self, table):
