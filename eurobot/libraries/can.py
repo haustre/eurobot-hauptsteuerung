@@ -11,6 +11,8 @@ import socket
 import struct
 import threading
 import queue
+import time
+import copy
 from enum import Enum
 
 
@@ -32,10 +34,12 @@ class Can(object):
         """
         self.sender = sender
         self.queue_send = queue.Queue()
-        self.queue_debug = queue.Queue()  # Todo: Add all buffers
+        self.queue_debug = queue.Queue()
+        self.msg_queues = []
+        self.msg_interrupts = []
         self.can_frame_fmt = "=IB3x8s"
         self.socket = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
-        can_filter, can_mask = 0x600, 0x600
+        can_filter, can_mask = 0x600, 0x000
         can_filter = struct.pack("=II", can_filter, can_mask)
         self.socket.setsockopt(socket.SOL_CAN_RAW, socket.CAN_RAW_FILTER, can_filter)
         self.socket.bind((interface, ))
@@ -45,6 +49,16 @@ class Can(object):
         self.t_send_connection = threading.Thread(target=self._send_connection)
         self.t_send_connection.setDaemon(1)
         self.t_send_connection.start()
+
+    def create_queue(self, msg_type, msg_queue):
+        self.msg_queues.append((msg_type, msg_queue))
+        return len(self.msg_queues)-1
+
+    def remove_queue(self, queue_number):
+        self.msg_queues.pop(queue_number)
+
+    def create_interrupt(self, msg_type, function):
+        self.msg_interrupts.append((msg_type, function))
 
     def send(self, msg_frame):
         """ Packs a CAN-dictionary to a CAN-frame encodes it and puts it in the send queue
@@ -82,8 +96,15 @@ class Can(object):
         while 1:
             frame, addr = self.socket.recvfrom(16)
             can_id, can_msg = self._dissect_can_frame(frame)
-
-            #msg_frame = can.unpack(can_id, can_msg)
+            msg_frame = unpack(can_id, can_msg)
+            for queue in self.msg_queues:   # TODO: very slow
+                msg_type, msg_queue = queue
+                if msg_type == msg_frame['type']:
+                    msg_queue.put_nowait(msg_frame)
+            for interrupt in self.msg_interrupts:
+                msg_type, function = interrupt
+                if msg_type == msg_frame['type']:
+                    function(msg_frame)
             self.queue_debug.put_nowait((can_id, can_msg.decode('latin-1')))     # Todo: Check if full
 
     def _send_connection(self):
@@ -130,11 +151,14 @@ def unpack(can_id, can_msg):
     """
     type_mask = 0b00111111000
     type_nr = (can_id & type_mask) >> 3
-    msg_type = MsgTypes(type_nr)
+    msg_type = MsgTypes(type_nr).value
     sender_mask = 0b00000000111
-    sender = MsgSender(can_id & sender_mask)
+    sender = MsgSender(can_id & sender_mask).value
     encoding, dictionary = MsgEncoding[MsgTypes(type_nr).value]
-    data = struct.unpack(encoding, can_msg)
+    try:
+        data = struct.unpack(encoding, can_msg)
+    except struct.error:
+        raise Exception("CAN message encoding wrong:" + encoding + ": " + str(can_msg))
     msg_frame = {}
     for i, line in enumerate(reversed(data)):
         if not isinstance(dictionary[i], str):
@@ -181,14 +205,30 @@ class MsgTypes(Enum):
     EmergencyShutdown = 0
     Emergency_Stop = 1
     Game_End = 2
-    Position_Robot_1 = 3
-    Position_Robot_2 = 4
-    Position_Enemy_1 = 5
-    Position_Enemy_2 = 6
+    Position_Robot_small = 3
+    Position_Robot_big = 4
+    Position_Enemy_small = 5
+    Position_Enemy_big = 6
     Close_Range_Dedection = 7
     Goto_Position = 8
     Drive_Status = 9
-    Debug_Drive = 10
+    Stands_Command = 10
+    Stands_Status = 11
+    Cup_Command = 12
+    Cup_Status = 13
+    Clapper_Command = 14
+    Clapper_Status = 15
+    Popcorn_Command = 16
+    Popcorn_Status = 17
+    Peripherie_inputs = 18
+    Debug_Drive = 19
+    Configuration = 20
+    Board_Status = 21
+    Path = 22
+    Carpet_Command = 23
+    Carpet_Status = 24
+    Climbing_Command = 25
+    Climbing_Status = 26
 
 
 class MsgSender(Enum):
@@ -203,7 +243,7 @@ class MsgSender(Enum):
 # Format: 'Encoding type: ( Format, (1 Byte, 2 Byte ....)),
 EncodingTypes = {
     'game_end':
-        ('!B', ('time_to_game_end', '')),
+        ('!B', ['time_to_game_end']),
     'position':
         ('!BHHH', ('x_position', 'y_position', 'angle', ('position_correct', 'angle_correct'))),
     'close_range_dedection':
@@ -211,31 +251,57 @@ EncodingTypes = {
                     ('front_left_correct', 'front_middle_correct', 'front_right_correct', ),
                     ('sensor1', 'sensor2', 'sensor3', 'sensor4'))),
     'goto_position':
-        ('!HHHH', ('x_position', 'y_position', 'angle', 'speed')),
+        ('!BbHHH', ('x_position', 'y_position', 'angle', 'speed', 'path_length')),
     'drive_status':
         ('!BB', (('status'), 'time_to_destination')),
     'task_command':
-        ('!BB', ('task_nr', ('start_task', 'stop_task', 'get_status'))),
+        ('!B', ['command']),
     'task_status':
-        ('!BBB', ('task_nr', ('task_ready', 'task_running', 'task_finished'), 'collected_pieces')),
+        ('!BB', ('state', 'collected_pieces')),
     'peripherie':
-        ('!B', (('emergency_stop', 'key_is_removed'))),
+        ('!BB', (['emergency_stop', 'key_inserted'])),
     'debug_drive':
-        ('!hh', ('speed_left', 'speed_right'))
-
+        ('!hh', ('speed_left', 'speed_right')),
+    'emergency':
+        ('!B', ['code']),
+    'configuration':
+        ('!BB', ('reserve', ('is_robot_small', 'is_robot_big', 'is_enemy_small', 'is_enemy_big',
+                  'start_left', 'start_orientation'))),
+    'Board_Status':
+        ('!BB', (('config_complete'), 'error_code')),
+    'Path':
+        ('!bHH', ('x', 'y', 'speed'))
 }
 
 # the list contains which message type is encoded with which protocol
 MsgEncoding = {
+    MsgTypes.EmergencyShutdown.value: EncodingTypes['emergency'],
+    MsgTypes.Emergency_Stop.value: EncodingTypes['emergency'],
     MsgTypes.Game_End.value: EncodingTypes['game_end'],
-    MsgTypes.Position_Robot_1.value: EncodingTypes['position'],
-    MsgTypes.Position_Robot_2.value: EncodingTypes['position'],
-    MsgTypes.Position_Enemy_1.value: EncodingTypes['position'],
-    MsgTypes.Position_Enemy_2.value: EncodingTypes['position'],
+    MsgTypes.Position_Robot_small.value: EncodingTypes['position'],
+    MsgTypes.Position_Robot_big.value: EncodingTypes['position'],
+    MsgTypes.Position_Enemy_small.value: EncodingTypes['position'],
+    MsgTypes.Position_Enemy_big.value: EncodingTypes['position'],
     MsgTypes.Close_Range_Dedection.value: EncodingTypes['close_range_dedection'],
     MsgTypes.Goto_Position.value: EncodingTypes['goto_position'],
     MsgTypes.Drive_Status.value: EncodingTypes['drive_status'],
-    MsgTypes.Debug_Drive.value: EncodingTypes['debug_drive']
+    MsgTypes.Stands_Command.value: EncodingTypes['task_command'],
+    MsgTypes.Stands_Status.value: EncodingTypes['task_status'],
+    MsgTypes.Cup_Command.value: EncodingTypes['task_command'],
+    MsgTypes.Cup_Status.value: EncodingTypes['task_status'],
+    MsgTypes.Clapper_Command.value: EncodingTypes['task_command'],
+    MsgTypes.Clapper_Status.value: EncodingTypes['task_status'],
+    MsgTypes.Popcorn_Command.value: EncodingTypes['task_command'],
+    MsgTypes.Popcorn_Status.value: EncodingTypes['task_status'],
+    MsgTypes.Peripherie_inputs.value: EncodingTypes['peripherie'],
+    MsgTypes.Debug_Drive.value: EncodingTypes['debug_drive'],
+    MsgTypes.Configuration.value: EncodingTypes['configuration'],
+    MsgTypes.Board_Status.value: EncodingTypes['Board_Status'],
+    MsgTypes.Path.value: EncodingTypes['Path'],
+    MsgTypes.Carpet_Command.value: EncodingTypes['task_command'],
+    MsgTypes.Carpet_Status.value: EncodingTypes['task_status'],
+    MsgTypes.Climbing_Command.value: EncodingTypes['task_command'],
+    MsgTypes.Climbing_Status.value: EncodingTypes['task_status']
 }
 
 # Colors used in can table (Red, Green, Blue) 0-255
@@ -243,12 +309,28 @@ MsgColors = {
     MsgTypes.EmergencyShutdown.value:      (205, 41, 41),
     MsgTypes.Emergency_Stop.value:         (205, 41, 41),
     MsgTypes.Game_End.value:               (41, 205, 41),
-    MsgTypes.Position_Robot_1.value:       (41, 205, 180),
-    MsgTypes.Position_Robot_2.value:       (31, 154, 135),
-    MsgTypes.Position_Enemy_1.value:       (41, 175, 205),
-    MsgTypes.Position_Enemy_2.value:       (31, 131, 154),
+    MsgTypes.Position_Robot_small.value:   (41, 205, 180),
+    MsgTypes.Position_Robot_big.value:     (31, 154, 135),
+    MsgTypes.Position_Enemy_small.value:   (41, 175, 205),
+    MsgTypes.Position_Enemy_big.value:     (31, 131, 154),
     MsgTypes.Close_Range_Dedection.value:  (41, 52, 205),
     MsgTypes.Goto_Position.value:          (123, 41, 205),
     MsgTypes.Drive_Status.value:           (205, 41, 183),
-    MsgTypes.Debug_Drive.value:            (205, 41, 183)
+    MsgTypes.Debug_Drive.value:            (205, 41, 183),
+    MsgTypes.Stands_Command.value:         (205, 41, 183),
+    MsgTypes.Stands_Status.value:          (205, 41, 183),
+    MsgTypes.Cup_Command.value:            (205, 41, 183),
+    MsgTypes.Cup_Status.value:             (205, 41, 183),
+    MsgTypes.Clapper_Command.value:        (205, 41, 183),
+    MsgTypes.Clapper_Status.value:         (205, 41, 183),
+    MsgTypes.Popcorn_Command.value:        (205, 41, 183),
+    MsgTypes.Popcorn_Status.value:         (205, 41, 183),
+    MsgTypes.Peripherie_inputs.value:      (205, 41, 183),
+    MsgTypes.Configuration.value:          (205, 41, 183),
+    MsgTypes.Board_Status.value:           (205, 41, 183),
+    MsgTypes.Path.value:                   (205, 41, 183),
+    MsgTypes.Carpet_Command.value:         (205, 41, 183),
+    MsgTypes.Carpet_Status.value:          (205, 41, 183),
+    MsgTypes.Climbing_Command.value:       (205, 41, 183),
+    MsgTypes.Climbing_Status.value:        (205, 41, 183),
 }

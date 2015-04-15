@@ -5,8 +5,11 @@ This module contains unittests for CAN packer functions.
 __author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"
 
-from unittest import TestCase
 import struct
+import time
+import random
+import queue
+from unittest import TestCase
 from eurobot.libraries import can
 
 
@@ -41,7 +44,8 @@ class TestCanPacker(TestCase):
         packer_format = '!BHHH'
         can_msg = struct.pack(packer_format, data_correct, 234, 1234, 2345)
         msg_frame = can.unpack(can_id, can_msg)
-        correct_result = (False, True, 234, 1234, 2345, can.MsgTypes.Position_Robot_1, can.MsgSender.Hauptsteuerung)
+        correct_result = (False, True, 234, 1234, 2345, can.MsgTypes.Position_Robot_big.value,
+                          can.MsgSender.Hauptsteuerung.value)
         result = msg_frame['angle_correct'], msg_frame['position_correct'], msg_frame['angle'],\
             msg_frame['y_position'], msg_frame['x_position'], msg_frame['type'], msg_frame['sender']
         self.assertEqual(correct_result, result)
@@ -52,7 +56,7 @@ class TestCanPacker(TestCase):
         This function converts a dictionary to a CAN message and checks if it is correct.
         """
         can_msg = {
-            'type': can.MsgTypes.Position_Robot_1.value,
+            'type': can.MsgTypes.Position_Robot_big.value,
             'position_correct': True,
             'angle_correct': False,
             'angle': 234,
@@ -68,3 +72,48 @@ class TestCanPacker(TestCase):
         packer_format = '!BHHH'
         can_msg = struct.pack(packer_format, data_correct, 234, 1234, 2345)
         self.assertEqual(result, (can_id, can_msg))
+
+
+class TestCanCommunication(TestCase):
+    """ Unittest for The CAN communication with the Discovery Board
+    All tests will fail if the Discovery Board is not connected to the computer
+    """
+
+    def setUp(self):
+        self.msgqueue = queue.Queue()
+        try:
+            self.can_connection = can.Can('can0', can.MsgSender.Hauptsteuerung)
+        except:
+            self.can_connection = None
+            print("CAN Interface not running")
+
+    def test_position_robot_1(self):
+        if self.can_connection:
+            print(len(can.MsgTypes))
+            for msg_type in range(len(can.MsgTypes)):
+                print(msg_type)
+                _, dictionary = can.MsgEncoding[can.MsgTypes(msg_type).value]
+                self.can_connection.create_queue(msg_type, self.msgqueue)
+
+                for i in range(10):
+                    msg_send = {'type': msg_type}
+                    for byte in dictionary:
+                        if isinstance(byte, str):
+                            msg_send[byte] = random.randrange(0, 2**8-1)
+                        else:
+                            for bit in byte:
+                                msg_send[bit] = random.choice((True, False))
+
+                    msg_recv = self.compare_send_recv(msg_send)
+                    self.assertEqual(msg_recv, msg_send)
+        else:
+            self.fail(msg="Skip Discovery Board Test")
+
+    def compare_send_recv(self, msg_send):
+        self.can_connection.send(msg_send)
+        msg_rcv = self.msgqueue.get()
+        del msg_rcv['sender']
+        return msg_rcv
+
+    def tearDown(self):
+        pass

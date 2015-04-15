@@ -55,7 +55,6 @@ class Table(QTableWidget):
         if autoscroll is True:
             slide_bar = self.verticalScrollBar()
             slide_bar.setValue(slide_bar.maximum())
-        print(row_count)
 
     def filter_types(self, types):
         """ Applies a filter to the list and hides unwanted rows
@@ -73,6 +72,9 @@ class Table(QTableWidget):
                 for item in items_to_hide:
                     self.hideRow(item.row())
 
+    def reset(self):
+        self.setRowCount(0)
+
 
 class CanTableControl(QWidget):
     """ Controls what will be be shown in the CAN table """
@@ -82,13 +84,16 @@ class CanTableControl(QWidget):
         self.run_button = QPushButton('Run')
         self.run_button.clicked.connect(self.run_button_clicked)
         self.run_button.setCheckable(True)
+        self.reset_button = QPushButton('Reset')
+        self.reset_button.clicked.connect(self.reset_button_clicked)
         self.can_window = SendCan(self)
         self.send_button = QPushButton('Send CAN message')
         self.send_button.clicked.connect(self.can_button_clicked)
 
         grid = QGridLayout()
         grid.setSizeConstraint(QLayout.SetMinAndMaxSize)
-        grid.addWidget(self.autoscroll_box, 0, 0)
+        #grid.addWidget(self.autoscroll_box, 0, 0)
+        grid.addWidget(self.reset_button, 0, 0)
         grid.addWidget(self.run_button, 0, 1)
 
         self.type_chechboxes = []
@@ -113,6 +118,9 @@ class CanTableControl(QWidget):
             for checkbox in self.type_chechboxes:
                 checkbox.setEnabled(True)
 
+    def reset_button_clicked(self):
+        self.emit(SIGNAL('reset_Table'))
+
     def can_button_clicked(self):
         """ Opens a new Window for sending CAN messages """
         self.can_window.exec_()
@@ -132,16 +140,17 @@ class CanTableControl(QWidget):
         """
         msg_frame_copy = copy.copy(msg_frame)
         if self.run_button.isChecked():
-            table_sender = str(msg_frame_copy['sender'].name)
-            table_type = str(msg_frame_copy['type'].name)
-            table_color = can.MsgColors[msg_frame_copy['type'].value]
-            visible = self.type_chechboxes[msg_frame_copy['type'].value].isChecked()
+            table_sender = str(can.MsgSender(msg_frame_copy['sender']).name)
+            table_type = str(can.MsgTypes(msg_frame_copy['type']).name)
+            table_color = can.MsgColors[msg_frame_copy['type']]
+            visible = self.type_chechboxes[msg_frame_copy['type']].isChecked()
             del msg_frame_copy['type']
             del msg_frame_copy['sender']
             table_msg = str(msg_frame_copy)
             current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
             new_row = [current_time, table_sender, table_type, table_msg]
-            autoscroll = self.autoscroll_box.isChecked()
+            #autoscroll = self.autoscroll_box.isChecked()
+            autoscroll = True
             self.emit(SIGNAL('new_can_Table_Row'), new_row, table_color, autoscroll, visible)
 
 
@@ -246,9 +255,13 @@ class SendCan(QDialog):
     def send(self):  # Todo: compete method
         """ This method sends the CAN message """
         index = self.msg_type_combo.currentIndex()
+        encoding, dictionary = can.MsgEncoding[index]
+        index = self.msg_type_combo.currentIndex()
         msg_type = can.MsgTypes(index).value
         can_msg = {
             'type': msg_type,
         }
-
+        for i, entry in enumerate(dictionary):
+            can_msg[entry] = self.lines[i].text()
+        print(can_msg)
         self.emit(SIGNAL('send_can_over_tcp'), can_msg)
