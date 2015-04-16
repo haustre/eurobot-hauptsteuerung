@@ -239,8 +239,8 @@ class StandsTask(Task):
             'command': self.command['ready collect'],
         }
         self.can_socket.send(can_msg)
-        point1 = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand + 30)
-        point2 = self.calculate_stopping_point(starting_point, stand_point, self.distance_to_stand - 50)
+        point1 = self.calculate_stopping_point(starting_point, stand_point, 30)
+        point2 = self.calculate_stopping_point(starting_point, stand_point, -50)
         self.drive.drive_path([point1[0:2]], point2,  end_speed=10)
         time.sleep(0.7)
         #  TODO: block if not not needed
@@ -252,6 +252,7 @@ class StandsTask(Task):
         #self.can_socket.send(can_msg)
 
     def calculate_stopping_point(self, from_pos, to_pos, distance):
+        distance += self.distance_to_stand
         stopping_point = [0, 0]
         dx = to_pos[0] - from_pos[0]
         dy = to_pos[1] - from_pos[1]
@@ -267,11 +268,12 @@ class CupTask(Task):
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
         self.my_color = my_color
-        self.distance = 200
+        self.distance = 150
         self.shift = 100
         self.points_game_element = 3
         self.free_arms = {'right': True, 'left': True}
         self.command = {'blocked': 0, 'ready collect': 1, 'open case': 2}
+        self.sides = {'left': 0, 'right': 1}
         cups_left = [{'position': (250, 1750)},
                      {'position': (910, 830)},
                      {'position': (1500, 1650)},
@@ -295,29 +297,33 @@ class CupTask(Task):
             'command': self.command['ready collect'],
         }
         self.can_socket.send(can_msg)
-        point1, point2, angle = self.calculate_stopping_points(starting_point, stand_point, self.distance, self.shift)
-        self.drive.drive_path([point1], (point2, angle), end_speed=10)
+        point1, point2 = self.calculate_stopping_points(starting_point, stand_point, self.sides['right'])
+        self.drive.drive_path([point1], point2, end_speed=10)
         #self.wait_for_task(can.MsgTypes.Stands_Status.value, 0)
-        can_msg = {
-            'type': can.MsgTypes.Cup_Command.value,
-            'command': self.command['blocked'],
-        }
+        #can_msg = {
+        #    'type': can.MsgTypes.Cup_Command.value,
+        #    'command': self.command['blocked'],
+        #}
         self.can_socket.send(can_msg)
 
-    def calculate_stopping_points(self, from_pos, to_pos, distance, shift):
+    def calculate_stopping_points(self, from_pos, to_pos, side):
         point1 = [0, 0]
         point2 = [0, 0]
 
         dx = to_pos[0] - from_pos[0]
         dy = to_pos[1] - from_pos[1]
         angle = math.atan2(dy, dx)
-        x = math.cos(angle) * distance
-        y = math.sin(angle) * distance
+        x = math.cos(angle) * self.distance
+        y = math.sin(angle) * self.distance
         point1[0] = int(to_pos[0] - x)
         point1[1] = int(to_pos[1] - y)
 
-        x = math.cos(angle-math.pi/2) * shift
-        y = math.sin(angle-math.pi/2) * shift
+        if side == self.sides['left']:
+            x = math.cos(angle-math.pi/2) * self.shift
+            y = math.sin(angle-math.pi/2) * self.shift
+        else:
+            x = math.cos(angle+math.pi/2) * self.shift
+            y = math.sin(angle+math.pi/2) * self.shift
         point1[0] = int(point1[0] - x)
         point1[1] = int(point1[1] - y)
 
@@ -326,7 +332,7 @@ class CupTask(Task):
         point2[0] = int(point1[0] + x)
         point2[1] = int(point1[1] + y)
 
-        return point1, point2, angle / (2 * math.pi) * 360
+        return point1, (point2[0], point2[1], angle / (2 * math.pi) * 360)
 
 
 class ClapperTask(Task):
@@ -335,14 +341,14 @@ class ClapperTask(Task):
         self.points_game_element = 5
         self.movable = False
         y_pos = 1740
-        clapper_left = [{'position': (300, y_pos), 'side': 'right', 'angle': 0, 'end_position': (500, y_pos)},
-                        {'position': (900, y_pos), 'side': 'right', 'angle': 0, 'end_position': (1100, y_pos)},
-                        {'position': (2400, y_pos), 'side': 'left', 'angle': 180, 'end_position': (2200, y_pos)}
+        clapper_left = [{'position': (300, y_pos, 90), 'side': 'right'},
+                        {'position': (900, y_pos, 90), 'side': 'right'},
+                        {'position': (2400, y_pos, 90), 'side': 'left'}
                         ]
 
-        clapper_right = [{'position': (2700, y_pos), 'side': 'left', 'angle': 180, 'end_position': (2500, y_pos)},
-                         {'position': (2100, y_pos), 'side': 'left', 'angle': 180, 'end_position': (1900, y_pos)},
-                         {'position': (600, y_pos), 'side': 'right', 'angle': 0, 'end_position': (800, y_pos)}
+        clapper_right = [{'position': (2700, y_pos, 90), 'side': 'left'},
+                         {'position': (2100, y_pos, 90), 'side': 'left'},
+                         {'position': (600, y_pos, 90), 'side': 'right'}
                          ]
 
         for clapper in clapper_left:
@@ -361,7 +367,7 @@ class ClapperTask(Task):
             raise Exception("Unknown team color")
 
     def goto_task(self, clapper_number):
-        return self.my_game_elements[clapper_number]['position'], self.my_game_elements[clapper_number]['angle']
+        return self.my_game_elements[clapper_number]['position']
 
     def do_task(self, clapper_number):
         if self.my_game_elements[clapper_number]['side'] == 'left':
@@ -373,17 +379,18 @@ class ClapperTask(Task):
             'command': clapper_side,
         }
         self.can_socket.send(can_msg)
-        time.sleep(1)
+        time.sleep(1)   # TODO: wait for response
         # TODO: check if the way is free
         can_msg = {
             'type': can.MsgTypes.Goto_Position.value,
-            'x_position': self.my_game_elements[clapper_number]['end_position'][0],
-            'y_position': self.my_game_elements[clapper_number]['end_position'][1],
-            'angle': self.my_game_elements[clapper_number]['angle'] * 100,
-            'speed': -25,    # TODO: check
+            'x_position': self.my_game_elements[clapper_number]['position'][0],
+            'y_position': self.my_game_elements[clapper_number]['position'][1],
+            'angle': 0 * 100,
+            'speed': 10,    # TODO: check
             'path_length': 0,
         }
         self.can_socket.send(can_msg)
+        time.sleep(1)
         can_msg = {
             'type': can.MsgTypes.Clapper_Command.value,
             'command': 0,   # both arms up

@@ -21,7 +21,13 @@ class RobotPosition():
         self.scale = table_size / resolution
         self.last_position_update = 0
         self.last_angle_update = 0
+        self.new_position_data = []
         can_socket.create_interrupt(msg_type, self.can_robot_position)
+
+    def get_new_position_lock(self):
+        lock = threading.Lock()
+        self.new_position_data.append(lock)
+        return lock
 
     def can_robot_position(self, can_msg):
         margin = int(20 * self.scale)
@@ -32,6 +38,9 @@ class RobotPosition():
                 self.position = x, y
                 self.map[round(x / self.scale) - margin: round(x / self.scale) + margin,
                          round(y / self.scale) - margin: round(y / self.scale) + margin] += 1
+                for lock in self.new_position_data:  # release all locks
+                    lock.acquire(False)
+                    lock.release()
             self.last_position_update = time.time()
         if can_msg['angle_correct']:
             with self.lock:
@@ -67,8 +76,8 @@ class PositionOtherRobot(RobotPosition):
     def check_navigation(self):
         while True:
             now = time.time()
-            if now - self.last_position_update > 0.1:
+            if now - self.last_position_update > 0.5:
                 self.angle = None
-            if now - self.last_angle_update > 0.1:
+            if now - self.last_angle_update > 0.5:
                 self.position = None
             time.sleep(0.5)    # TODO: set correct time

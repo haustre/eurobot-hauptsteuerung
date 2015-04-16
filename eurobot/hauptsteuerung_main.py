@@ -31,6 +31,7 @@ class Main():
             can_connection = 'can0'
             if not (hostname == 'Roboter-klein' or hostname == 'Roboter-gross'):
                 raise Exception('Wrong Hostname\nSet Hostname to "Roboter-klein" or "Roboter-gross"')
+        self.clear_config('/root/gui_config')
         subprocess.Popen(['software/robo_gui'])
         self.can_socket = can.Can(can_connection, can.MsgSender.Hauptsteuerung)
         self.countdown = game_logic.Countdown(self.can_socket)
@@ -38,7 +39,7 @@ class Main():
         self.drive = drive.Drive(self.can_socket)
         self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
         self.reset = False
-        time.sleep(1)   # TODO: delete file
+        self.debugger.start()
         self. strategy = self.read_config('/root/gui_config')
         self.strategy['robot_name'] = hostname
         print(self.strategy)
@@ -51,6 +52,12 @@ class Main():
              'popcorn': game_logic.PopcornTask(self.robots, self.strategy['side'], self.can_socket, self.drive)
              }
         self.run()
+
+    def clear_config(self, file_name):
+        try:
+            open(file_name, 'w').close()
+        except FileNotFoundError:
+            print('Configuration not found')
 
     def read_config(self, file_name):
         while True:
@@ -75,7 +82,6 @@ class Main():
                 time.sleep(2)
 
     def run(self):
-        self.debugger.start()
         # TODO: get information from gui
         if self.strategy['side'] == 'left':
             side = 1
@@ -162,10 +168,11 @@ class Main():
                 self.drive.set_enemy_detection(False)
                 self.drive.set_speed(15)
                 self.game_tasks['stand'].do_task(5)
-                self.game_tasks['stand'].do_task(6)
-                self.drive.drive_path([], (290, 1460, 180))
-                self.game_tasks['stand'].do_task(1)
-                #self.game_tasks['cup'].do_task(0)
+                #self.game_tasks['stand'].do_task(6)
+                #self.drive.drive_path([], (290, 1460, 180))
+                #self.game_tasks['stand'].do_task(1)
+
+                self.game_tasks['cup'].do_task(1)
                 #self.game_tasks['stand'].do_task(1)
                 self.drive.drive_path([], (1500, 1000, 180))
                 can_msg = {

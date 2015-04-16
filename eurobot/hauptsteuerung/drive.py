@@ -21,11 +21,13 @@ class Drive():
         self.close_range_detection = True
         self.enemy_detection = True
         self.my_robot = None
+        self.my_robot_new_position = None
         self.robots = []
 
     def add_my_robot(self, robot):
         self.my_robot = robot
         self.route_finder.add_my_robot(robot)
+        self.my_robot_new_position = self.my_robot.get_new_position_lock()
 
     def add_robot(self, robot):
         self.robots.append(robot)
@@ -114,6 +116,7 @@ class Drive():
                 del path[index]
 
     def wait_for_arrival(self, path, speed=100):    # TODO: add timeout
+        path_pointer = 0
         robot_big = self.my_robot.name == 'Roboter-gross'
         break_distance = 250 + (300 / 100 * speed)  # TODO: not tested
         drive_queue = queue.Queue()
@@ -143,11 +146,16 @@ class Drive():
                         self.can_socket.send(can_msg)
                 except queue.Empty:
                     pass
+            if self.my_robot_new_position.acquire(False):   # TODO: Not tested
+                my_position = self.my_robot.get_position()
+                for i, point in enumerate(path[path_pointer:path_pointer+6]):
+                    if math.sqrt((my_position[0] - point[0])**2 + (my_position[1] - point[1])**2) < 200:
+                        path_pointer += (i+1)
             if self.enemy_detection:
                 for robot in self.robots:
                     position = robot.get_position()
                     if position:
-                        for point in path:
+                        for point in path[path_pointer:path_pointer+20]:
                             if math.sqrt((position[0] - point[0])**2 + (position[1] - point[1])**2) < 200:
                                 emergency = True
                                 can_msg = {
@@ -155,7 +163,7 @@ class Drive():
                                     'code': 0,
                                 }
                                 self.can_socket.send(can_msg)
-            time.sleep(0.003)
+            time.sleep(0.010)
         self.can_socket.remove_queue(close_range_queue_number)
         self.can_socket.remove_queue(drive_queue_number)
         if emergency:
