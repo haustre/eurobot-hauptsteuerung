@@ -23,6 +23,7 @@ class Drive():
         self.my_robot = None
         self.my_robot_new_position = None
         self.robots = []
+        self.rotation_direction = None
 
     def add_my_robot(self, robot):
         self.my_robot = robot
@@ -42,23 +43,37 @@ class Drive():
     def set_enemy_detection(self, activate):
         self.enemy_detection = activate
 
-    def drive_route(self, destination, timeout=15):
+    def drive_route(self, destination, angle, timeout=15):
         starting_time = time.time()
         arrived = False
         while arrived is False:
             route, path_len = self.route_finder.calculate_path(destination)
-            arrived = self.drive_path(route, destination)
+            arrived = self.drive_path(route, destination, angle)
             if time.time() - starting_time > timeout:
                 return False
             time.sleep(0.5)
         return True
 
-    def drive_path(self, path, destination, path_speed=None, end_speed=None, blocking=True):
+    def drive_path(self, path, destination, angle_in, path_speed=None, end_speed=None, blocking=True):
+        if destination:
+            if len(destination) == 2:
+                x, y = destination
+                angle = None
+            elif len(destination) == 3:
+                x, y, angle = destination
+            else:
+                raise Exception('Destination formatted wrong')
+            x, y = int(x), int(y)
+        else:
+            x, y = 65535, 65535
+        if angle_in or angle:
+            angle = int((abs(angle_in) % 360000)*100)
+        else:
+            angle = 65535
         if end_speed is None:
             end_speed = self.speed
         if path_speed is None:
             path_speed = self.speed
-        x, y, angle = destination
         in_save_zone = True
         wrong_point = None
         filtered_path = copy.copy(path)
@@ -68,15 +83,15 @@ class Drive():
             if save_zone[0][0] > point[0] > save_zone[0][1] or save_zone[1][0] > point[1] > save_zone[1][1]:
                 in_save_zone = False
                 wrong_point = point
-        if save_zone[0][0] > x > save_zone[0][1] or save_zone[1][0] > y > save_zone[1][1]:
+        if save_zone[0][0] > x > save_zone[0][1] or save_zone[1][0] > y > save_zone[1][1] or x == 65535 and y == 65535:
             in_save_zone = False
             wrong_point = x, y
         if in_save_zone:
             can_msg = {
                 'type': can.MsgTypes.Goto_Position.value,
-                'x_position': int(x),
-                'y_position': int(y),
-                'angle': int((abs(angle) % 360000)*100),
+                'x_position': x,
+                'y_position': y,
+                'angle': angle,
                 'speed': end_speed,
                 'path_length': len(filtered_path),
             }
@@ -111,7 +126,6 @@ class Drive():
                             (path[i][0] - path[i+1][0] == path[i+1][0] - path[i+2][0]) and
                             (path[i][1] - path[i+1][1] == path[i+1][1] - path[i+2][1])):
                         points_to_delete.append(i+1)
-            #print(len(path), set(points_to_delete))
             for index in reversed(sorted(list(set(points_to_delete)))):
                 del path[index]
 
@@ -144,6 +158,31 @@ class Drive():
                             'code': 0,
                         }
                         self.can_socket.send(can_msg)
+                        if self.rotation_direction is None:  # TODO: Not tested
+                            if (range_msg['distance_front_right'] < range_msg['distance_front_left'] or
+                               range_msg['front_right_correct'] is False):
+                                self.rotation_direction = 'left'
+                            else:
+                                self.rotation_direction = 'right'
+                        else:
+                            if self.rotation_direction == 'left':
+                                self.rotation_direction = 'right'
+                            else:
+                                self.rotation_direction = 'left'
+                        if self.rotation_direction == 'left':
+                            angle = self.my_robot.get_angle - 90
+                        else:
+                            angle = self.my_robot.get_angle + 90
+                        angle = int((abs(angle) % 360000)*100)
+                        can_msg = {
+                            'type': can.MsgTypes.Goto_Position.value,
+                            'x_position': 65535,
+                            'y_position': 65535,
+                            'angle': angle,
+                            'speed': int(self.speed/2),
+                            'path_length': 0,
+                        }
+                        self.can_socket.send(can_msg)
                 except queue.Empty:
                     pass
             if self.my_robot_new_position.acquire(False):   # TODO: Not tested
@@ -155,7 +194,7 @@ class Drive():
                 for robot in self.robots:
                     position = robot.get_position()
                     if position:
-                        for point in path[path_pointer:path_pointer+20]:
+                        for point in path[path_pointer:path_pointer+25]:
                             if math.sqrt((position[0] - point[0])**2 + (position[1] - point[1])**2) < 200:
                                 emergency = True
                                 can_msg = {
@@ -163,10 +202,11 @@ class Drive():
                                     'code': 0,
                                 }
                                 self.can_socket.send(can_msg)
-            time.sleep(0.010)
+            time.sleep(0.005)
         self.can_socket.remove_queue(close_range_queue_number)
         self.can_socket.remove_queue(drive_queue_number)
         if emergency:
             return False
         else:
+            self.rotation_direction = None
             return True

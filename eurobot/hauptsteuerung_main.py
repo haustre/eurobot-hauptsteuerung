@@ -23,21 +23,26 @@ from hauptsteuerung.robot import PositionMyRobot, PositionOtherRobot
 class Main():
     def __init__(self):
         """ Main programm running on Robot"""
+        self.debug = False
         hostname = socket.gethostname()
         if len(sys.argv) == 3:
             can_connection = sys.argv[1]
             hostname = sys.argv[2]
+            self.debug = True
         else:
             can_connection = 'can0'
             if not (hostname == 'Roboter-klein' or hostname == 'Roboter-gross'):
                 raise Exception('Wrong Hostname\nSet Hostname to "Roboter-klein" or "Roboter-gross"')
-        self.clear_config('/root/gui_config')
-        subprocess.Popen(['software/robo_gui'])
         self.can_socket = can.Can(can_connection, can.MsgSender.Hauptsteuerung)
+        if self.debug:
+            self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
+            self.enemy_simulation.start()
+        else:
+            self.clear_config('/root/gui_config')
+            subprocess.Popen(['software/robo_gui'])
         self.countdown = game_logic.Countdown(self.can_socket)
         self.debugger = debug.LaptopCommunication(self.can_socket)
         self.drive = drive.Drive(self.can_socket)
-        self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
         self.reset = False
         self.debugger.start()
         self. strategy = self.read_config('/root/gui_config')
@@ -60,26 +65,34 @@ class Main():
             print('Configuration not found')
 
     def read_config(self, file_name):
-        while True:
-            strategy = {}
-            try:
-                with open(file_name) as f:
-                    file_content = f.readlines()
-            except FileNotFoundError:
-                print('Configuration not found')
-            if len(file_content) == 7:
-                complete = file_content[6].strip().strip('complete: ')
-                if complete == 'yes':
-                    strategy['side'] = file_content[0].strip().strip('side: ')
-                    strategy['strategy'] = file_content[1].strip().strip('strategy: ')
-                    strategy['enemy_small'] = file_content[2].strip().strip('enemy small: ')
-                    strategy['enemy_big'] = file_content[3].strip().strip('enemy big: ')
-                    strategy['robot_small'] = file_content[4].strip().strip('own_robot_small: ')
-                    strategy['robot_big'] = file_content[5].strip().strip('own_robot_big: ')
-                    return strategy
-            else:
-                print('Configuration not finished')
-                time.sleep(2)
+        if self.debug:
+            strategy = {
+                'robot_small': False, 'robot_big': True, 'enemy_small': False, 'enemy_big': False,
+                'robot_name': None, 'side': 'left', 'strategy': 0
+            }
+            print("!!!! Debug Program !!!!")
+            return strategy
+        else:
+            while True:
+                strategy = {}
+                try:
+                    with open(file_name) as f:
+                        file_content = f.readlines()
+                except FileNotFoundError:
+                    print('Configuration not found')
+                if len(file_content) == 7:
+                    complete = file_content[6].strip().strip('complete: ')
+                    if complete == 'yes':
+                        strategy['side'] = file_content[0].strip().strip('side: ')
+                        strategy['strategy'] = file_content[1].strip().strip('strategy: ')
+                        strategy['enemy_small'] = file_content[2].strip().strip('enemy small: ')
+                        strategy['enemy_big'] = file_content[3].strip().strip('enemy big: ')
+                        strategy['robot_small'] = file_content[4].strip().strip('own_robot_small: ')
+                        strategy['robot_big'] = file_content[5].strip().strip('own_robot_big: ')
+                        return strategy
+                else:
+                    print('Configuration not finished')
+                    time.sleep(2)
 
     def run(self):
         # TODO: get information from gui
@@ -126,7 +139,6 @@ class Main():
         self.countdown.start()
         self.can_socket.create_interrupt(can.MsgTypes.Peripherie_inputs.value, self.periphery_input)
         self.countdown.set_interrupt(self.game_end, 'game_end', 2)
-        #self.enemy_simulation.start()
         self.strategy_start()
         print("Programm End")
 
@@ -174,7 +186,7 @@ class Main():
 
                 self.game_tasks['cup'].do_task(1)
                 #self.game_tasks['stand'].do_task(1)
-                self.drive.drive_path([], (1500, 1000, 180))
+                self.drive.drive_path([], (1500, 1000), 180)
                 can_msg = {
                     'type': can.MsgTypes.Stands_Command.value,
                     'command': self.game_tasks['stand'].command['open case'],
@@ -185,12 +197,12 @@ class Main():
                 self.drive.set_close_range_detection(False)
                 self.drive.set_enemy_detection(True)
                 self.drive.set_speed(15)
-                self.drive.drive_path([], (500, 1000, 0))
+                self.drive.drive_path([], (500, 1000), 0)
                 self.drive.set_speed(-15)
                 points = [(400, 400, 0), (2600, 400, 180)]
                 while self.reset is False:
                     for point in points:
-                        self.drive.drive_route(point)
+                        self.drive.drive_route(point, None)
             elif self.strategy['strategy'] == 'C':
                 if False:
                     self.drive.set_close_range_detection(True)
@@ -199,25 +211,25 @@ class Main():
                         points = [(900, 1600), (2100, 900), (900, 900), (2100, 1600)]
                         for point in points:
                             for i in range(1):
-                                self.drive.drive_path([], (point, 180))
+                                self.drive.drive_path([], point, 180)
                 if True:
                     self.drive.set_close_range_detection(False)
                     self.drive.set_enemy_detection(False)
                     self.drive.set_speed(15)
-                    self.drive.drive_path([], (1000, 1000, 0))
-                    point = self.game_tasks['popcorn'].goto_task(3)
-                    self.drive.drive_route(point)
+                    self.drive.drive_path([], (1000, 1000), 0)
+                    point, angle = self.game_tasks['popcorn'].goto_task(3)
+                    self.drive.drive_route(point, angle)
                     #self.drive.drive_path([], point)
                     self.game_tasks['popcorn'].do_task(3)
-                    self.drive.drive_route((2600, 400, 180))
+                    self.drive.drive_route((2600, 400), 180)
 
         if self.strategy['robot_name'] == 'Roboter-klein':
             if self.strategy['strategy'] == 'A':
                 self.drive.set_close_range_detection(False)
                 self.drive.set_enemy_detection(False)
                 self.drive.set_speed(100)
-                point = self.game_tasks['stair'].goto_task()
-                self.drive.drive_path([], point)
+                point, angle = self.game_tasks['stair'].goto_task()
+                self.drive.drive_path([], point, angle)
                 self.drive.set_close_range_detection(False)
                 self.drive.set_speed(60)
                 self.game_tasks['stair'].do_task()
