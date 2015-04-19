@@ -167,34 +167,6 @@ class StairTask(Task):
         self.drive.drive_path([], self.my_path['carpet 2'])
         self.send_task_command(can.MsgTypes.Carpet_Command.value, self.my_path['fire 2'], blocking=True)
 
-    def _goto_position(self, waypoint):
-        can_msg = {
-            'type': can.MsgTypes.Goto_Position.value,
-            'x_position': self.my_path[waypoint][0],
-            'y_position': self.my_path[waypoint][1],
-            'angle': self.my_path[waypoint][3],
-            'speed': 25,    # TODO: check
-            'path_length': 0,
-        }
-        self.can_socket.send(can_msg)
-
-        can_queue = queue.Queue()
-        queue_number = self.can_socket.create_queue(can.MsgTypes.Drive_Status.value, can_queue)
-        arrived = False
-        while arrived is False:
-            can_msg = can_queue.get()
-            if can_msg['status'] == 0 and can_msg['time_to_destination'] == 0:  # TODO: change status
-                arrived = True
-        self.can_socket.remove_queue(queue_number)
-
-    def _send_command(self, command):
-        can_msg = {
-            'type': can.MsgTypes.Climbing_Command.value,
-            'command': command,
-        }
-        self.can_socket.send(can_msg)
-        # TODO: wait to finish
-
 
 class StandsTask(Task):
     def __init__(self, robots, my_color, can_socket, drive):
