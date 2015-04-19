@@ -44,7 +44,7 @@ class Main():
         self.debugger = debug.LaptopCommunication(self.can_socket)
         self.drive = drive.Drive(self.can_socket)
         self.reset = False
-        self.debugger.start()
+        self.debugger.start_can()
         self. strategy = self.read_config('/root/gui_config')
         self.strategy['robot_name'] = hostname
         print(self.strategy)
@@ -56,6 +56,8 @@ class Main():
              'cup': game_logic.CupTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
              'popcorn': game_logic.PopcornTask(self.robots, self.strategy['side'], self.can_socket, self.drive)
              }
+        self.debugger.add_game_tasks(self.game_tasks)
+        self.debugger.start_game_tasks()
         self.run()
 
     def clear_config(self, file_name):
@@ -67,7 +69,7 @@ class Main():
     def read_config(self, file_name):
         if self.debug:
             strategy = {
-                'robot_small': False, 'robot_big': True, 'enemy_small': False, 'enemy_big': False,
+                'robot_small': True, 'robot_big': True, 'enemy_small': True, 'enemy_big': True,
                 'robot_name': None, 'side': 'left', 'strategy': 0
             }
             print("!!!! Debug Program !!!!")

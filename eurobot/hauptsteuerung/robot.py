@@ -30,7 +30,7 @@ class RobotPosition():
         return lock
 
     def can_robot_position(self, can_msg):
-        margin = int(20 * self.scale)
+        margin = int(200 / self.scale)
         # TODO: check sender ID (in case drive and navigation both send)
         if can_msg['position_correct']:
             x, y = can_msg['x_position'], can_msg['y_position']

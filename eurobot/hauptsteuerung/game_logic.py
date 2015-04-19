@@ -68,9 +68,13 @@ class Task():
         self.can_socket = can_socket
         self.can_socket.create_interrupt(can_id, self.can_command)
         self.can_socket.create_interrupt(can_id+1, self.can_status)
-        self.my_game_elements = [None]
+        self.my_game_elements = []
+        self.enemy_game_elements = []
         self.collected = 0
         self.movable = True
+        self.moved_thread = threading.Thread(target=self.check_if_moved)
+        self.moved_thread.setDaemon(1)
+        self.moved_thread.start()
 
     def estimate_distance(self, robot):
         robot_x, robot_y = robot.get_position()
@@ -87,12 +91,21 @@ class Task():
 
     def check_if_moved(self):
         if self.movable:
-            for robot in self.robots:
-                drive_map = robot.get_map()
-                for game_element in self.my_game_elements:
-                    x, y = game_element['position']
-                    if drive_map[x, y]:
-                        game_element['moved'] = True
+            while True:
+                for robot in self.robots.values():
+                    if robot:
+                        drive_map = robot.get_map()
+                        for game_element in self.my_game_elements:
+                            x, y = game_element['position']
+                            x, y = int(x/10), int(y/10)
+                            if drive_map[x, y]:
+                                game_element['moved'] = True
+                        for game_element in self.enemy_game_elements:
+                            x, y = game_element['position']
+                            x, y = int(x/10), int(y/10)
+                            if drive_map[x, y]:
+                                game_element['moved'] = True
+                time.sleep(0.1)
 
     def can_command(self, can_msg):
         pass
@@ -118,6 +131,14 @@ class Task():
             if can_msg['state'] < 2:
                 finished = True
         self.can_socket.remove_queue(queue_number)
+
+    def get_debug_data(self):
+        game_elements = []
+        for element in self.my_game_elements:
+            game_elements.append((element['position'], element['moved']))
+        for element in self.enemy_game_elements:
+            game_elements.append((element['position'], element['moved']))
+        return game_elements
 
 
 class StairTask(Task):
@@ -256,7 +277,6 @@ class CupTask(Task):
         for stand in cups_left:
             stand['moved'] = False
         self.my_game_elements = cups_left
-        self.enemy_game_elements = None
 
     def goto_task(self, object_number):
         return self.my_game_elements[object_number]['position'], None  # TODO: set correct position
@@ -348,8 +368,8 @@ class PopcornTask(Task):
         self.points_game_element = 3
         self.angle = 90
         self.command = {'ready collect': 0, 'open case': 1, }
-        popcorn_left = [{'position': (300, 400), 'end_position': (300, 180)},
-                        {'position': (600, 400), 'end_position': (600, 180)}
+        popcorn_left = [{'start_position': (300, 400), 'position': (300, 180)},
+                        {'start_position': (600, 400), 'position': (600, 180)}
                         ]
 
         for popcorn in popcorn_left:
@@ -357,10 +377,10 @@ class PopcornTask(Task):
 
         popcorn_right = copy.deepcopy(popcorn_left)
         for popcorn in popcorn_right:
+            x, y = popcorn['start_position']
+            popcorn['start_position'] = (3000-x, y)
             x, y = popcorn['position']
             popcorn['position'] = (3000-x, y)
-            x, y = popcorn['end_position']
-            popcorn['end_position'] = (3000-x, y)
         if my_color == 'left':
             self.my_game_elements = popcorn_left
             self.enemy_game_elements = popcorn_right
@@ -372,16 +392,16 @@ class PopcornTask(Task):
 
     def goto_task(self, object_number):
         if object_number < 2:
-            return self.my_game_elements[object_number]['position'], self.angle
+            return self.my_game_elements[object_number]['start_position'], self.angle
         else:
             object_number -= 2
-            return self.enemy_game_elements[object_number]['position'], self.angle
+            return self.enemy_game_elements[object_number]['start_position'], self.angle
 
     def do_task(self, object_number):
         if object_number < 2:
-            self.drive.drive_path([], self.my_game_elements[object_number]['end_position'], self.angle,  end_speed=-5)
+            self.drive.drive_path([], self.my_game_elements[object_number]['position'], self.angle,  end_speed=-5)
             self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['ready collect'], blocking=True)
-            self.drive.drive_path([], self.my_game_elements[object_number]['position'], self.angle,  end_speed=5)
+            self.drive.drive_path([], self.my_game_elements[object_number]['start_position'], self.angle,  end_speed=5)
         else:
             object_number -= 2
             self.drive.drive_path([], self.enemy_game_elements[object_number]['end_position'], self.angle,  end_speed=-5)

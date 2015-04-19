@@ -78,10 +78,10 @@ class Ui_MainWindow(QtGui.QWidget):
         self.threads.append(ThreadSetRandomCoordinate)       # Only for Demo
 
 
-        ThreadPrintOutSettings.start()                       # Only for Demo
-        ThreadSetRandomCoordinate.start()                    # Only for Demo
-        ThreadChasingLED.start()
-        ThreadPollingButtons.start()
+        ThreadPrintOutSettings.start_can()                       # Only for Demo
+        ThreadSetRandomCoordinate.start_can()                    # Only for Demo
+        ThreadChasingLED.start_can()
+        ThreadPollingButtons.start_can()
 
     """
     /*----------------------------------------------------------------------------------------------------

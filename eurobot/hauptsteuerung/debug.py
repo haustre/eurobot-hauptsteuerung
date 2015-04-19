@@ -26,8 +26,11 @@ class LaptopCommunication():
         """
         self.can_socket = can_socket
         self.tcp_socket = Server()
-        self.debug_loop = threading.Thread(target=self.can_loop)
-        self.debug_loop.setDaemon(1)
+        self.game_tasks = {}
+        self.can_thread = threading.Thread(target=self.can_loop)
+        self.can_thread.setDaemon(1)
+        self.game_task_thread = threading.Thread(target=self.game_task_loop)
+        self.game_task_thread.setDaemon(1)
 
     def can_loop(self):
         """
@@ -38,12 +41,12 @@ class LaptopCommunication():
             idle = True
             # send new can messages to laptop
             try:
-                can_msg = self.can_socket.queue_debug.get_nowait()
-                self.tcp_socket.write(can_msg)
+                tcp_msg = 'Can', self.can_socket.queue_debug.get_nowait()
+                self.tcp_socket.write(tcp_msg)
                 current_time = datetime.datetime.now().strftime("%M:%S.%f")[0:-3]
                 text = "\n" + current_time + ": "
                 logfile.write(text)  # TODO:  the write commands are blocking and should be put in a separate thread.
-                json.dump(can_msg, logfile)
+                json.dump(tcp_msg, logfile)
                 idle = False
             except queue.Empty:
                 pass
@@ -55,8 +58,21 @@ class LaptopCommunication():
             if idle is True:
                 time.sleep(0.01)  # TODO: remove
 
-    def start(self):
-        self.debug_loop.start()
+    def start_can(self):
+        self.can_thread.start()
+
+    def start_game_tasks(self):
+        self.game_task_thread.start()
+
+    def game_task_loop(self):
+        while True:
+            for task in self.game_tasks.keys():
+                time.sleep(0.1)
+                tcp_msg = 'game_task', self.game_tasks[task].get_debug_data()
+                self.tcp_socket.write(tcp_msg)
+
+    def add_game_tasks(self, game_tasks):
+        self.game_tasks = game_tasks
 
 
 class EnemySimulation():
