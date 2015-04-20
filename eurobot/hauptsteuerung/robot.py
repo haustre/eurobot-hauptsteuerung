@@ -17,7 +17,7 @@ class RobotPosition():
         self.lock = threading.Lock()
         resolution = 200
         table_size = 2000
-        self.map = np.zeros((resolution*1.5, resolution))
+        self.map = np.zeros((resolution*1.5+1, resolution+1))
         self.scale = table_size / resolution
         self.last_position_update = 0
         self.last_angle_update = 0

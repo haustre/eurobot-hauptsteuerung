@@ -326,15 +326,15 @@ class ClapperTask(Task):
         self.command = {'up': 0, 'right': 1, 'left': 2}
         self.angle = 90
         self.end_angle = 270
-        y_pos = 1740
-        clapper_left = [{'position': (300, y_pos), 'side': 'right'},
-                        {'position': (900, y_pos), 'side': 'right'},
-                        {'position': (2400, y_pos), 'side': 'left'}
+        self.distance = 260
+        clapper_left = [{'position': (300, 2000), 'side': 'right'},
+                        {'position': (900, 2000), 'side': 'right'},
+                        {'position': (2400, 2000), 'side': 'left'}
                         ]
 
-        clapper_right = [{'position': (2700, y_pos), 'side': 'left'},
-                         {'position': (2100, y_pos), 'side': 'left'},
-                         {'position': (600, y_pos), 'side': 'right'}
+        clapper_right = [{'position': (2700, 2000), 'side': 'left'},
+                         {'position': (2100, 2000), 'side': 'left'},
+                         {'position': (600, 2000), 'side': 'right'}
                          ]
 
         for clapper in clapper_left:
@@ -353,12 +353,16 @@ class ClapperTask(Task):
             raise Exception("Unknown team color")
 
     def goto_task(self, clapper_number):
-        return self.my_game_elements[clapper_number]['position'], self.angle
+        (x, y), angle = self.my_game_elements[clapper_number]['position'], self.angle
+        y -= self.distance
+        return (x, y), angle
 
     def do_task(self, clapper_number):
         side = self.my_game_elements[clapper_number]['side']
         self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command[side], blocking=True)
-        self.drive.drive_path([], self.my_game_elements[clapper_number]['position'], self.end_angle, end_speed=10)
+        x, y = self.my_game_elements[clapper_number]['position'], self.angle
+        y -= self.distance
+        self.drive.drive_path([], (x, y), self.end_angle, end_speed=10)
         self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command['up'])
 
 
@@ -367,9 +371,10 @@ class PopcornTask(Task):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
         self.points_game_element = 3
         self.angle = 90
+        self.distance = 180
         self.command = {'ready collect': 0, 'open case': 1, }
-        popcorn_left = [{'start_position': (300, 400), 'position': (300, 180)},
-                        {'start_position': (600, 400), 'position': (600, 180)}
+        popcorn_left = [{'start_position': (300, 400), 'position': (300, 0)},
+                        {'start_position': (600, 400), 'position': (600, 0)}
                         ]
 
         for popcorn in popcorn_left:
@@ -399,11 +404,15 @@ class PopcornTask(Task):
 
     def do_task(self, object_number):
         if object_number < 2:
-            self.drive.drive_path([], self.my_game_elements[object_number]['position'], self.angle,  end_speed=-5)
+            x, y = self.my_game_elements[object_number]['position']
+            y += self.distance
+            self.drive.drive_path([], (x, y), self.angle,  end_speed=-5)
             self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['ready collect'], blocking=True)
             self.drive.drive_path([], self.my_game_elements[object_number]['start_position'], self.angle,  end_speed=5)
         else:
             object_number -= 2
-            self.drive.drive_path([], self.enemy_game_elements[object_number]['end_position'], self.angle,  end_speed=-5)
+            x, y = self.enemy_game_elements[object_number]['position']
+            y += self.distance
+            self.drive.drive_path([], (x, y), self.angle,  end_speed=-5)
             self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['ready collect'], blocking=True)
-            self.drive.drive_path([], self.enemy_game_elements[object_number]['position'], self.angle,  end_speed=5)
+            self.drive.drive_path([], self.enemy_game_elements[object_number]['start_position'], self.angle,  end_speed=5)
