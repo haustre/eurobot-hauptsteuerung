@@ -158,7 +158,7 @@ def unpack(can_id, can_msg):
     try:
         data = struct.unpack(encoding, can_msg)
     except struct.error:
-        raise Exception("CAN message encoding wrong:" + encoding + ": " + str(can_msg))
+        raise Exception("CAN message encoding wrong: " + encoding + " ID:" + str(can_id) + " Msg:" + str(can_msg))
     msg_frame = {}
     for i, line in enumerate(reversed(data)):
         if not isinstance(dictionary[i], str):
