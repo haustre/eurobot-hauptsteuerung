@@ -178,33 +178,49 @@ class Main():
     def strategy_start(self):
         if self.strategy['robot_name'] == 'Roboter-gross':
             if self.strategy['strategy'] == 'A':
-                self.drive.set_close_range_detection(False)
-                self.drive.set_enemy_detection(False)
-                self.drive.set_speed(15)
-                self.game_tasks['stand'].do_task(5)
-                #self.game_tasks['stand'].do_task(6)
-                #self.drive.drive_path([], (290, 1460, 180))
-                #self.game_tasks['stand'].do_task(1)
-
-                self.game_tasks['cup'].do_task(1)
-                #self.game_tasks['stand'].do_task(1)
-                self.drive.drive_path([], (1500, 1000), 180)
-                can_msg = {
-                    'type': can.MsgTypes.Stands_Command.value,
-                    'command': self.game_tasks['stand'].command['open case'],
-                }
-                self.can_socket.send(can_msg)
+                if True:
+                    self.drive.set_close_range_detection(False)
+                    self.drive.set_enemy_detection(False)
+                    self.drive.set_speed(30)
+                    self.game_tasks['stand'].do_task(5)
+                    self.game_tasks['stand'].do_task(6)
+                    self.drive.drive_path([], (290, 1460), None)
+                    self.game_tasks['stand'].do_task(1)
+                    self.drive.drive_path([], (1000, 1000), None)
+                    point = self.game_tasks['stand'].goto_empty()
+                    self.drive.drive_route(point, None)
+                    self.game_tasks['stand'].do_empty()
+                    self.drive.drive_path([], (1000, 1000), None)
+                if False:
+                    point, angle = self.game_tasks['popcorn'].goto_task(0)
+                    self.drive.drive_route(point, angle)
+                    self.game_tasks['popcorn'].do_task(0)
+                    point, angle = self.game_tasks['popcorn'].goto_task(1)
+                    self.drive.drive_route(point, angle)
+                    self.game_tasks['popcorn'].do_task(1)
+                    point = self.game_tasks['popcorn'].goto_empty()
+                    self.drive.drive_route(point, None)
+                    self.game_tasks['popcorn'].do_empty()
+                if True:
+                    point, angle = self.game_tasks['clapper'].goto_task(1)
+                    self.drive.drive_route(point, angle)
+                    self.game_tasks['clapper'].do_task(1)
+                    self.drive.drive_path([], (1000, 1000), None)
 
             elif self.strategy['strategy'] == 'B':
                 self.drive.set_close_range_detection(False)
-                self.drive.set_enemy_detection(True)
-                self.drive.set_speed(15)
-                self.drive.drive_path([], (500, 1000), 0)
-                self.drive.set_speed(-15)
-                points = [(400, 400, 0), (2600, 400, 180)]
-                while self.reset is False:
-                    for point in points:
-                        self.drive.drive_route(point, None)
+                self.drive.set_enemy_detection(False)
+                self.drive.set_speed(30)
+                self.drive.drive_path([], (1000, 1000), None)
+                point, angle = self.game_tasks['popcorn'].goto_task(0)
+                self.drive.drive_route(point, angle)
+                self.game_tasks['popcorn'].do_task(0)
+                point, angle = self.game_tasks['popcorn'].goto_task(1)
+                self.drive.drive_route(point, angle)
+                self.game_tasks['popcorn'].do_task(1)
+                point = self.game_tasks['popcorn'].goto_empty()
+                self.drive.drive_route(point, None)
+                self.game_tasks['popcorn'].do_empty()
             elif self.strategy['strategy'] == 'C':
                 if False:
                     self.drive.set_close_range_detection(True)
@@ -219,11 +235,23 @@ class Main():
                     self.drive.set_enemy_detection(False)
                     self.drive.set_speed(15)
                     self.drive.drive_path([], (1000, 1000), 0)
-                    point, angle = self.game_tasks['popcorn'].goto_task(3)
+                    point, angle = self.game_tasks['popcorn'].goto_task(0)
                     self.drive.drive_route(point, angle)
-                    #self.drive.drive_path([], point)
-                    self.game_tasks['popcorn'].do_task(3)
+                    self.game_tasks['popcorn'].do_task(0)
+
+                    point, angle = self.game_tasks['popcorn'].goto_task(1)
+                    self.drive.drive_route(point, angle)
+                    self.game_tasks['popcorn'].do_task(1)
+
                     self.drive.drive_route((2600, 400), 180)
+                if True:
+                    self.drive.set_close_range_detection(False)
+                    self.drive.set_enemy_detection(False)
+                    self.drive.set_speed(15)
+                    self.drive.drive_path([], (1000, 1000), 0)
+                    point, angle = self.game_tasks['clapper'].goto_task(1)
+                    self.drive.drive_route(point, angle)
+                    self.game_tasks['clapper'].do_task(1)
 
         if self.strategy['robot_name'] == 'Roboter-klein':
             if self.strategy['strategy'] == 'A':

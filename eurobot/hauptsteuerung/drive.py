@@ -24,6 +24,7 @@ class Drive():
         self.my_robot_new_position = None
         self.robots = []
         self.rotation_direction = None
+        self.stop = False
 
     def add_my_robot(self, robot):
         self.my_robot = robot
@@ -54,6 +55,14 @@ class Drive():
             time.sleep(0.5)
         return True
 
+    def request_stop(self):
+        self.stop = True    # TODO: check variable in wait_for_arrival
+        can_msg = {
+            'type': can.MsgTypes.Emergency_Stop.value,
+            'code': 0,
+        }
+        self.can_socket.send(can_msg)
+
     def drive_path(self, path, destination, angle_in, path_speed=None, end_speed=None, blocking=True):
         if destination:
             if len(destination) == 2:
@@ -66,8 +75,10 @@ class Drive():
             x, y = int(x), int(y)
         else:
             x, y = 65535, 65535
-        if angle_in or angle:
+        if angle_in:
             angle = int((abs(angle_in) % 360000)*100)
+        elif angle:
+            angle = int((abs(angle) % 360000)*100)
         else:
             angle = 65535
         if end_speed is None:
@@ -89,7 +100,7 @@ class Drive():
         if in_save_zone:
             can_msg = {
                 'type': can.MsgTypes.Goto_Position.value,
-                'x_position': x,
+                'x_position': x + 0,  # TODO: remove offset
                 'y_position': y,
                 'angle': angle,
                 'speed': end_speed,
@@ -101,7 +112,7 @@ class Drive():
                 for point in filtered_path:
                     can_msg = {
                         'type': can.MsgTypes.Path.value,
-                        'x': point[0],
+                        'x': point[0] + 0,  # TODO: remove offset
                         'y': point[1],
                         'speed': path_speed
                     }
@@ -170,7 +181,7 @@ class Drive():
                             else:
                                 self.rotation_direction = 'left'
                         if self.rotation_direction == 'left':
-                            angle = self.my_robot.get_angle - 90
+                            angle = self.my_robot.get_angle() - 90
                         else:
                             angle = self.my_robot.get_angle + 90
                         angle = int((abs(angle) % 360000)*100)
