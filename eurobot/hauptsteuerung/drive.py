@@ -75,9 +75,9 @@ class Drive():
             x, y = int(x), int(y)
         else:
             x, y = 65535, 65535
-        if angle_in:
+        if angle_in is not None:
             angle = int((abs(angle_in) % 360000)*100)
-        elif angle:
+        elif angle is not None:
             angle = int((abs(angle) % 360000)*100)
         else:
             angle = 65535
