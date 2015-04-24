@@ -98,6 +98,26 @@ class Drive():
             in_save_zone = False
             wrong_point = x, y
         if in_save_zone:
+            if len(path) > 0:
+                drive_queue = queue.Queue()
+                drive_queue_number = self.can_socket.create_queue(can.MsgTypes.Drive_Status.value, drive_queue)
+                my_x, my_y = self.my_robot.get_position()
+                path_x, path_y = path[0]
+                dx, dy = path_x - my_x, path_y - my_y
+                angle = math.atan2(dy, dx)
+                angle = int((abs(angle) % 360000)*100)
+                can_msg = {
+                    'type': can.MsgTypes.Goto_Position.value,
+                    'x_position': 65535,
+                    'y_position': 65535,
+                    'angle': angle,
+                    'speed': int(self.speed/2),
+                    'path_length': 0,
+                }
+                self.can_socket.send(can_msg)
+                while drive_queue.get() != 0:
+                    pass
+                self.can_socket.remove_queue(drive_queue_number)
             can_msg = {
                 'type': can.MsgTypes.Goto_Position.value,
                 'x_position': x + 0,  # TODO: remove offset
@@ -167,31 +187,6 @@ class Drive():
                         can_msg = {
                             'type': can.MsgTypes.Emergency_Stop.value,
                             'code': 0,
-                        }
-                        self.can_socket.send(can_msg)
-                        if self.rotation_direction is None:  # TODO: Not tested
-                            if (range_msg['distance_front_right'] < range_msg['distance_front_left'] or
-                               range_msg['front_right_correct'] is False):
-                                self.rotation_direction = 'left'
-                            else:
-                                self.rotation_direction = 'right'
-                        else:
-                            if self.rotation_direction == 'left':
-                                self.rotation_direction = 'right'
-                            else:
-                                self.rotation_direction = 'left'
-                        if self.rotation_direction == 'left':
-                            angle = self.my_robot.get_angle() - 90
-                        else:
-                            angle = self.my_robot.get_angle + 90
-                        angle = int((abs(angle) % 360000)*100)
-                        can_msg = {
-                            'type': can.MsgTypes.Goto_Position.value,
-                            'x_position': 65535,
-                            'y_position': 65535,
-                            'angle': angle,
-                            'speed': int(self.speed/2),
-                            'path_length': 0,
                         }
                         self.can_socket.send(can_msg)
                 except queue.Empty:
