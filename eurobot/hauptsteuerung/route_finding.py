@@ -108,8 +108,6 @@ class RouteFinding():
 
         v_range2 = slice(max(0, -pos_x), min(-pos_x + gamefield.shape[0], array.shape[0]))
         h_range2 = slice(max(0, -pos_y), min(-pos_y + gamefield.shape[1], array.shape[1]))
-        print(v_range1, h_range1)
-        print(v_range2, h_range1)
         gamefield[v_range1, h_range1] += array[v_range2, h_range2]
         return gamefield
 

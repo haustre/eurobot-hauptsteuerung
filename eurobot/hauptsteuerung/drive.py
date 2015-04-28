@@ -76,9 +76,9 @@ class Drive():
         else:
             x, y = 65535, 65535
         if angle_in is not None:
-            angle = int((abs(angle_in) % 360000)*100)
+            angle = int((abs(angle_in) % 360)*100)
         elif angle is not None:
-            angle = int((abs(angle) % 360000)*100)
+            angle = int((abs(angle) % 360)*100)
         else:
             angle = 65535
         if end_speed is None:
@@ -94,30 +94,30 @@ class Drive():
             if save_zone[0][0] > point[0] > save_zone[0][1] or save_zone[1][0] > point[1] > save_zone[1][1]:
                 in_save_zone = False
                 wrong_point = point
-        if save_zone[0][0] > x > save_zone[0][1] or save_zone[1][0] > y > save_zone[1][1] or x == 65535 and y == 65535:
+        if save_zone[0][0] > x > save_zone[0][1] or save_zone[1][0] > y > save_zone[1][1]:
             in_save_zone = False
             wrong_point = x, y
-        if in_save_zone:
+        if in_save_zone or x == 65535 and y == 65535:
             if len(path) > 0:
-                drive_queue = queue.Queue()
-                drive_queue_number = self.can_socket.create_queue(can.MsgTypes.Drive_Status.value, drive_queue)
                 my_x, my_y = self.my_robot.get_position()
                 path_x, path_y = path[0]
                 dx, dy = path_x - my_x, path_y - my_y
-                angle = math.atan2(dy, dx)
-                angle = int((abs(angle) % 360000)*100)
-                can_msg = {
-                    'type': can.MsgTypes.Goto_Position.value,
-                    'x_position': 65535,
-                    'y_position': 65535,
-                    'angle': angle,
-                    'speed': int(self.speed/2),
-                    'path_length': 0,
-                }
-                self.can_socket.send(can_msg)
-                while drive_queue.get() != 0:
-                    pass
-                self.can_socket.remove_queue(drive_queue_number)
+                rotate_angle = math.atan2(dy, dx) / (2 * math.pi) * 360
+                rotate_angle = int((abs(rotate_angle) % 360)*100)
+                if abs(angle - rotate_angle) > 20 * 100:
+                    can_msg = {
+                        'type': can.MsgTypes.Goto_Position.value,
+                        'x_position': 65535,
+                        'y_position': 65535,
+                        'angle': rotate_angle,
+                        'speed': int(self.speed/2),
+                        'path_length': 0,
+                    }
+                    drive_queue = queue.Queue()
+                    drive_queue_number = self.can_socket.create_queue(can.MsgTypes.Drive_Status.value, drive_queue)
+                    self.can_socket.send(can_msg)
+                    drive_msg = drive_queue.get()
+                    self.can_socket.remove_queue(drive_queue_number)
             can_msg = {
                 'type': can.MsgTypes.Goto_Position.value,
                 'x_position': x + 0,  # TODO: remove offset
@@ -145,7 +145,7 @@ class Drive():
                 'code': 0,
             }
             self.can_socket.send(can_msg)
-            raise Exception('Coordinates outside the table:' + wrong_point)
+            raise Exception('Coordinates outside the table:' + str(wrong_point[0]) + str(wrong_point[1]))
         return True
 
     def filter_path(self, path):

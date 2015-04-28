@@ -256,7 +256,7 @@ class StandsTask(Task):
         return self.empty_position['start_position']
 
     def do_empty(self):
-        self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready platform'], blocking=False)
+        self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready platform'], blocking=True)
         self.drive.drive_path([], self.empty_position['position'], None, end_speed=15)
         self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['open case'], blocking=True)
         self.drive.drive_path([], self.empty_position['start_position'], None, end_speed=-15)

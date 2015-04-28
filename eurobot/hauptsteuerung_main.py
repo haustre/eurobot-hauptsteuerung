@@ -222,14 +222,16 @@ class Main():
                 self.drive.drive_route(point, None)
                 self.game_tasks['popcorn'].do_empty()
             elif self.strategy['strategy'] == 'C':
-                if False:
+                if True:
                     self.drive.set_close_range_detection(True)
-                    self.drive.set_speed(50)
+                    self.drive.set_enemy_detection(True)
+                    self.drive.set_speed(30)
+                    self.drive.drive_path([], (800, 1000), None)
                     while self.reset is False:
-                        points = [(900, 1600), (2100, 900), (900, 900), (2100, 1600)]
+                        points = [(900, 1400), (2100, 900), (900, 900), (2100, 1400)]
                         for point in points:
                             for i in range(1):
-                                self.drive.drive_path([], point, 180)
+                                self.drive.drive_route(point, None, 180)
                 if True:
                     self.drive.set_close_range_detection(False)
                     self.drive.set_enemy_detection(False)
@@ -244,7 +246,7 @@ class Main():
                     self.game_tasks['popcorn'].do_task(1)
 
                     self.drive.drive_route((2600, 400), 180)
-                if True:
+                if False:
                     self.drive.set_close_range_detection(False)
                     self.drive.set_enemy_detection(False)
                     self.drive.set_speed(15)
