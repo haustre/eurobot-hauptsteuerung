@@ -80,16 +80,19 @@ class RouteFinding():
                     sensor_angle = - 20
                     x = my_x + math.cos(math.radians(my_angle+sensor_angle))*can_msg['distance_front_left']
                     y = my_y + math.sin(math.radians(my_angle+sensor_angle))*can_msg['distance_front_left']
-                    self.close_range_robots.append((x, y))
+                    if 0 < x < 3000 and 0 < y < 2000:
+                        self.close_range_robots.append((x, y))
                 if can_msg['front_middle_correct']:
                     x = my_x + math.cos(math.radians(my_angle))*can_msg['distance_front_middle']
                     y = my_y + math.sin(math.radians(my_angle))*can_msg['distance_front_middle']
-                    self.close_range_robots.append((x, y))
+                    if 0 < x < 3000 and 0 < y < 2000:
+                        self.close_range_robots.append((x, y))
                 if can_msg['front_right_correct']:
                     sensor_angle = 20
                     x = my_x + math.cos(math.radians(my_angle+sensor_angle))*can_msg['distance_front_right']
                     y = my_y + math.sin(math.radians(my_angle+sensor_angle))*can_msg['distance_front_right']
-                    self.close_range_robots.append((x, y))
+                    if 0 < x < 3000 and 0 < y < 2000:
+                        self.close_range_robots.append((x, y))
 
     def _add_array(self, gamefield, array, position):
         """ Adds an two arrays together
@@ -131,16 +134,16 @@ class RouteFinding():
         x_size = int(size * 1.5)
         y_size = size
         wall_size = int(size / 20)
-        wall_height = 20
-        array = 1 + np.random.random((y_size, x_size)) / 2
+        #array = 1 + np.random.random((y_size, x_size)) / 2
+        array = np.ones((y_size, x_size))
         for y in range(wall_size):
-            array[y, :] = wall_height-wall_height/wall_size*y
-        for y in range(y_size-1, y_size-wall_size, -1):
-            array[y, :] = wall_height-wall_height/wall_size*(y_size-y)
+            array[y, :] = weight-weight/wall_size*y
+        for y in range(y_size-1, y_size-wall_size-1, -1):
+            array[y, :] = weight-weight/wall_size*(y_size-y-1)
         for x in range(wall_size):
-            array[:, x] = wall_height-wall_height/wall_size*x
-        for x in range(x_size-1, x_size-wall_size, -1):
-            array[:, x] = wall_height-wall_height/wall_size*(x_size-x)
+            array[:, x] = weight-weight/wall_size*x
+        for x in range(x_size-1, x_size-wall_size-1, -1):
+            array[:, x] = weight-weight/wall_size*(x_size-x-1)
         array[0:int(580 * pixel_per_mm), int(978 * pixel_per_mm):int(2022 * pixel_per_mm)] = weight  # Stairs
         # yellow start
         array[int(767 * pixel_per_mm):int((789+50) * pixel_per_mm), 0:int(400 * pixel_per_mm)] = weight
