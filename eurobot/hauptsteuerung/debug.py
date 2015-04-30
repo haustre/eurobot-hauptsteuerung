@@ -59,12 +59,15 @@ class LaptopCommunication():
                 time.sleep(0.01)  # TODO: remove
 
     def start_can(self):
+        """ starts to send the CAN information over ethernet """
         self.can_thread.start()
 
     def start_game_tasks(self):
+        """ starts to send the game task information over ethernet """
         self.game_task_thread.start()
 
     def game_task_loop(self):
+        """ loop sending the game task information """
         while True:
             for task in self.game_tasks.keys():
                 time.sleep(0.1)
@@ -130,6 +133,9 @@ class Position():
         self.angle = random.randrange(0, 36000)
 
     def get_coordinates(self):
+        """
+        :return: coordinates of the robot (x, y, angel)
+        """
         self.angle += self.speed * 3
         self.x += int(self.speed * math.cos(self.angle / 100 / 360*2*math.pi))
         self.y += int(self.speed * math.sin(self.angle / 100 / 360*2*math.pi))

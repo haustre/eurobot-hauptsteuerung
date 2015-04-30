@@ -1,5 +1,5 @@
 """
-This module contains classes for the game logic
+This module contains the countdown and all classes for the game logic
 """
 __author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"
@@ -26,6 +26,9 @@ class Countdown():
         self.timer_loop.setDaemon(1)
 
     def start(self):
+        """ starts the countdown
+        :return: None
+        """
         self.start_time = time.time()
         self.running = True
         for timer in self.timers_to_start:
@@ -33,6 +36,9 @@ class Countdown():
         self.timer_loop.start()
 
     def time_left(self):
+        """ returns the time left to the end of the game or false if the game is not started
+        :return: time left until game end
+        """
         if self.running:
             time_left = int(self.game_time - (time.time() - self.start_time))
         else:
@@ -40,6 +46,12 @@ class Countdown():
         return time_left
 
     def set_interrupt(self, object_to_call, interrupt_name, time_left):
+        """ creates a new interrupt
+        :param object_to_call: this object gets called at the specified time
+        :param interrupt_name: name of the interrupt
+        :param time_left: time to call the object
+        :return: None
+        """
         if self.running:
             interrupt_time = self.game_time - time_left
             threading.Timer(interrupt_time, object_to_call, [interrupt_name]).start()
@@ -48,6 +60,7 @@ class Countdown():
             self.timers_to_start.append(call)
 
     def _loop(self):
+        """ loop counting down the remaining time """
         time_left = 90
         while time_left >= 0:
             print(int(time_left))
@@ -62,6 +75,7 @@ class Countdown():
 
 
 class Task():
+    """ parent class of all game tasks """
     def __init__(self, robots, can_socket, can_id, drive):
         self.drive = drive
         self.robots = robots
@@ -77,6 +91,10 @@ class Task():
         self.moved_thread.start()
 
     def estimate_distance(self, robot):
+        """ gives back the nearest game element and an estimated distance to it
+        :param robot: robot to estimate the distance to
+        :return: distance to the game element, number of the element
+        """
         robot_x, robot_y = robot.get_position()
         shortest_distance = None
         nearest_element = None
@@ -90,6 +108,7 @@ class Task():
         return shortest_distance, nearest_element
 
     def check_if_moved(self):
+        """ loop checking which game elements have been moved """
         if self.movable:
             while True:
                 for robot in self.robots.values():
@@ -111,9 +130,19 @@ class Task():
         pass
 
     def can_status(self, can_msg):
+        """ sets the count of the selected game elements according to the periphery board
+        :param can_msg: CAN message from the periphery board
+        :return:
+        """
         self.collected = can_msg['collected_pieces']
 
     def send_task_command(self, msg_id, command, blocking=False):
+        """ sends a command over CAN to the periphery board
+        :param msg_id: CAN id
+        :param command: CAN command
+        :param blocking: specifies if the robot should wait for a response of the periphery board
+        :return: None
+        """
         can_msg = {
             'type': msg_id,
             'command': command,
@@ -123,6 +152,10 @@ class Task():
             self.wait_for_task(msg_id+1)
 
     def wait_for_task(self, msg_id):
+        """ waits for a response of the periphery board
+        :param msg_id: CAN id to wait for
+        :return: None
+        """
         can_queue = queue.Queue()
         queue_number = self.can_socket.create_queue(msg_id, can_queue)
         finished = False
@@ -133,6 +166,10 @@ class Task():
         self.can_socket.remove_queue(queue_number)
 
     def get_debug_data(self):
+        """ returns the position of each game element and if it is moved
+        used by the GUI to display this data
+        :return: dictionary
+        """
         game_elements = []
         for element in self.my_game_elements:
             game_elements.append((element['position'], element['moved']))
@@ -142,13 +179,14 @@ class Task():
 
 
 class StairTask(Task):
+    """ Class for driving to the top of the stair """
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Climbing_Command.value, drive)
         self.climbing_command = {'up': 0, 'bottom': 1, 'middle': 2, 'top': 3}
         self.carpet_command = {'fire right': 0, 'fire left': 1}
         path_left = {'in_front': (1250, 1080, 270),
                      'bottom': (1250, 700, 270),
-                     'beginning': (1200, 650, 270),
+                     'beginning': (1250, 650, 270),
                      'top': (1250, 190, 270),
                      'carpet 1': (1080, 200, 180),
                      'fire 1': self.carpet_command['fire left'],
@@ -173,9 +211,13 @@ class StairTask(Task):
             raise Exception("Unknown team color")
 
     def goto_task(self):
+        """ returns the position information of the stair
+        :return: position, angle
+        """
         return self.my_path['in_front'][0:2], self.my_path['in_front'][2]
 
     def do_task(self):
+        """ drives to the top of the stair """
         self.drive.drive_path([], self.my_path['bottom'], blocking=False)  # TODO: Danger no close range detection
         self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['bottom'], blocking=True)
         self.drive.drive_path([], self.my_path['beginning'], end_speed=30)  # TODO: Danger no close range detection
@@ -190,6 +232,7 @@ class StairTask(Task):
 
 
 class StandsTask(Task):
+    """ Class collecting the stands """
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
         self.distance_to_stand = 200
@@ -227,10 +270,17 @@ class StandsTask(Task):
         else:
             raise Exception("Unknown team color")
 
-    def goto_task(self, object_number):
+    def goto_task(self, object_number):  # TODO: Calculate Point in front of the stand
+        """ returns the position information of the specified stand
+        :param object_number: specifies which game element is chosen
+        :return: position, angle
+        """
         return self.my_game_elements[object_number]['position'], self.my_game_elements[object_number]['angle']
 
     def do_task(self, object_number):
+        """ collects the chosen stand
+        :param object_number:  specifies which game element is chosen
+        """
         starting_point = self.robots['me'].get_position()
         stand_point = self.my_game_elements[object_number]['position']
         self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready collect'])
@@ -241,6 +291,12 @@ class StandsTask(Task):
         #threading.Timer(0.5, self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['blocked'])).start()
 
     def calculate_stopping_point(self, from_pos, to_pos, distance):
+        """ calculates the correct position to collect the stand
+        :param from_pos: position of the robot
+        :param to_pos: position of the stand
+        :param distance: distance to the stand
+        :return: point to drive to, angle
+        """
         distance += self.distance_to_stand
         stopping_point = [0, 0]
         dx = to_pos[0] - from_pos[0]
@@ -253,9 +309,13 @@ class StandsTask(Task):
         return stopping_point[0], stopping_point[1], angle / (2 * math.pi) * 360
 
     def goto_empty(self):
+        """ returns the position information of the place to put the stands to
+        :return: position with angle
+        """
         return self.empty_position['start_position']
 
     def do_empty(self):
+        """ puts down the stands """
         self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready platform'], blocking=True)
         self.drive.drive_path([], self.empty_position['position'], None, end_speed=15)
         self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['open case'], blocking=True)
@@ -265,6 +325,7 @@ class StandsTask(Task):
 
 
 class CupTask(Task):
+    """ Class collecting the cups """
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Cup_Command.value, drive)
         self.my_color = my_color
@@ -286,9 +347,16 @@ class CupTask(Task):
         self.my_game_elements = cups_left
 
     def goto_task(self, object_number):
+        """ returns the position information of the specified cup
+        :param object_number: specifies which game element is chosen
+        :return: position, angle
+        """
         return self.my_game_elements[object_number]['position'], None  # TODO: set correct position
 
     def do_task(self, object_number):
+        """ collects the chosen cup
+        :param object_number:  specifies which game element is chosen
+        """
         starting_point = self.robots['me'].get_position()
         stand_point = self.my_game_elements[object_number]['position']
         self.send_task_command(can.MsgTypes.Cup_Command.value, self.command['ready collect'])
@@ -297,6 +365,12 @@ class CupTask(Task):
         time.sleep(0.2)
 
     def calculate_stopping_points(self, from_pos, to_pos, side):
+        """ calculates the correct position to collect the cup
+        :param from_pos: position of the robot
+        :param to_pos: position of the stand
+        :param side: which side is used to collect the cup
+        :return: point to drive to, angle
+        """
         point1 = [0, 0]
         point2 = [0, 0]
 
@@ -321,11 +395,11 @@ class CupTask(Task):
         y = math.sin(angle) * 50
         point2[0] = int(point1[0] + x)
         point2[1] = int(point1[1] + y)
-
         return point1, (point2[0], point2[1]), angle / (2 * math.pi) * 360
 
 
 class ClapperTask(Task):
+    """ Class for closing the clappers """
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Clapper_Command.value, drive)
         self.points_game_element = 5
@@ -359,11 +433,18 @@ class ClapperTask(Task):
             raise Exception("Unknown team color")
 
     def goto_task(self, clapper_number):
+        """ returns the position information of the specified clapper
+        :param clapper_number: specifies which game element is chosen
+        :return: position, angle
+        """
         (x, y), angle = self.my_game_elements[clapper_number]['position'], self.angle
         y -= self.distance
         return (x, y), angle
 
     def do_task(self, clapper_number):
+        """ closes the chosen clapper
+        :param clapper_number:  specifies which game element is chosen
+        """
         side = self.my_game_elements[clapper_number]['side']
         self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command[side], blocking=True)
         if side == 'right':
@@ -375,6 +456,7 @@ class ClapperTask(Task):
 
 
 class PopcornTask(Task):
+    """ Class for collecting the popcorn from the popcorn machine """
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
         self.points_game_element = 3
@@ -411,6 +493,10 @@ class PopcornTask(Task):
             raise Exception("Unknown team color")
 
     def goto_task(self, object_number):
+        """ returns the position information of the specified popcorn machine
+        :param object_number: specifies which game element is chosen
+        :return: position, angle
+        """
         if object_number < 2:
             return self.my_game_elements[object_number]['start_position'], self.angle
         else:
@@ -418,6 +504,9 @@ class PopcornTask(Task):
             return self.enemy_game_elements[object_number]['start_position'], self.angle
 
     def do_task(self, object_number):
+        """ collecting the popcorn from the chosen popcorn machine
+        :param object_number:  specifies which game element is chosen
+        """
         if object_number < 2:
             self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['ready collect'], blocking=False)
             x, y = self.my_game_elements[object_number]['position']
@@ -439,9 +528,15 @@ class PopcornTask(Task):
             self.drive.drive_path([], self.enemy_game_elements[object_number]['start_position'], self.angle,  end_speed=5)
 
     def goto_empty(self):
+        """ returns the position information of the place to empty the popcorn
+        :return: position with angle
+        """
         return self.empty_position['start_position']
 
     def do_empty(self):
+        """ puts down the collected popcorn
+        :return: None
+        """
         self.drive.drive_path([], self.empty_position['position'], None, end_speed=-15)
         self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['open case'], blocking=True)
         self.drive.drive_path([], self.empty_position['start_position'], None, end_speed=15)

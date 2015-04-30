@@ -103,6 +103,11 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         painter.drawPoint(self.goto[0]*scale, self.goto[1]*scale)
 
     def _draw_game_elements(self, painter, scale):
+        """ draws if game elements have been moved
+        :param painter: painter used to draw
+        :param scale: scale of the pixels
+        :return: None
+        """
         for game_element in self.game_elements.keys():
             if self.game_elements[game_element] == True:
                 pen = QPen(Qt.red, 12, Qt.SolidLine)

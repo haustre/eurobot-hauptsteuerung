@@ -51,10 +51,19 @@ class Can(object):
         self.t_send_connection.start()
 
     def create_queue(self, msg_type, msg_queue):
+        """ create a queue for the specified message type
+        :param msg_type: type of CAN message to put in the queue
+        :param msg_queue: queue to put the messages in
+        :return: queue number
+        """
         self.msg_queues.append((msg_type, msg_queue))
         return len(self.msg_queues)-1
 
     def remove_queue(self, queue_number):
+        """ remove a queue
+        :param queue_number: Number given by create_queue
+        :return: None
+        """
         self.msg_queues.pop(queue_number)
 
     def create_interrupt(self, msg_type, function):
