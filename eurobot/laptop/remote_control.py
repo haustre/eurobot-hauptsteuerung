@@ -45,6 +45,7 @@ class RemoteControlWindow(QDialog):
             "press and hold Drive"
         text_label = QLabel(text)
         self.close_button.clicked.connect(self.close)
+        self.drive_button.released.connect(self.stop)
         self.speed_slider.valueChanged[int].connect(self.slider_change)
         vbox1 = QVBoxLayout()
         vbox1.addWidget(text_label)
@@ -59,9 +60,17 @@ class RemoteControlWindow(QDialog):
 
         :param slider_value: position of the slider
         """
-        slider_value = (slider_value + 1) / 100 * 1000
+        slider_value = (slider_value + 1) / 100 * 100
         self.speed = slider_value
         self.speed_label.setText("Speed: %d mm/s" % self.speed)
+
+    def stop(self):
+        can_msg = {
+            'type': can.MsgTypes.Debug_Drive.value,
+            'speed_left': 0,
+            'speed_right': 0
+            }
+        self.emit(SIGNAL('send_can_over_tcp'), can_msg)
 
     def control_loop(self):
         """ Is called every 90 ms and sends the motor speed to the robot
@@ -84,16 +93,16 @@ class RemoteControlWindow(QDialog):
         """ Is called at every key press. It sets the motor speed according to the direction. """
         if type(event) == QKeyEvent and event.isAutoRepeat() is False:
             if event.key() == Qt.Key_W:
-                self.speed_motor_left = -self.speed
+                self.speed_motor_left = self.speed
                 self.speed_motor_right = self.speed
             if event.key() == Qt.Key_S:
-                self.speed_motor_left = self.speed
+                self.speed_motor_left = -self.speed
                 self.speed_motor_right = -self.speed
             if event.key() == Qt.Key_A:
-                self.speed_motor_left = self.speed
+                self.speed_motor_left = -self.speed
                 self.speed_motor_right = self.speed
             if event.key() == Qt.Key_D:
-                self.speed_motor_left = -self.speed
+                self.speed_motor_left = self.speed
                 self.speed_motor_right = -self.speed
 
     def keyReleaseEvent(self, event):

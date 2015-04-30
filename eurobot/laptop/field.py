@@ -23,6 +23,7 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         self.path_length = 0
         self.path = []
         self.goto = (0, 0)
+        self.game_elements = {}
         self.robot_big = {'x_position': 0, 'y_position': 0, 'diameter': 300, 'angle': 0, 'pixmap': self.robot1_pixmap}
         self.robot_small = {'x_position': 0, 'y_position': 0, 'diameter': 200, 'angle': 0, 'pixmap': self.robot1_pixmap}
         self.enemy_big = {'x_position': 0, 'y_position': 0, 'diameter': 300, 'angle': 0, 'pixmap': self.enemy1_pixmap}
@@ -56,6 +57,7 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         self._draw_robot(painter, self.enemy_big, scale)
         self._draw_robot(painter, self.enemy_small, scale)
         self._draw_path(painter, scale)
+        self._draw_game_elements(painter, scale)
 
         painter.end()
 
@@ -82,7 +84,6 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
 
     def _draw_path(self, painter, scale):
         """ This method draws the planned route of the Robot
-
         :param painter: painter used to draw
         :param path: path to draw
         :param scale: scale of the pixels
@@ -100,6 +101,21 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         pen = QPen(Qt.magenta, 12, Qt.SolidLine)
         painter.setPen(pen)
         painter.drawPoint(self.goto[0]*scale, self.goto[1]*scale)
+
+    def _draw_game_elements(self, painter, scale):
+        """ draws if game elements have been moved
+        :param painter: painter used to draw
+        :param scale: scale of the pixels
+        :return: None
+        """
+        for game_element in self.game_elements.keys():
+            if self.game_elements[game_element] == True:
+                pen = QPen(Qt.red, 12, Qt.SolidLine)
+                painter.setPen(pen)
+            else:
+                pen = QPen(Qt.green, 12, Qt.SolidLine)
+                painter.setPen(pen)
+            painter.drawPoint(game_element[0]*scale, game_element[1]*scale)
 
     def setpoint(self, msg_frame):
         """ This method checks if a CAN message contains the position of a Robot and actualise the position on the map.
@@ -143,3 +159,8 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
             self.path = (0, 0)
         if redraw is True:
             self.update()
+
+    def draw_game_tasks(self, msg_frame):
+        for point in msg_frame:
+            (x, y), moved = point
+            self.game_elements[(x, y)] = moved

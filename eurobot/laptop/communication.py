@@ -190,10 +190,14 @@ class TcpConnection(QThread):
                 if self.tcp.connected is False:
                     break
                 if data is not None:
-                    can_id = data[0]
-                    can_msg = data[1].encode('latin-1')
-                    msg_frame = can.unpack(can_id, can_msg)
-                    self.emit(SIGNAL('tcp_data'), msg_frame)
+                    if data[0] == 'Can':
+                        can_id = data[1][0]
+                        can_msg = data[1][1].encode('latin-1')
+                        msg_frame = can.unpack(can_id, can_msg)
+                        self.emit(SIGNAL('can_data'), msg_frame)
+                    elif data[0] == 'game_task':
+                        msg = data[1]
+                        self.emit(SIGNAL('game_element'), msg)
                 else:
                     time.sleep(0.01)
             speak.speak("Connection to Robot lost")
