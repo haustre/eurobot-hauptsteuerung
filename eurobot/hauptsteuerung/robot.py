@@ -30,6 +30,7 @@ class RobotPosition():
 
     def get_new_position_lock(self):
         """ returns a lock which gets released each time new position information is received.
+
         :return: lock
         """
         lock = threading.Lock()

@@ -34,11 +34,11 @@ The Tasks-Model shows the structure of the program. Here is a description of eac
         Thread sending out the CAN messages from the send queue.
 *   CAN in, :py:func:`libraries.can.Can._recv_connection`
         Thread putting new received CAN messages in the receive queue.
-*   Navigation, *not jet implemented (PA2)*
+*   Navigation
         Knows the position of each robot and every thing else on the table.
-*   Game logic, *not jet implemented (PA2)*
+*   Game logic
         Has the overview of the game and decides where to go and which task to start.
-*   Game tasks, *not jet implemented (PA2)*
+*   Game tasks
         One thread per task. Can send and receive CAN messages and communicates with the game logic task.
 
 .
@@ -60,6 +60,38 @@ hauptsteuerung.debug module
 ---------------------------
 
 .. automodule:: hauptsteuerung.debug
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+hauptsteuerung.drive module
+---------------------------
+
+.. automodule:: hauptsteuerung.drive
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+hauptsteuerung.game_logic module
+--------------------------------
+
+.. automodule:: hauptsteuerung.game_logic
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+hauptsteuerung.robot module
+---------------------------
+
+.. automodule:: hauptsteuerung.robot
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+hauptsteuerung.route_finding module
+-----------------------------------
+
+.. automodule:: hauptsteuerung.route_finding
     :members:
     :undoc-members:
     :show-inheritance:

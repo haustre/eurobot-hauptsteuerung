@@ -52,6 +52,7 @@ class Can(object):
 
     def create_queue(self, msg_type, msg_queue):
         """ create a queue for the specified message type
+
         :param msg_type: type of CAN message to put in the queue
         :param msg_queue: queue to put the messages in
         :return: queue number
@@ -61,6 +62,7 @@ class Can(object):
 
     def remove_queue(self, queue_number):
         """ remove a queue
+
         :param queue_number: Number given by create_queue
         :return: None
         """

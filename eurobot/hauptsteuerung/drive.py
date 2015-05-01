@@ -29,6 +29,7 @@ class Drive():
 
     def add_my_robot(self, robot):
         """ adds a reference to the robot
+
         :param robot: robot where tho program is running on
         :return: None
         """
@@ -38,6 +39,7 @@ class Drive():
 
     def add_robot(self, robot):
         """ adds a reference to the robot
+
         :param robot: robot
         :return: None
         """
@@ -46,6 +48,7 @@ class Drive():
 
     def set_speed(self, speed):
         """ sets the standard speed of the drive
+
         :param speed: speed in %
         :return: None
         """
@@ -53,6 +56,7 @@ class Drive():
 
     def set_close_range_detection(self, activate):
         """ activates detection of enemies with the close range detection.
+
         :param activate: True or False
         :return: None
         """
@@ -60,13 +64,15 @@ class Drive():
 
     def set_enemy_detection(self, activate):
         """ activates detection of enemies with the data of the navigation system.
+
         :param activate: True or False
         :return: None
         """
         self.enemy_detection = activate
 
     def drive_route(self, destination, angle, timeout=15):
-        """
+        """ drives to a given location
+
         :param destination: destination (x, y) or (x, y, angle)
         :param angle: final angle
         :param timeout: timeout if point is not reachable
@@ -85,6 +91,7 @@ class Drive():
 
     def request_stop(self):
         """ stops the robot
+
         :return: None
         """
         self.stop = True    # TODO: check variable in wait_for_arrival
@@ -96,6 +103,7 @@ class Drive():
 
     def drive_path(self, path, destination, angle_in, path_speed=None, end_speed=None, blocking=True):
         """ drives a path to a point if the coordinates are outside the table an exception is raised
+
         :param path: waypoints
         :param destination: (x, y) or (x, y, angle)
         :param angle_in: final angle ( overrides the angle of destination)
@@ -191,6 +199,7 @@ class Drive():
 
     def filter_path(self, path):
         """ filters a path to cause less CAN traffic
+
         :param path: path to filter
         :return: filtered path
         """
@@ -207,6 +216,7 @@ class Drive():
 
     def wait_for_arrival(self, path, speed=100):    # TODO: add timeout
         """ controls if the drive is free and breaks if a robot is in the way
+
         :param path: path to check for other robots
         :param speed: speed for calculating the close range detection
         :return: destination reached

@@ -21,6 +21,7 @@ class Main():
     def __init__(self):
         """ In the initialisation the program determines on which robot it is running, reads in the configuration
         and creates all necessary objects.
+
         :return: None
         """
         self.debug = False  # False = running on the Robot, True F running on the PC
@@ -83,6 +84,7 @@ class Main():
 
     def clear_config(self, file_name):
         """ deletes a given file
+
         :param file_name: name of the file to delete
         :type file_name: str
         :return: None
@@ -94,6 +96,7 @@ class Main():
 
     def read_config(self, file_name):
         """ wait for the GUI program to write the config file and read it in
+
         :param file_name: name of the configuration file
         :type file_name: str
         :return: configuration dictionary
@@ -129,6 +132,7 @@ class Main():
 
     def send_start_configuration(self):
         """ sends the configuration over CAN to the other boards
+
         :return: None
         """
         if self.strategy['side'] == 'left':
@@ -153,6 +157,7 @@ class Main():
 
     def run(self):
         """ starts the game
+
         :return: None
         """
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
@@ -164,6 +169,7 @@ class Main():
 
     def wait_for_game_start(self):
         """ wait for the start of the game ( key removed )
+
         :return: None
         """
         peripherie_queue = queue.Queue()
@@ -178,6 +184,7 @@ class Main():
     def periphery_input(self, can_msg):
         """ checks inputs of the periphery board
         sets the reset flag if the emergency key is pressed
+
         :return: None
         """
         if can_msg['emergency_stop'] == 1 and can_msg['key_inserted'] == 0 and False:  # TODO: activate
@@ -192,6 +199,7 @@ class Main():
     def game_end(self, time_string):
         """ This method is called at the end of the game.
         It sends a emergency stop message over Can to ensure that nothing moves after the game end.
+
         :param time_string: name of the interrupt
         :return: None
         """
@@ -207,6 +215,7 @@ class Main():
 
     def strategy_start(self):  # TODO: Contains multiple test scenarios which will be removed
         """ Executes the chosen start strategy
+
         :return: None
         """
         if self.strategy['robot_name'] == 'Roboter-gross':  # check on which robot the program is running

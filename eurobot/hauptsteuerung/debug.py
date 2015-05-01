@@ -34,8 +34,7 @@ class LaptopCommunication():
 
     def can_loop(self):
         """
-        This is the main debugging thread.
-        """
+        This is the main debugging thread. """
         logfile = open('logfile.txt', 'a')  # TODO: close File at the end of the program
         while True:
             idle = True
@@ -123,9 +122,7 @@ class EnemySimulation():
 
 
 class Position():
-    """
-    This class generates the coordinates of a virtual robot.
-    """
+    """ This class generates the coordinates of a virtual robot. """
     def __init__(self, speed):
         self.speed = speed
         self.x = random.randrange(0, 3000)
@@ -134,6 +131,7 @@ class Position():
 
     def get_coordinates(self):
         """
+
         :return: coordinates of the robot (x, y, angel)
         """
         self.angle += self.speed * 3

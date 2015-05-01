@@ -30,6 +30,7 @@ class RouteFinding():
 
     def add_my_robot(self, robot):
         """ adds a reference to the robot
+
         :param robot: robot where tho program is running on
         :return: None
         """
@@ -37,6 +38,7 @@ class RouteFinding():
 
     def add_robot(self, robot):
         """ adds a reference to the robot
+
         :param robot: robot
         :return: None
         """
@@ -46,6 +48,7 @@ class RouteFinding():
         """ calculates the path from the robot to the destination
         All other robots are drawn in the weight map. If no data of the robot positions is available
         the close range detection data is used.
+
         :param target: destination
         :return: path to the destination
         """
@@ -79,6 +82,7 @@ class RouteFinding():
     def filter_path(self, path):
         """ filters out waypoints near the robot.
         This reduces the risk ouf timing problems if a route is calculated while the robot is moving
+
         :param path: path to filter
         :return: filtered path
         """
@@ -116,6 +120,7 @@ class RouteFinding():
 
     def _add_array(self, gamefield, array, position):
         """ Adds an two arrays together
+
         :param gamefield: table array
         :param array: array to add
         :param pos_x: x position where to add the array
@@ -149,6 +154,7 @@ class RouteFinding():
 
     def _make_table(self, size):
         """ creates a weight map of the table
+
         :param size: y resolution of the generated table
         :return: map of the table
         """
@@ -181,6 +187,7 @@ class RouteFinding():
 
     def _create_graph(self, table):
         """ creates a graph for the A-star algorithm with the given weights
+
         :param table: weight array
         :return: graph
         """
@@ -205,7 +212,8 @@ class RouteFinding():
         return graph
 
     def _find_route(self, weights, position, destination):
-        """
+        """ Finds the shortest route between two points in a graph using the A-Star algorithm.
+
         :param weights: wight map
         :param position: position of the robot
         :param destination: node to drive to
@@ -218,6 +226,7 @@ class RouteFinding():
 
     def _path_heuristic(self, start, end):
         """ heuristic for the A-star algorithm
+
         :param start: start position
         :param end: end position
         :return: estimated distance

@@ -14,9 +14,7 @@ import copy
 
 class Countdown():
     def __init__(self, can_socket):
-        """
-        This class counts down the remaining time till the end of the game
-        """
+        """ This class counts down the remaining time till the end of the game """
         self.can_socket = can_socket
         self.running = False
         self.start_time = 0
@@ -27,6 +25,7 @@ class Countdown():
 
     def start(self):
         """ starts the countdown
+
         :return: None
         """
         self.start_time = time.time()
@@ -37,6 +36,7 @@ class Countdown():
 
     def time_left(self):
         """ returns the time left to the end of the game or false if the game is not started
+
         :return: time left until game end
         """
         if self.running:
@@ -47,6 +47,7 @@ class Countdown():
 
     def set_interrupt(self, object_to_call, interrupt_name, time_left):
         """ creates a new interrupt
+
         :param object_to_call: this object gets called at the specified time
         :param interrupt_name: name of the interrupt
         :param time_left: time to call the object
@@ -92,6 +93,7 @@ class Task():
 
     def estimate_distance(self, robot):
         """ gives back the nearest game element and an estimated distance to it
+
         :param robot: robot to estimate the distance to
         :return: distance to the game element, number of the element
         """
@@ -131,6 +133,7 @@ class Task():
 
     def can_status(self, can_msg):
         """ sets the count of the selected game elements according to the periphery board
+
         :param can_msg: CAN message from the periphery board
         :return:
         """
@@ -138,6 +141,7 @@ class Task():
 
     def send_task_command(self, msg_id, command, blocking=False):
         """ sends a command over CAN to the periphery board
+
         :param msg_id: CAN id
         :param command: CAN command
         :param blocking: specifies if the robot should wait for a response of the periphery board
@@ -153,6 +157,7 @@ class Task():
 
     def wait_for_task(self, msg_id):
         """ waits for a response of the periphery board
+
         :param msg_id: CAN id to wait for
         :return: None
         """
@@ -168,6 +173,7 @@ class Task():
     def get_debug_data(self):
         """ returns the position of each game element and if it is moved
         used by the GUI to display this data
+
         :return: dictionary
         """
         game_elements = []
@@ -212,6 +218,7 @@ class StairTask(Task):
 
     def goto_task(self):
         """ returns the position information of the stair
+
         :return: position, angle
         """
         return self.my_path['in_front'][0:2], self.my_path['in_front'][2]
@@ -272,6 +279,7 @@ class StandsTask(Task):
 
     def goto_task(self, object_number):  # TODO: Calculate Point in front of the stand
         """ returns the position information of the specified stand
+
         :param object_number: specifies which game element is chosen
         :return: position, angle
         """
@@ -279,6 +287,7 @@ class StandsTask(Task):
 
     def do_task(self, object_number):
         """ collects the chosen stand
+
         :param object_number:  specifies which game element is chosen
         """
         starting_point = self.robots['me'].get_position()
@@ -292,6 +301,7 @@ class StandsTask(Task):
 
     def calculate_stopping_point(self, from_pos, to_pos, distance):
         """ calculates the correct position to collect the stand
+
         :param from_pos: position of the robot
         :param to_pos: position of the stand
         :param distance: distance to the stand
@@ -310,6 +320,7 @@ class StandsTask(Task):
 
     def goto_empty(self):
         """ returns the position information of the place to put the stands to
+
         :return: position with angle
         """
         return self.empty_position['start_position']
@@ -348,6 +359,7 @@ class CupTask(Task):
 
     def goto_task(self, object_number):
         """ returns the position information of the specified cup
+
         :param object_number: specifies which game element is chosen
         :return: position, angle
         """
@@ -355,6 +367,7 @@ class CupTask(Task):
 
     def do_task(self, object_number):
         """ collects the chosen cup
+
         :param object_number:  specifies which game element is chosen
         """
         starting_point = self.robots['me'].get_position()
@@ -366,6 +379,7 @@ class CupTask(Task):
 
     def calculate_stopping_points(self, from_pos, to_pos, side):
         """ calculates the correct position to collect the cup
+
         :param from_pos: position of the robot
         :param to_pos: position of the stand
         :param side: which side is used to collect the cup
@@ -434,6 +448,7 @@ class ClapperTask(Task):
 
     def goto_task(self, clapper_number):
         """ returns the position information of the specified clapper
+
         :param clapper_number: specifies which game element is chosen
         :return: position, angle
         """
@@ -443,6 +458,7 @@ class ClapperTask(Task):
 
     def do_task(self, clapper_number):
         """ closes the chosen clapper
+
         :param clapper_number:  specifies which game element is chosen
         """
         side = self.my_game_elements[clapper_number]['side']
@@ -494,6 +510,7 @@ class PopcornTask(Task):
 
     def goto_task(self, object_number):
         """ returns the position information of the specified popcorn machine
+
         :param object_number: specifies which game element is chosen
         :return: position, angle
         """
@@ -505,6 +522,7 @@ class PopcornTask(Task):
 
     def do_task(self, object_number):
         """ collecting the popcorn from the chosen popcorn machine
+
         :param object_number:  specifies which game element is chosen
         """
         if object_number < 2:
@@ -529,12 +547,14 @@ class PopcornTask(Task):
 
     def goto_empty(self):
         """ returns the position information of the place to empty the popcorn
+
         :return: position with angle
         """
         return self.empty_position['start_position']
 
     def do_empty(self):
         """ puts down the collected popcorn
+
         :return: None
         """
         self.drive.drive_path([], self.empty_position['position'], None, end_speed=-15)
