@@ -263,8 +263,8 @@ class Drive():
                 for robot in self.robots:
                     position = robot.get_position()
                     if position:
-                        for point in path[path_pointer:path_pointer+25]:
-                            if math.sqrt((position[0] - point[0])**2 + (position[1] - point[1])**2) < 200:
+                        for point in path[path_pointer:path_pointer+20]:
+                            if math.sqrt((position[0] - point[0])**2 + (position[1] - point[1])**2) < 350:
                                 emergency = True
                                 can_msg = {
                                     'type': can.MsgTypes.Emergency_Stop.value,

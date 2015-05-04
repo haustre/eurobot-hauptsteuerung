@@ -173,16 +173,16 @@ class RouteFinding():
             array[:, x] = weight-weight/wall_size*x
         for x in range(x_size-1, x_size-wall_size-1, -1):
             array[:, x] = weight-weight/wall_size*(x_size-x-1)
-        array[0:int(580 * pixel_per_mm), int(978 * pixel_per_mm):int(2022 * pixel_per_mm)] = weight  # Stairs
+        array[0:math.ceil(580 * pixel_per_mm), math.floor(978 * pixel_per_mm):math.ceil(2022 * pixel_per_mm)] = weight  # Stairs
         # yellow start
-        array[int(767 * pixel_per_mm):int((789+50) * pixel_per_mm), 0:int(400 * pixel_per_mm)] = weight
-        array[int((1211-50) * pixel_per_mm):int(1233 * pixel_per_mm), 0:int(400 * pixel_per_mm)] = weight
+        array[math.floor(767 * pixel_per_mm):math.ceil((789+50) * pixel_per_mm), 0:math.ceil(400 * pixel_per_mm)] = weight
+        array[math.floor((1211-50) * pixel_per_mm):math.ceil(1233 * pixel_per_mm), 0:math.ceil(400 * pixel_per_mm)] = weight
         # green start
-        array[int(767 * pixel_per_mm):int((789+50) * pixel_per_mm), int(2600 * pixel_per_mm):int(3000 * pixel_per_mm)] = weight
-        array[int((1211-50) * pixel_per_mm):int(1233 * pixel_per_mm), int(2600 * pixel_per_mm):int(3000 * pixel_per_mm)] = weight
+        array[math.floor(767 * pixel_per_mm):math.ceil((789+50) * pixel_per_mm), math.floor(2600 * pixel_per_mm):math.ceil(3000 * pixel_per_mm)] = weight
+        array[math.floor((1211-50) * pixel_per_mm):math.ceil(1233 * pixel_per_mm), math.floor(2600 * pixel_per_mm):math.ceil(3000 * pixel_per_mm)] = weight
 
-        array[int(1800 * pixel_per_mm):int(2000 * pixel_per_mm), int(1100 * pixel_per_mm):int(1900 * pixel_per_mm)] = weight
-        array = morphology.grey_dilation(array, size=(9, 9))
+        array[math.floor(1800 * pixel_per_mm):math.ceil(2000 * pixel_per_mm), math.floor(1100 * pixel_per_mm):math.ceil(1900 * pixel_per_mm)] = weight
+        array = morphology.grey_dilation(array, size=(11, 11))
         return array
 
     def _create_graph(self, table):

@@ -273,8 +273,8 @@ class Main():
                         points = [(900, 1400), (2100, 900), (900, 900), (2100, 1400)]
                         for point in points:
                             for i in range(1):
-                                self.drive.drive_route(point, None, 180)
-                if True:
+                                self.drive.drive_route(point, None, timeout=20)
+                if False:
                     self.drive.set_close_range_detection(False)
                     self.drive.set_enemy_detection(False)
                     self.drive.set_speed(15)
