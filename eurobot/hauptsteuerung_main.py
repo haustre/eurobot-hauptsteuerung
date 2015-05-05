@@ -12,8 +12,9 @@ import subprocess
 from libraries import can
 from hauptsteuerung import drive
 from hauptsteuerung import debug
-from hauptsteuerung import game_logic
+from hauptsteuerung import game_tasks
 from hauptsteuerung.robot import PositionMyRobot, PositionOtherRobot
+from hauptsteuerung.game_logic import GameLogic
 
 
 class Main():
@@ -41,7 +42,7 @@ class Main():
         else:
             self.clear_config('/root/gui_config')   # delete the old configuration file
             subprocess.Popen(['software/robo_gui'])     # start the GUI program
-        self.countdown = game_logic.Countdown(self.can_socket)
+        self.countdown = game_tasks.Countdown(self.can_socket)
         self.debugger = debug.LaptopCommunication(self.can_socket)
         self.drive = drive.Drive(self.can_socket)
         self.reset = False
@@ -53,12 +54,13 @@ class Main():
         self.robots = {'me': None, 'friendly robot': None, 'enemy1': None, 'enemy2': None}  # create the robot dictionary
         # create all game element objects
         self.game_tasks = \
-            {'clapper': game_logic.ClapperTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
-             'stair': game_logic.StairTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
-             'stand': game_logic.StandsTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
-             'cup': game_logic.CupTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
-             'popcorn': game_logic.PopcornTask(self.robots, self.strategy['side'], self.can_socket, self.drive)
+            {'clapper': game_tasks.ClapperTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
+             'stair': game_tasks.StairTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
+             'stand': game_tasks.StandsTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
+             'cup': game_tasks.CupTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
+             'popcorn': game_tasks.PopcornTask(self.robots, self.strategy['side'], self.can_socket, self.drive)
              }
+        self.game_logic = GameLogic(self.game_tasks, self.drive)
         self.debugger.add_game_tasks(self.game_tasks)
         self.debugger.start_game_tasks()
         # create all robot objects and put them in a dictionary
@@ -209,6 +211,7 @@ class Main():
                 'code': 0,
             }
             self.can_socket.send(can_msg)
+            self.game_logic.stop()
             time.sleep(5)  # TODO: make longer
             print("Game End")
             self.reset = True

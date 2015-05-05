@@ -83,6 +83,8 @@ class Drive():
         starting_time = time.time()
         while self.stop is False:
             route, path_len = self.route_finder.calculate_path(destination)
+            if path_len >= 100:  # TODO: Not tested
+                return False
             arrived = self.drive_path(route, destination, angle)
             if arrived:
                 return True
