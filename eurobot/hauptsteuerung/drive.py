@@ -9,6 +9,7 @@ import time
 import copy
 import queue
 import math
+from shapely.geometry import LineString, Point
 from libraries import can
 from hauptsteuerung import route_finding
 
@@ -138,6 +139,8 @@ class Drive():
         wrong_point = None
         filtered_path = copy.copy(path)
         self.filter_path(filtered_path)
+        self.filter_path2(filtered_path)
+        self.filter_path3(filtered_path)
         save_zone = [[300, 2700], [300, 2700]]
         for point in filtered_path:  # checks if all waypoints are on the table
             if save_zone[0][0] > point[0] > save_zone[0][1] or save_zone[1][0] > point[1] > save_zone[1][1]:
@@ -201,7 +204,7 @@ class Drive():
         """ filters a path to cause less CAN traffic
 
         :param path: path to filter
-        :return: filtered path
+        :return: None
         """
         if len(path) > 3:
             points_to_delete = []
@@ -213,6 +216,29 @@ class Drive():
                         points_to_delete.append(i+1)
             for index in reversed(sorted(list(set(points_to_delete)))):
                 del path[index]
+
+    def filter_path2(self, path):
+        points_to_delete = []
+        for i in range(len(path)-1):
+            if abs(path[i][0] - path[i+1][0]) <= 1 and abs(path[i][1] - path[i+1][1]) <= 1:
+                points_to_delete.append(i+1)
+        for index in reversed(sorted(list(set(points_to_delete)))):
+            del path[index]
+
+    def filter_path3(self, path, max_error):
+        points_to_delete = []
+        i = 0
+        while i < len(path)-2:
+            line = LineString([path[i], path[i+2]])
+            point = Point(path[i+1])
+            distance_from_line = point.distance(line)
+            if distance_from_line <= max_error:
+                points_to_delete.append(i+1)
+                i += 2
+            else:
+                i += 1
+        for index in reversed(sorted(list(set(points_to_delete)))):
+            del path[index]
 
     def wait_for_arrival(self, path, speed=100):    # TODO: add timeout
         """ controls if the drive is free and breaks if a robot is in the way

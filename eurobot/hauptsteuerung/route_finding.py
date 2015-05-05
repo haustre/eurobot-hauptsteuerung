@@ -231,5 +231,5 @@ class RouteFinding():
         :param end: end position
         :return: estimated distance
         """
-        distance = math.sqrt((start[0] - end[0])**2 + (start[1] - end[1])**2)*1.5
+        distance = math.sqrt((start[0] - end[0])**2 + (start[1] - end[1])**2)*math.sqrt(2)
         return distance
