@@ -83,8 +83,10 @@ class Drive():
         starting_time = time.time()
         while self.stop is False:
             route, path_len = self.route_finder.calculate_path(destination)
+            #print("path_len: " + str(path_len))
             if path_len >= 100:  # TODO: Not tested
-                return False
+                #return False
+                pass
             arrived = self.drive_path(route, destination, angle)
             if arrived:
                 return True
@@ -144,7 +146,7 @@ class Drive():
         filtered_path = copy.copy(path)
         self.filter_path(filtered_path)
         self.filter_path2(filtered_path)
-        self.filter_path3(filtered_path)
+        self.filter_path3(filtered_path, 1)
         save_zone = [[300, 2700], [300, 2700]]
         for point in filtered_path:  # checks if all waypoints are on the table
             if save_zone[0][0] > point[0] > save_zone[0][1] or save_zone[1][0] > point[1] > save_zone[1][1]:
@@ -166,7 +168,7 @@ class Drive():
                         'x_position': 65535,
                         'y_position': 65535,
                         'angle': rotate_angle,
-                        'speed': int(self.speed/2),
+                        'speed': int(self.speed),
                         'path_length': 0,
                     }
                     drive_queue = queue.Queue()
@@ -294,7 +296,7 @@ class Drive():
                     position = robot.get_position()
                     if position:
                         for point in path[path_pointer:path_pointer+20]:
-                            if math.sqrt((position[0] - point[0])**2 + (position[1] - point[1])**2) < 350:
+                            if math.sqrt((position[0] - point[0])**2 + (position[1] - point[1])**2) < 250:
                                 emergency = True
                                 can_msg = {
                                     'type': can.MsgTypes.Emergency_Stop.value,

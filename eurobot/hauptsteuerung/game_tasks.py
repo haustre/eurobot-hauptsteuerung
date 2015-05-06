@@ -111,8 +111,8 @@ class Task():
 
     def check_if_moved(self):
         """ loop checking which game elements have been moved """
-        if self.movable:
-            while True:
+        while True:
+            if self.movable:
                 for robot in self.robots.values():
                     if robot:
                         drive_map = robot.get_map()
@@ -225,15 +225,15 @@ class StairTask(Task):
 
     def do_task(self):
         """ drives to the top of the stair """
-        self.drive.drive_path([], self.my_path['bottom'], blocking=False)  # TODO: Danger no close range detection
+        self.drive.drive_path([], self.my_path['bottom'], None, blocking=False)  # TODO: Danger no close range detection
         self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['bottom'], blocking=True)
-        self.drive.drive_path([], self.my_path['beginning'], end_speed=30)  # TODO: Danger no close range detection
+        self.drive.drive_path([], self.my_path['beginning'], None, end_speed=30)  # TODO: Danger no close range detection
         threading.Timer(0.5, self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['top'])).start()
         self.drive.drive_path([], self.my_path['top'])
         self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['up'], blocking=True)
         self.drive.drive_path([], self.my_path['carpet 1'])
         self.send_task_command(can.MsgTypes.Carpet_Command.value, self.my_path['fire 1'], blocking=True)
-        self.drive.drive_path([], self.my_path['top'], end_speed=(-self.drive.speed))
+        self.drive.drive_path([], self.my_path['top'], None, end_speed=(-self.drive.speed))
         self.drive.drive_path([], self.my_path['carpet 2'])
         self.send_task_command(can.MsgTypes.Carpet_Command.value, self.my_path['fire 2'], blocking=True)
 
