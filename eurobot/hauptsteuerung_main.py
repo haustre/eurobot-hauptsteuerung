@@ -267,7 +267,7 @@ class Main():
                 self.drive.drive_route(point, None)
                 self.game_tasks['popcorn'].do_empty()
             elif self.strategy['strategy'] == 'C':  # Test strategy
-                if True:
+                if False:
                     self.drive.set_close_range_detection(True)
                     self.drive.set_enemy_detection(True)
                     self.drive.set_speed(30)
@@ -277,28 +277,17 @@ class Main():
                         for point in points:
                             for i in range(1):
                                 self.drive.drive_route(point, None, timeout=20)
-                if False:
+                if True:
                     self.drive.set_close_range_detection(False)
                     self.drive.set_enemy_detection(False)
-                    self.drive.set_speed(15)
-                    self.drive.drive_path([], (1000, 1000), 0)
-                    point, angle = self.game_tasks['popcorn'].goto_task(0)
-                    self.drive.drive_route(point, angle)
-                    self.game_tasks['popcorn'].do_task(0)
-
-                    point, angle = self.game_tasks['popcorn'].goto_task(1)
-                    self.drive.drive_route(point, angle)
-                    self.game_tasks['popcorn'].do_task(1)
-
-                    self.drive.drive_route((2600, 400), 180)
-                if False:
-                    self.drive.set_close_range_detection(False)
-                    self.drive.set_enemy_detection(False)
-                    self.drive.set_speed(15)
-                    self.drive.drive_path([], (1000, 1000), 0)
-                    point, angle = self.game_tasks['clapper'].goto_task(1)
-                    self.drive.drive_route(point, angle)
-                    self.game_tasks['clapper'].do_task(1)
+                    self.drive.set_speed(30)
+                    if self.strategy['side'] == 'left':
+                        self.drive.drive_path([], (800, 1000), None)
+                    else:
+                        self.drive.drive_path([], (3000-800, 1000), None)
+                    self.game_logic.start()
+                    time.sleep(60)
+                    self.game_logic.stop()
 
         if self.strategy['robot_name'] == 'Roboter-klein':
             if self.strategy['strategy'] == 'A':

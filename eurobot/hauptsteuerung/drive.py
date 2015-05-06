@@ -83,7 +83,7 @@ class Drive():
         starting_time = time.time()
         while self.stop is False:
             route, path_len = self.route_finder.calculate_path(destination)
-            #print("path_len: " + str(path_len))
+            #print(path_len)
             if path_len >= 100:  # TODO: Not tested
                 #return False
                 pass
@@ -146,7 +146,7 @@ class Drive():
         filtered_path = copy.copy(path)
         self.filter_path(filtered_path)
         self.filter_path2(filtered_path)
-        self.filter_path3(filtered_path, 1)
+        self.filter_path3(filtered_path, 2)
         save_zone = [[300, 2700], [300, 2700]]
         for point in filtered_path:  # checks if all waypoints are on the table
             if save_zone[0][0] > point[0] > save_zone[0][1] or save_zone[1][0] > point[1] > save_zone[1][1]:

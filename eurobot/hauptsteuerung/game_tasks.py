@@ -98,7 +98,7 @@ class Task():
         :return: distance to the game element, number of the element
         """
         robot_x, robot_y = self.robots['me'].get_position()
-        shortest_distance = None
+        shortest_distance = 9000  # Not on the Table
         nearest_element = None
         for i, game_element in enumerate(self.my_game_elements):
             if game_element['moved'] is False:
@@ -243,7 +243,7 @@ class StandsTask(Task):
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
         self.distance_to_stand = 200
-        self.points_game_element = 3
+        self.points_game_element = -1000  # TODO: points = 3
         empty_position = {'start_position': (1300, 1650, 90), 'position': (1300, 1760, 90)}
         self.command = {'blocked': 0, 'ready collect': 1, 'ready platform': 2, 'open case': 3}
         stands_left = [{'position': (90, 200)},
@@ -268,6 +268,7 @@ class StandsTask(Task):
             self.enemy_game_elements = stands_right
             self.empty_position = empty_position
         elif my_color == 'right':
+            self.empty_position = {}
             self.my_game_elements = stands_right
             self.enemy_game_elements = stands_left
             x, y, angle = empty_position['start_position']
@@ -283,7 +284,7 @@ class StandsTask(Task):
         :param object_number: specifies which game element is chosen
         :return: position, angle
         """
-        return self.my_game_elements[object_number]['position'], self.my_game_elements[object_number]['angle']
+        return self.my_game_elements[object_number]['position'], 0
 
     def do_task(self, object_number):
         """ collects the chosen stand
@@ -499,6 +500,7 @@ class PopcornTask(Task):
             self.enemy_game_elements = popcorn_right
             self.empty_position = empty_position
         elif my_color == 'right':
+            self.empty_position = {}
             self.my_game_elements = popcorn_right
             self.enemy_game_elements = popcorn_left
             x, y, angle = empty_position['start_position']
