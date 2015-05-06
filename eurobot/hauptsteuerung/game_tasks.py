@@ -191,7 +191,7 @@ class StairTask(Task):
         self.climbing_command = {'up': 0, 'bottom': 1, 'middle': 2, 'top': 3}
         self.carpet_command = {'fire right': 0, 'fire left': 1}
         path_left = {'in_front': (1250, 1080, 270),
-                     'bottom': (1250, 700, 270),
+                     'bottom': (1250, 675, 270),
                      'beginning': (1250, 650, 270),
                      'top': (1250, 190, 270),
                      'carpet 1': (1080, 200, 180),
@@ -225,16 +225,22 @@ class StairTask(Task):
 
     def do_task(self):
         """ drives to the top of the stair """
-        self.drive.drive_path([], self.my_path['bottom'], blocking=False)  # TODO: Danger no close range detection
+        self.drive.drive_path([], self.my_path['bottom'], None, blocking=False)  # TODO: Danger no close range detection
         self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['bottom'], blocking=True)
-        self.drive.drive_path([], self.my_path['beginning'], end_speed=30)  # TODO: Danger no close range detection
-        threading.Timer(0.5, self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['top'])).start()
-        self.drive.drive_path([], self.my_path['top'])
+        threading.Timer(2, self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['top'])).start() #ToDo do not works
+        self.drive.drive_path([], self.my_path['top'], None)
+
+        myY, myY = self.robots['me'].get_position()
+
+        while myY > 290:
+            self.drive.drive_path([], self.my_path['top'], None)
+            myY, myY = self.robots['me'].get_position()
+
         self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['up'], blocking=True)
-        self.drive.drive_path([], self.my_path['carpet 1'])
+        self.drive.drive_path([], self.my_path['carpet 1'], None)
         self.send_task_command(can.MsgTypes.Carpet_Command.value, self.my_path['fire 1'], blocking=True)
-        self.drive.drive_path([], self.my_path['top'], end_speed=(-self.drive.speed))
-        self.drive.drive_path([], self.my_path['carpet 2'])
+        self.drive.drive_path([], self.my_path['top'], None, end_speed=(-self.drive.speed))
+        self.drive.drive_path([], self.my_path['carpet 2'], None)
         self.send_task_command(can.MsgTypes.Carpet_Command.value, self.my_path['fire 2'], blocking=True)
 
 
