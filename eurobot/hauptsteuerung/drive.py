@@ -103,6 +103,8 @@ class Drive():
             'code': 0,
         }
         self.can_socket.send(can_msg)
+        time.sleep(0.2)
+        self.stop = False
 
     def drive_path(self, path, destination, angle_in, path_speed=None, end_speed=None, blocking=True):
         """ drives a path to a point if the coordinates are outside the table an exception is raised
