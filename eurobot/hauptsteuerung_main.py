@@ -141,7 +141,7 @@ class Main():
             side = 1
         else:
             side = 0
-        if self.strategy['strategy'] == 1 or self.strategy['strategy'] == 2:
+        if self.strategy['strategy'] == 'C':
             start_orientation = 0   # near Clapper
         else:
             start_orientation = 1   # near Stair

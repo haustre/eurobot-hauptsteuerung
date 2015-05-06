@@ -208,6 +208,14 @@ class StairTask(Task):
                 path_right[key] = 0
             elif value == 0:
                 path_right[key] = 1
+            x, y, angle = path_right['carpet 1']
+            path_right['carpet 1'] = x, y, angle + 180
+            x, y, angle = path_right['carpet 2']
+            path_right['carpet 2'] = x, y, angle + 180
+            fire1 = path_right['fire 1']
+            fire2 = path_right['fire 2']
+            path_right['fire 1'] = fire2
+            path_right['fire 2'] = fire1
 
         if my_color == 'left':
             self.my_path = path_left
