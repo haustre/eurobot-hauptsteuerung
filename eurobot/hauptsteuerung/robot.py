@@ -53,7 +53,7 @@ class RobotPosition():
             self.last_position_update = time.time()
         if can_msg['angle_correct']:
             with self.lock:
-                self.angle = can_msg['angle']
+                self.angle = can_msg['angle'] / 100
             self.last_angle_update = time.time()
 
     def get_position(self):

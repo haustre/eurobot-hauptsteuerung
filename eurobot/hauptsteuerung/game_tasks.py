@@ -111,8 +111,8 @@ class Task():
 
     def check_if_moved(self):
         """ loop checking which game elements have been moved """
-        if self.movable:
-            while True:
+        while True:
+            if self.movable:
                 for robot in self.robots.values():
                     if robot:
                         drive_map = robot.get_map()
