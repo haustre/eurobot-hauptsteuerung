@@ -290,14 +290,21 @@ class Main():
                     self.game_logic.stop()
 
         if self.strategy['robot_name'] == 'Roboter-klein':
+            time.sleep(3)
             if self.strategy['strategy'] == 'A':
-                self.drive.set_close_range_detection(False)
-                self.drive.set_enemy_detection(False)
+                self.drive.set_close_range_detection(True)
+                self.drive.set_enemy_detection(True)
                 self.drive.set_speed(100)
                 point, angle = self.game_tasks['stair'].goto_task()
-                self.drive.drive_path([], point, angle)
+
+                if self.drive.drive_path([], point, angle):
+                    pass
+                else:
+                    self.drive.drive_route(point, angle)
+
                 self.drive.set_close_range_detection(False)
-                self.drive.set_speed(60)
+                self.drive.set_enemy_detection(False)
+                self.drive.set_speed(50)
                 self.game_tasks['stair'].do_task()
             elif self.strategy['strategy'] == 'B':
                 raise Exception('Strategy not programmed')
