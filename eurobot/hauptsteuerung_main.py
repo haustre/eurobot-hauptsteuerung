@@ -292,15 +292,27 @@ class Main():
         if self.strategy['robot_name'] == 'Roboter-klein':
             time.sleep(3)
             if self.strategy['strategy'] == 'A':
+                self.drive.set_close_range_detection(False)
+                self.drive.set_enemy_detection(False)
+
+                self.drive.set_speed(100)
+                if self.strategy['side'] == 'left':
+                    self.drive.drive_path([], (500, 1080), None)
+                else:
+                    self.drive.drive_path([], (3000-500, 1080), None)
+
                 self.drive.set_close_range_detection(True)
                 self.drive.set_enemy_detection(True)
-                self.drive.set_speed(100)
-                point, angle = self.game_tasks['stair'].goto_task()
 
-                if self.drive.drive_path([], point, angle):
-                    pass
+                point, angle = self.game_tasks['stair'].goto_task()
+                self.drive.drive_path([],point, angle)
+
+                if self.strategy['side'] == 'left':
+                    while self.drive.drive_path([],(1250, 700), angle) == False:
+                        time.sleep(5)
                 else:
-                    self.drive.drive_route(point, angle)
+                    while self.drive.drive_path([],(3000-1250, 700), angle) == False:
+                        time.sleep(5)
 
                 self.drive.set_close_range_detection(False)
                 self.drive.set_enemy_detection(False)
