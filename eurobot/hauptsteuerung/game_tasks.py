@@ -266,8 +266,8 @@ class StandsTask(Task):
         self.points_game_element = 6
         empty_position = {'start_position': (1300, 1650, 90), 'position': (1300, 1760, 90)}
         self.command = {'blocked': 0, 'ready collect': 1, 'ready platform': 2, 'open case': 3}
-        stands_left = [{'position': (90, 200), 'start position': (290, 490)},
-                       {'position': (90, 1750), 'start position': (290, 1460)},
+        stands_left = [{'position': (90, 200), 'start position': (300, 490)},
+                       {'position': (90, 1750), 'start position': (300, 1460)},
                        #{'position': (90, 1850), 'start position': None},
                        #{'position': (850, 100), 'start position': None},
                        {'position': (850, 200), 'start position': (650, 490)},
@@ -347,7 +347,7 @@ class StandsTask(Task):
 
         :return: position with angle
         """
-        return self.empty_position['start_position']
+        return self.empty_position['start_position'], None
 
     def do_empty(self):
         """ puts down the stands """
@@ -576,7 +576,7 @@ class PopcornTask(Task):
 
         :return: position with angle
         """
-        return self.empty_position['start_position']
+        return self.empty_position['start_position'], None
 
     def do_empty(self):
         """ puts down the collected popcorn

@@ -122,6 +122,8 @@ class Drive():
         :return: destination reached
         :rtype: bool
         """
+        if destination is None and angle_in is None:
+            return True
         if destination:
             if len(destination) == 2:
                 x, y = destination
@@ -148,7 +150,7 @@ class Drive():
         filtered_path = copy.copy(path)
         self.filter_path(filtered_path)
         self.filter_path2(filtered_path)
-        self.filter_path3(filtered_path, 2)
+        self.filter_path3(filtered_path, 1.5)
         save_zone = [[300, 2700], [300, 2700]]
         for point in filtered_path:  # checks if all waypoints are on the table
             if save_zone[0][0] > point[0] > save_zone[0][1] or save_zone[1][0] > point[1] > save_zone[1][1]:
@@ -258,7 +260,10 @@ class Drive():
         """
         path_pointer = 0
         robot_big = self.my_robot.name == 'Roboter-gross'
-        break_distance = 250 + (300 / 100 * speed)  # TODO: not tested
+        if robot_big:
+            break_distance = 250 + (300 / 100 * speed)  # TODO: not tested
+        else:
+            break_distance = 150
         drive_queue = queue.Queue()
         close_range_queue = queue.Queue()
         drive_queue_number = self.can_socket.create_queue(can.MsgTypes.Drive_Status.value, drive_queue)

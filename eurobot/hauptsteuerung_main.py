@@ -60,7 +60,7 @@ class Main():
              'cup': game_tasks.CupTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
              'popcorn': game_tasks.PopcornTask(self.robots, self.strategy['side'], self.can_socket, self.drive)
              }
-        self.game_logic = GameLogic(self.game_tasks, self.drive, self.countdown)
+        self.game_logic = GameLogic(self.game_tasks, self.drive, self.countdown, self.robots)
         self.debugger.add_game_tasks(self.game_tasks)
         self.debugger.start_game_tasks()
         # create all robot objects and put them in a dictionary
