@@ -92,6 +92,8 @@ class Drive():
             arrived = self.drive_path(route, destination, angle)
             if arrived:
                 return True
+            else:
+                starting_time += 2  # TODO: Not tested
             time.sleep(0.5)
             if time.time() - starting_time > timeout:
                 return False
@@ -285,12 +287,18 @@ class Drive():
                     if ((range_msg['front_middle_correct'] and range_msg['distance_front_middle'] < break_distance) or
                        (range_msg['front_left_correct'] and range_msg['distance_front_left'] < break_distance) and robot_big or
                        (range_msg['front_right_correct'] and range_msg['distance_front_right'] < break_distance)):
-                        emergency = True
-                        can_msg = {
-                            'type': can.MsgTypes.Emergency_Stop.value,
-                            'code': 0,
-                        }
-                        self.can_socket.send(can_msg)
+                        distance = 350
+                        my_x, my_y = self.my_robot.get_position()
+                        my_angle = self.my_robot.get_angle()
+                        if my_y > 2000 - distance and 45 < my_angle < 135:
+                            print("Close detection to close to edge")
+                        else:
+                            emergency = True
+                            can_msg = {
+                                'type': can.MsgTypes.Emergency_Stop.value,
+                                'code': 0,
+                            }
+                            self.can_socket.send(can_msg)
                 except queue.Empty:
                     pass
             if self.my_robot_new_position.acquire(False):   # TODO: Not tested

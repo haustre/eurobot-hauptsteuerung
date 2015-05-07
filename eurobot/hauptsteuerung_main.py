@@ -278,9 +278,9 @@ class Main():
                             for i in range(1):
                                 self.drive.drive_route(point, None, timeout=20)
                 if True:
-                    self.drive.set_close_range_detection(False)
-                    self.drive.set_enemy_detection(False)
-                    self.drive.set_speed(30)
+                    self.drive.set_close_range_detection(True)
+                    self.drive.set_enemy_detection(True)
+                    self.drive.set_speed(60)
                     #if self.strategy['side'] == 'left':
                     #    self.drive.drive_path([], (800, 1000), None)
                     #else:
