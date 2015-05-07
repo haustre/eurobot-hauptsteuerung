@@ -122,6 +122,8 @@ class Drive():
         :return: destination reached
         :rtype: bool
         """
+        if destination is None and angle_in is None:
+            return True
         if destination:
             if len(destination) == 2:
                 x, y = destination
@@ -148,7 +150,7 @@ class Drive():
         filtered_path = copy.copy(path)
         self.filter_path(filtered_path)
         self.filter_path2(filtered_path)
-        self.filter_path3(filtered_path, 2)
+        self.filter_path3(filtered_path, 1.5)
         save_zone = [[300, 2700], [300, 2700]]
         for point in filtered_path:  # checks if all waypoints are on the table
             if save_zone[0][0] > point[0] > save_zone[0][1] or save_zone[1][0] > point[1] > save_zone[1][1]:

@@ -125,7 +125,8 @@ class _TcpConnection(object):
             try:
                 send_queue.put_nowait(data)
             except queue.Full:
-                print("Tcp send Queue full!!")
+                #print("Tcp send Queue full!!")
+                pass
 
 
 class Server(_TcpConnection):
