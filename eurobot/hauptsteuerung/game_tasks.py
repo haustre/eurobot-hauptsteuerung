@@ -190,15 +190,17 @@ class StairTask(Task):
         super().__init__(robots, can_socket, can.MsgTypes.Climbing_Command.value, drive)
         self.climbing_command = {'up': 0, 'bottom': 1, 'middle': 2, 'top': 3}
         self.carpet_command = {'fire right': 0, 'fire left': 1}
-        path_left = {'in_front': (1250, 700, 270),
-                     'bottom': (1250, 675, 270),
+        path_left = {'in_front': (1250, 740, 270),
+                     'bottom': (1250, 700, 270),
                      'beginning': (1250, 650, 270),
                      'top': (1250, 190, 270),
-                     'carpet 1': (1080, 200, 180),
+                     'top not reached': (1250, 240, 270),
+                     'carpet 1': (1080, 240, 185),
                      'fire 1': self.carpet_command['fire left'],
-                     'turning point': (1250, 200, 270),
-                     'carpet 2': (1400, 200, 0),
-                     'fire 2': self.carpet_command['fire right']
+                     'turning point': (1250, 240, 270),
+                     'carpet 2': (1400, 240, 355),
+                     'fire 2': self.carpet_command['fire right'],
+                     'end point': (1250, 210, 90)
                      }
         path_right = {}
         for key, value in path_left.items():
@@ -209,9 +211,9 @@ class StairTask(Task):
             elif value == 0:
                 path_right[key] = 1
         x, y, angle = path_right['carpet 1']
-        path_right['carpet 1'] = x, y, angle + 180
+        path_right['carpet 1'] = x, y, 360-(angle - 180)
         x, y, angle = path_right['carpet 2']
-        path_right['carpet 2'] = x, y, angle + 180
+        path_right['carpet 2'] = x, y, 360-(angle - 180)
             #fire1 = path_right['fire 1']
             #fire2 = path_right['fire 2']
             #path_right['fire 1'] = fire2
@@ -233,7 +235,6 @@ class StairTask(Task):
 
     def do_task(self):
         """ drives to the top of the stair """
-        self.drive.drive_path([], self.my_path['bottom'], None, blocking=False)  # TODO: Danger no close range detection
         self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['bottom'], blocking=True)
         timer = threading.Timer(2, self.send_climbing_top)
         timer.setDaemon(True)
@@ -252,6 +253,7 @@ class StairTask(Task):
         self.drive.drive_path([], self.my_path['top'], None, end_speed=(-self.drive.speed))
         self.drive.drive_path([], self.my_path['carpet 2'], None)
         self.send_task_command(can.MsgTypes.Carpet_Command.value, self.my_path['fire 2'], blocking=True)
+        self.drive.drive_path([], self.my_path['end point'], None, end_speed=(-self.drive.speed))
 
     def send_climbing_top(self):
         self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['top'])

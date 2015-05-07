@@ -265,7 +265,7 @@ class Drive():
         if robot_big:
             break_distance = 250 + (300 / 100 * speed)  # TODO: not tested
         else:
-            break_distance = 150
+            break_distance = 200
         drive_queue = queue.Queue()
         close_range_queue = queue.Queue()
         drive_queue_number = self.can_socket.create_queue(can.MsgTypes.Drive_Status.value, drive_queue)
@@ -284,8 +284,8 @@ class Drive():
                     range_msg = close_range_queue.get_nowait()
                     while close_range_queue.empty() is False:
                         close_range_queue.get_nowait()
-                    if ((range_msg['front_middle_correct'] and range_msg['distance_front_middle'] < break_distance) or
-                       (range_msg['front_left_correct'] and range_msg['distance_front_left'] < break_distance) and robot_big or
+                    if ((range_msg['front_middle_correct'] and range_msg['distance_front_middle'] < break_distance) and robot_big or
+                       (range_msg['front_left_correct'] and range_msg['distance_front_left'] < break_distance) or
                        (range_msg['front_right_correct'] and range_msg['distance_front_right'] < break_distance)):
                         distance = 350
                         my_x, my_y = self.my_robot.get_position()
