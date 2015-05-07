@@ -80,6 +80,8 @@ class Drive():
         :return: destination reached
         :rtype: bool
         """
+        if destination is None and angle is None:
+            return True
         starting_time = time.time()
         while self.stop is False:
             route, path_len = self.route_finder.calculate_path(destination)

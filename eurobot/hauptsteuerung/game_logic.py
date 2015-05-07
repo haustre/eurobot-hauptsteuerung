@@ -6,13 +6,28 @@ __license__ = "GPLv3"
 
 
 class GameLogic():
-    def __init__(self, game_tasks, drive):
+    def __init__(self, game_tasks, drive, countdown):
         self.game_tasks = game_tasks
         self.drive = drive
+        self.countdown = countdown
         self.running = True
 
     def start(self):
         while self.running:
+            collected = self.game_tasks['stand'].collected
+            if (collected >= 4) or (self.countdown.time_left() <= 15 and collected >= 2):
+                point, angle = self.game_tasks['stand'].goto_empty()
+                print("Empty Stands")
+                if self.drive.drive_route(point, angle):
+                    self.game_tasks['stand'].do_empty()
+
+            collected = self.game_tasks['popcorn'].collected
+            if (collected >= 10) or (self.countdown.time_left() <= 15 and collected >= 5):
+                point, angle = self.game_tasks['popcorn'].goto_empty()
+                print("Empty Popcorn")
+                if self.drive.drive_route(point, angle):
+                    self.game_tasks['popcorn'].do_empty()
+
             ratings = []
             for task_name, task in self.game_tasks.items():
                 if task_name != 'stair':

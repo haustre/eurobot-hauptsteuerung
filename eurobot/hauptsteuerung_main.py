@@ -60,7 +60,7 @@ class Main():
              'cup': game_tasks.CupTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
              'popcorn': game_tasks.PopcornTask(self.robots, self.strategy['side'], self.can_socket, self.drive)
              }
-        self.game_logic = GameLogic(self.game_tasks, self.drive)
+        self.game_logic = GameLogic(self.game_tasks, self.drive, self.countdown)
         self.debugger.add_game_tasks(self.game_tasks)
         self.debugger.start_game_tasks()
         # create all robot objects and put them in a dictionary
@@ -227,8 +227,8 @@ class Main():
                     self.drive.set_close_range_detection(False)
                     self.drive.set_enemy_detection(False)
                     self.drive.set_speed(30)
-                    self.game_tasks['stand'].do_task(5)
-                    self.game_tasks['stand'].do_task(6)
+                    self.game_tasks['stand'].do_task(3)
+                    self.game_tasks['stand'].do_task(4)
                     self.drive.drive_path([], (290, 1460), None)
                     self.game_tasks['stand'].do_task(1)
                     self.drive.drive_path([], (1000, 1000), None)

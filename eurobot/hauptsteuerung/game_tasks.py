@@ -208,14 +208,14 @@ class StairTask(Task):
                 path_right[key] = 0
             elif value == 0:
                 path_right[key] = 1
-            x, y, angle = path_right['carpet 1']
-            path_right['carpet 1'] = x, y, angle + 180
-            x, y, angle = path_right['carpet 2']
-            path_right['carpet 2'] = x, y, angle + 180
-            fire1 = path_right['fire 1']
-            fire2 = path_right['fire 2']
-            path_right['fire 1'] = fire2
-            path_right['fire 2'] = fire1
+        x, y, angle = path_right['carpet 1']
+        path_right['carpet 1'] = x, y, angle + 180
+        x, y, angle = path_right['carpet 2']
+        path_right['carpet 2'] = x, y, angle + 180
+            #fire1 = path_right['fire 1']
+            #fire2 = path_right['fire 2']
+            #path_right['fire 1'] = fire2
+            #path_right['fire 2'] = fire1
 
         if my_color == 'left':
             self.my_path = path_left
@@ -235,7 +235,9 @@ class StairTask(Task):
         """ drives to the top of the stair """
         self.drive.drive_path([], self.my_path['bottom'], None, blocking=False)  # TODO: Danger no close range detection
         self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['bottom'], blocking=True)
-        threading.Timer(2, self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['top'])).start() #ToDo do not works
+        timer = threading.Timer(2, self.send_climbing_top)
+        timer.setDaemon(True)
+        timer.start()
         self.drive.drive_path([], self.my_path['top'], None)
 
         myY, myY = self.robots['me'].get_position()
@@ -251,23 +253,26 @@ class StairTask(Task):
         self.drive.drive_path([], self.my_path['carpet 2'], None)
         self.send_task_command(can.MsgTypes.Carpet_Command.value, self.my_path['fire 2'], blocking=True)
 
+    def send_climbing_top(self):
+        self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['top'])
+
 
 class StandsTask(Task):
     """ Class collecting the stands """
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
         self.distance_to_stand = 200
-        self.points_game_element = -1000  # TODO: points = 3
+        self.points_game_element = 6
         empty_position = {'start_position': (1300, 1650, 90), 'position': (1300, 1760, 90)}
         self.command = {'blocked': 0, 'ready collect': 1, 'ready platform': 2, 'open case': 3}
-        stands_left = [{'position': (90, 200)},
-                       {'position': (90, 1750)},
-                       {'position': (90, 1850)},
-                       {'position': (850, 100)},
-                       {'position': (850, 200)},
-                       {'position': (870, 1355)},
-                       {'position': (1100, 1770)},
-                       {'position': (1300, 1400)},
+        stands_left = [{'position': (90, 200), 'start position': (290, 490)},
+                       {'position': (90, 1750), 'start position': (290, 1460)},
+                       #{'position': (90, 1850), 'start position': None},
+                       #{'position': (850, 100), 'start position': None},
+                       {'position': (850, 200), 'start position': (650, 490)},
+                       {'position': (870, 1355), 'start position': None},
+                       {'position': (1100, 1770), 'start position': None},
+                       {'position': (1300, 1400), 'start position': None},
                        ]
 
         for stand in stands_left:
@@ -277,6 +282,9 @@ class StandsTask(Task):
         for stand in stands_right:
             x, y = stand['position']
             stand['position'] = (3000-x, y)
+            if stand['start position'] is not None:
+                x, y = stand['start position']
+                stand['start position'] = (3000-x, y)
         if my_color == 'left':
             self.my_game_elements = stands_left
             self.enemy_game_elements = stands_right
@@ -298,7 +306,7 @@ class StandsTask(Task):
         :param object_number: specifies which game element is chosen
         :return: position, angle
         """
-        return self.my_game_elements[object_number]['position'], 0
+        return self.my_game_elements[object_number]['start position'], None
 
     def do_task(self, object_number):
         """ collects the chosen stand
@@ -357,7 +365,7 @@ class CupTask(Task):
         self.my_color = my_color
         self.distance = 150
         self.shift = 100
-        self.points_game_element = 3
+        self.points_game_element = -1000  # TODO: points = 3
         self.free_arms = {'right': True, 'left': True}
         self.command = {'blocked': 0, 'ready collect': 1, 'open case': 2}
         self.sides = {'left': 0, 'right': 1}
