@@ -308,10 +308,12 @@ class Main():
                 self.drive.drive_path([],point, angle)
 
                 if self.strategy['side'] == 'left':
-                    while self.drive.drive_path([],(1250, 700), angle) == False:
-                        time.sleep(5)
+                    self.drive.drive_path([],(1250, 700), angle)
+                    while self.drive.drive_path([],point, angle) == False:
+                         time.sleep(5)
                 else:
-                    while self.drive.drive_path([],(3000-1250, 700), angle) == False:
+                    self.drive.drive_path([],(3000-1250, 700), angle)
+                    while self.drive.drive_path([],point, angle) == False:
                         time.sleep(5)
 
                 self.drive.set_close_range_detection(False)
