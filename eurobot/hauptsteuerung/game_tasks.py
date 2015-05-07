@@ -262,7 +262,7 @@ class StandsTask(Task):
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
         self.distance_to_stand = 200
-        self.points_game_element = 6
+        self.points_game_element = 7
         empty_position = {'start_position': (1300, 1650, 90), 'position': (1300, 1760, 90)}
         self.command = {'blocked': 0, 'ready collect': 1, 'ready platform': 2, 'open case': 3}
         stands_left = [{'position': (90, 200), 'start position': (300, 490)},
@@ -319,7 +319,9 @@ class StandsTask(Task):
         point1 = self.calculate_stopping_point(starting_point, stand_point, 30)
         point2 = self.calculate_stopping_point(starting_point, stand_point, -50)
         self.drive.drive_path([point1[0:2]], point2[0:2], None,  end_speed=10)
-        time.sleep(0.7)
+        time.sleep(0.3)
+        if object_number == 2:
+            self.drive.drive_path([], self.my_game_elements[object_number]['start position'], None,  end_speed=-10)
         #threading.Timer(0.5, self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['blocked'])).start()
 
     def calculate_stopping_point(self, from_pos, to_pos, distance):

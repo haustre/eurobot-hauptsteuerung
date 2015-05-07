@@ -141,7 +141,7 @@ class Main():
             side = 1
         else:
             side = 0
-        if self.strategy['strategy'] == 'C':
+        if self.strategy['strategy'] == 'C' and False:
             start_orientation = 0   # near Clapper
         else:
             start_orientation = 1   # near Stair
@@ -281,10 +281,11 @@ class Main():
                     self.drive.set_close_range_detection(False)
                     self.drive.set_enemy_detection(False)
                     self.drive.set_speed(30)
-                    if self.strategy['side'] == 'left':
-                        self.drive.drive_path([], (800, 1000), None)
-                    else:
-                        self.drive.drive_path([], (3000-800, 1000), None)
+                    #if self.strategy['side'] == 'left':
+                    #    self.drive.drive_path([], (800, 1000), None)
+                    #else:
+                    #    self.drive.drive_path([], (3000-800, 1000), None)
+                    self.game_tasks['stand'].do_task(3)
                     self.game_logic.start()
                     time.sleep(60)
                     self.game_logic.stop()

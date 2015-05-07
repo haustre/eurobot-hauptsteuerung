@@ -47,9 +47,8 @@ class GameLogic():
                 distance = self.calculate_distance(point, my_position)
             else:
                 distance = 0
-            arrived = False
             if distance < 200:
-                self.drive.drive_path([], point, angle)
+                arrived = self.drive.drive_path([], point, angle)
             else:
                 arrived = self.drive.drive_route(point, angle)
             if arrived:
