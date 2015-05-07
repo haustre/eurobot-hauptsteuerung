@@ -190,10 +190,11 @@ class StairTask(Task):
         super().__init__(robots, can_socket, can.MsgTypes.Climbing_Command.value, drive)
         self.climbing_command = {'up': 0, 'bottom': 1, 'middle': 2, 'top': 3}
         self.carpet_command = {'fire right': 0, 'fire left': 1}
-        path_left = {'in_front': (1250, 720, 270),
+        path_left = {'in_front': (1250, 740, 270),
                      'bottom': (1250, 700, 270),
                      'beginning': (1250, 650, 270),
                      'top': (1250, 190, 270),
+                     'top not reached': (1250, 240, 270),
                      'carpet 1': (1080, 240, 185),
                      'fire 1': self.carpet_command['fire left'],
                      'turning point': (1250, 240, 270),

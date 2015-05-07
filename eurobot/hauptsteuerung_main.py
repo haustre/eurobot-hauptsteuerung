@@ -301,26 +301,30 @@ class Main():
                 else:
                     self.drive.drive_path([], (3000-500, 1080), None)
 
-                self.drive.set_close_range_detection(False)
-                self.drive.set_enemy_detection(False)
+                self.drive.set_close_range_detection(True)
+                self.drive.set_enemy_detection(True)
 
                 point, angle = self.game_tasks['stair'].goto_task()
 
                 if self.strategy['side'] == 'left':
-                    self.drive.drive_path([],(1250, 1080), angle)
+                    if self.drive.drive_path([],(1250, 1080), angle) == False:
+                        time.sleep(1)
+                        self.drive.drive_path([],(1250, 1080), angle)
                     while self.drive.drive_path([],point, angle) == False:
                          print("Waiting")
-                         time.sleep(5)
+                         time.sleep(1)
                 else:
-                    self.drive.drive_path([],(3000-1250, 1080), angle)
+                    if self.drive.drive_path([],(3000-1250, 1080), angle) == False:
+                        time.sleep(1)
+                        self.drive.drive_path([],(3000-1250, 1080), angle)
                     while self.drive.drive_path([],point, angle) == False:
                         print("Waiting")
-                        time.sleep(5)
+                        time.sleep(1)
 
                 print("Do Climbing Task")
                 self.drive.set_close_range_detection(False)
                 self.drive.set_enemy_detection(False)
-                self.drive.set_speed(50)
+                self.drive.set_speed(60)
                 self.game_tasks['stair'].do_task()
 
             elif self.strategy['strategy'] == 'B':
