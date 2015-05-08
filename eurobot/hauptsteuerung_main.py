@@ -165,7 +165,7 @@ class Main():
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
         self.countdown.start()
         self.can_socket.create_interrupt(can.MsgTypes.Peripherie_inputs.value, self.periphery_input)
-        self.countdown.set_interrupt(self.game_end, 'game_end', 2)
+        self.countdown.set_interrupt(self.game_end, 'game_end', 3)
         self.strategy_start()  # run the start strategy
         print("Programm End")
 
@@ -212,9 +212,11 @@ class Main():
             }
             self.can_socket.send(can_msg)
             self.game_logic.stop()
-            time.sleep(5)  # TODO: make longer
+            time.sleep(2)  # TODO: make longer
             print("Game End")
             self.reset = True
+            time.sleep(0.5)
+            sys.exit()
 
     def strategy_start(self):  # TODO: Contains multiple test scenarios which will be removed
         """ Executes the chosen start strategy
@@ -224,12 +226,12 @@ class Main():
         if self.strategy['robot_name'] == 'Roboter-gross':  # check on which robot the program is running
             if self.strategy['strategy'] == 'A':
                 if True:
-                    self.drive.set_close_range_detection(False)
-                    self.drive.set_enemy_detection(False)
-                    self.drive.set_speed(30)
+                    self.drive.set_close_range_detection(True)
+                    self.drive.set_enemy_detection(True)
+                    self.drive.set_speed(15)
                     self.game_tasks['stand'].do_task(3)
                     self.game_tasks['stand'].do_task(4)
-                    self.drive.drive_path([], (290, 1460), None)
+                    self.game_tasks['stand'].goto_task(1)
                     self.game_tasks['stand'].do_task(1)
                     self.drive.drive_path([], (1000, 1000), None)
                     point = self.game_tasks['stand'].goto_empty()
@@ -246,7 +248,7 @@ class Main():
                     point = self.game_tasks['popcorn'].goto_empty()
                     self.drive.drive_route(point, None)
                     self.game_tasks['popcorn'].do_empty()
-                if True:
+                if False:
                     point, angle = self.game_tasks['clapper'].goto_task(1)
                     self.drive.drive_route(point, angle)
                     self.game_tasks['clapper'].do_task(1)
@@ -280,7 +282,7 @@ class Main():
                 if True:
                     self.drive.set_close_range_detection(True)
                     self.drive.set_enemy_detection(True)
-                    self.drive.set_speed(60)
+                    self.drive.set_speed(40)
                     #if self.strategy['side'] == 'left':
                     #    self.drive.drive_path([], (800, 1000), None)
                     #else:
