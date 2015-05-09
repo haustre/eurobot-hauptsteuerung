@@ -311,6 +311,7 @@ class Main():
                     if self.drive.drive_path([],(1250, 1080), angle) == False:
                         time.sleep(1)
                         self.drive.drive_path([],(1250, 1080), angle)
+                    self.game_tasks['stair'].prepare_for_climbing()
                     while self.drive.drive_path([],point, angle) == False:
                          print("Waiting")
                          time.sleep(1)
@@ -318,6 +319,7 @@ class Main():
                     if self.drive.drive_path([],(3000-1250, 1080), angle) == False:
                         time.sleep(1)
                         self.drive.drive_path([],(3000-1250, 1080), angle)
+                    self.game_tasks['stair'].prepare_for_climbing()
                     while self.drive.drive_path([],point, angle) == False:
                         print("Waiting")
                         time.sleep(1)

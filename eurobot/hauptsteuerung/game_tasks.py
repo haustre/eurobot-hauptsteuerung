@@ -193,7 +193,7 @@ class StairTask(Task):
         path_left = {'in_front': (1250, 740, 270),
                      'bottom': (1250, 700, 270),
                      'beginning': (1250, 650, 270),
-                     'top': (1250, 190, 270),
+                     'top': (1250, 200, 270),
                      'top not reached': (1250, 240, 270),
                      'carpet 1': (1080, 240, 185),
                      'fire 1': self.carpet_command['fire left'],
@@ -257,6 +257,9 @@ class StairTask(Task):
 
     def send_climbing_top(self):
         self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['top'])
+
+    def prepare_for_climbing(self):
+        self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['bottom'], blocking=False)
 
 
 class StandsTask(Task):
