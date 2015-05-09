@@ -23,6 +23,7 @@ class GameLogic():
                 print("Empty Stands")
                 if self.drive.drive_route(point, angle):
                     self.game_tasks['stand'].do_empty()
+                    self.game_tasks['stand'].points_game_element = 3
 
             collected = self.game_tasks['popcorn'].collected
             if (collected >= 10) or (self.countdown.time_left() <= 15 and collected >= 5):

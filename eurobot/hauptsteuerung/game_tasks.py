@@ -446,7 +446,7 @@ class ClapperTask(Task):
     """ Class for closing the clappers """
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Clapper_Command.value, drive)
-        self.points_game_element = 5
+        self.points_game_element = 5  # TODO: change to 5
         self.movable = False
         self.command = {'up': 0, 'right': 1, 'left': 2}
         self.angle = 90
@@ -491,6 +491,8 @@ class ClapperTask(Task):
 
         :param clapper_number:  specifies which game element is chosen
         """
+        old_close_range_detection = self.drive.close_range_detection
+        self.drive.close_range_detection = False
         side = self.my_game_elements[clapper_number]['side']
         self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command[side], blocking=True)
         if side == 'right':
@@ -500,6 +502,7 @@ class ClapperTask(Task):
         self.drive.drive_path([], None, angle, end_speed=10)
         self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command['up'])
         self.my_game_elements[clapper_number]['moved'] = True
+        self.drive.close_range_detection = old_close_range_detection
 
 
 class PopcornTask(Task):

@@ -87,6 +87,7 @@ class RouteFinding():
         :return: filtered path
         """
         del path[len(path)-1]
+        del path[len(path)-2]
         # look if point is near the robot
         x, y = self.my_robot.get_position()
         for i, point in enumerate(path):
