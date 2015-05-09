@@ -38,7 +38,7 @@ class Main():
         self.can_socket = can.Can(can_connection, can.MsgSender.Hauptsteuerung)
         if self.debug:
             self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
-            self.enemy_simulation.start()
+            #self.enemy_simulation.start()
         else:
             self.clear_config('/root/gui_config')   # delete the old configuration file
             subprocess.Popen(['software/robo_gui'])     # start the GUI program
@@ -106,7 +106,7 @@ class Main():
         if self.debug:
             strategy = {
                 'robot_small': True, 'robot_big': True, 'enemy_small': True, 'enemy_big': True,
-                'robot_name': None, 'side': 'left', 'strategy': 0
+                'robot_name': None, 'side': 'right', 'strategy': 'C'
             }
             print("!!!! Debug Program !!!!")
             return strategy
