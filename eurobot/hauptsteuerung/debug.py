@@ -27,6 +27,7 @@ class LaptopCommunication():
         self.can_socket = can_socket
         self.tcp_socket = Server()
         self.game_tasks = {}
+        self.running = True
         self.can_thread = threading.Thread(target=self.can_loop)
         self.can_thread.setDaemon(1)
         self.game_task_thread = threading.Thread(target=self.game_task_loop)
@@ -36,7 +37,7 @@ class LaptopCommunication():
         """
         This is the main debugging thread. """
         logfile = open('logfile.txt', 'a')  # TODO: close File at the end of the program
-        while True:
+        while self.running:
             idle = True
             # send new can messages to laptop
             try:
@@ -56,6 +57,8 @@ class LaptopCommunication():
                 idle = False
             if idle is True:
                 time.sleep(0.01)  # TODO: remove
+        self.tcp_socket.stop()
+        del self.tcp_socket
 
     def start_can(self):
         """ starts to send the CAN information over ethernet """
@@ -67,14 +70,18 @@ class LaptopCommunication():
 
     def game_task_loop(self):
         """ loop sending the game task information """
-        while True:
+        while self.running:
             for task in self.game_tasks.keys():
-                time.sleep(0.1)
                 tcp_msg = 'game_task', self.game_tasks[task].get_debug_data()
-                self.tcp_socket.write(tcp_msg)
+                if self.running:
+                    self.tcp_socket.write(tcp_msg)
+                    time.sleep(0.1)
 
     def add_game_tasks(self, game_tasks):
         self.game_tasks = game_tasks
+
+    def stop(self):
+        self.running = False
 
 
 class EnemySimulation():

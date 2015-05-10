@@ -128,11 +128,11 @@ class RobotSimulation():
         avg_speed = distance/drive_time
         time_now = 0
         while time_now < drive_time:
-            time_now += 0.02
+            time_now += 0.1
             x = start_point[0] + math.cos(direction) * time_now * avg_speed
             y = start_point[1] + math.sin(direction) * time_now * avg_speed
             self.send_position((x, y), self.robot_angle)
-            time.sleep(0.02)
+            time.sleep(0.1)
 
     def drive_angle(self):
         pass

@@ -9,6 +9,7 @@ import time
 import socket
 import queue
 import subprocess
+import gc
 from libraries import can
 from hauptsteuerung import drive
 from hauptsteuerung import debug
@@ -206,17 +207,17 @@ class Main():
         :return: None
         """
         if time_string is 'game_end':
+            self.reset = True
+            self.game_logic.stop()
+            self.drive.turn_off()
+            self.debugger.stop()
             can_msg = {
                 'type': can.MsgTypes.EmergencyShutdown.value,
                 'code': 0,
             }
             self.can_socket.send(can_msg)
-            self.game_logic.stop()
             time.sleep(2)  # TODO: make longer
             print("Game End")
-            self.reset = True
-            time.sleep(0.5)
-            sys.exit()
 
     def strategy_start(self):  # TODO: Contains multiple test scenarios which will be removed
         """ Executes the chosen start strategy
@@ -282,15 +283,9 @@ class Main():
                 if True:
                     self.drive.set_close_range_detection(True)
                     self.drive.set_enemy_detection(True)
-                    self.drive.set_speed(100)
-                    #if self.strategy['side'] == 'left':
-                    #    self.drive.drive_path([], (800, 1000), None)
-                    #else:
-                    #    self.drive.drive_path([], (3000-800, 1000), None)
+                    self.drive.set_speed(40)
                     self.game_tasks['stand'].do_task(3)
                     self.game_logic.start()
-                    time.sleep(60)
-                    self.game_logic.stop()
 
         if self.strategy['robot_name'] == 'Roboter-klein':
             time.sleep(3)
@@ -341,4 +336,7 @@ class Main():
 if __name__ == "__main__":
     while True:
         main_program = Main()
+        del main_program
         print("Robot Resets")
+        gc.collect()
+        time.sleep(10)
