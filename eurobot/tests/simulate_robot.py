@@ -34,6 +34,8 @@ class RobotSimulation():
         self.clapper_thread.setDaemon(1)
         self.stands_thread = threading.Thread(target=self.stands)
         self.stands_thread.setDaemon(1)
+        self.popcorn_thread = threading.Thread(target=self.popcorn)
+        self.popcorn_thread.setDaemon(1)
         self.start_game()
 
     def start_game(self):
@@ -48,6 +50,7 @@ class RobotSimulation():
         self.drive_thread.start()
         self.clapper_thread.start()
         self.stands_thread.start()
+        self.popcorn_thread.start()
         time.sleep(100)
 
     def clapper(self):
@@ -81,6 +84,32 @@ class RobotSimulation():
             }
             self.can_socket.send(can_msg)
 
+    def popcorn(self):
+        collected = 0
+        popcorn_queue = queue.Queue()
+        self.can_socket.create_queue(can.MsgTypes.Popcorn_Command.value, popcorn_queue)
+        while True:
+            popcorn_msg = popcorn_queue.get()
+            if popcorn_msg['command'] == 0:  # collect
+                time.sleep(3)
+                can_msg = {
+                    'type': can.MsgTypes.Popcorn_Status.value,
+                    'state': 1,
+                    'collected_pieces': collected
+                }
+                self.can_socket.send(can_msg)
+                time.sleep(3)
+                collected += 5
+            elif popcorn_msg['command'] == 1:
+                time.sleep(5)
+                collected = 0
+            can_msg = {
+                'type': can.MsgTypes.Popcorn_Status.value,
+                'state': 1,
+                'collected_pieces': collected
+            }
+            self.can_socket.send(can_msg)
+
     def drive(self):
         goto_queue = queue.Queue()
         self.can_socket.create_queue(can.MsgTypes.Goto_Position.value, goto_queue)
@@ -102,21 +131,22 @@ class RobotSimulation():
             self.send_arrived()
 
     def drive_path(self, path, target, speed):
+        rotation_time = 0.75  # approximation of 1/4 turn
         if target[0] == 65535 and target[1] == 65535:
-                time.sleep(1)  # TODO: calculate rotation
+                time.sleep(rotation_time)  # TODO: calculate rotation
         else:
             if len(path) == 0:
                 self.drive_line(self.robot_position, target, speed)
             else:
                 point, path_speed = path[0]
                 self.drive_line(self.robot_position, point, path_speed)
-                time.sleep(1)
+                time.sleep(rotation_time)
                 if len(path) > 1:
                     for i in range(len(path)-1):
                         point1, path_speed = path[i]
                         point2, _ = path[i+1]
                         self.drive_line(point1, point2, path_speed)
-                        time.sleep(1)  # TODO: calculate rotation
+                        time.sleep(rotation_time)  # TODO: calculate rotation
                     point, path_speed = path[len(path)-1]
                     self.drive_line(point, target, speed)
             self.robot_position = target

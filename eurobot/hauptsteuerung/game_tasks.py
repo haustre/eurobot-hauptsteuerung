@@ -267,7 +267,7 @@ class StandsTask(Task):
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
         self.distance_to_stand = 200
-        self.points_game_element = 7
+        self.points_game_element = 8
         empty_position = {'start_position': (1300, 1650, 90), 'position': (1300, 1760, 90)}
         self.command = {'blocked': 0, 'ready collect': 1, 'ready platform': 2, 'open case': 3}
         stands_left = [{'position': (90, 200), 'start position': (300, 490)},
@@ -508,7 +508,7 @@ class ClapperTask(Task):
 class PopcornTask(Task):
     """ Class for collecting the popcorn from the popcorn machine """
     def __init__(self, robots, my_color, can_socket, drive):
-        super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
+        super().__init__(robots, can_socket, can.MsgTypes.Popcorn_Command.value, drive)
         self.points_game_element = 3
         self.angle = 90
         self.distance = 130
