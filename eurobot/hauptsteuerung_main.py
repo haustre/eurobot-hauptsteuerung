@@ -282,7 +282,7 @@ class Main():
                 if True:
                     self.drive.set_close_range_detection(True)
                     self.drive.set_enemy_detection(True)
-                    self.drive.set_speed(40)
+                    self.drive.set_speed(100)
                     #if self.strategy['side'] == 'left':
                     #    self.drive.drive_path([], (800, 1000), None)
                     #else:

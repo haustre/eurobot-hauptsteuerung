@@ -5,6 +5,7 @@ import sys
 import time
 import queue
 import math
+import threading
 from eurobot.libraries import can
 
 
@@ -27,6 +28,12 @@ class RobotSimulation():
         self.can_socket = can.Can(sys.argv[1], can.MsgSender.Navigation)
         self.robot_position = self.start_position
         self.robot_angle = self.start_angle
+        self.drive_thread = threading.Thread(target=self.drive)
+        self.drive_thread.setDaemon(1)
+        self.clapper_thread = threading.Thread(target=self.clapper)
+        self.clapper_thread.setDaemon(1)
+        self.stands_thread = threading.Thread(target=self.stands)
+        self.stands_thread.setDaemon(1)
         self.start_game()
 
     def start_game(self):
@@ -38,7 +45,43 @@ class RobotSimulation():
             'key_inserted': False
         }
         self.can_socket.send(can_msg)
+        self.drive_thread.start()
+        self.clapper_thread.start()
+        self.stands_thread.start()
+        time.sleep(100)
 
+    def clapper(self):
+        clapper_queue = queue.Queue()
+        self.can_socket.create_queue(can.MsgTypes.Clapper_Command.value, clapper_queue)
+        while True:
+            clapper_msg = clapper_queue.get()
+            time.sleep(1)
+            can_msg = {
+                'type': can.MsgTypes.Clapper_Status.value,
+                'state': 0,
+                'collected_pieces': 1
+            }
+            self.can_socket.send(can_msg)
+
+    def stands(self):
+        collected = 0
+        stands_queue = queue.Queue()
+        self.can_socket.create_queue(can.MsgTypes.Stands_Command.value, stands_queue)
+        while True:
+            clapper_msg = stands_queue.get()
+            if clapper_msg['command'] == 1:
+                collected += 1
+            elif clapper_msg['command'] == 3:
+                collected = 0
+                time.sleep(2)
+            can_msg = {
+                'type': can.MsgTypes.Stands_Status.value,
+                'state': 1,
+                'collected_pieces': collected
+            }
+            self.can_socket.send(can_msg)
+
+    def drive(self):
         goto_queue = queue.Queue()
         self.can_socket.create_queue(can.MsgTypes.Goto_Position.value, goto_queue)
         path_queue = queue.Queue()
@@ -60,20 +103,39 @@ class RobotSimulation():
 
     def drive_path(self, path, target, speed):
         if target[0] == 65535 and target[1] == 65535:
-                time.sleep(0.5)  # TODO: calculate rotation
+                time.sleep(1)  # TODO: calculate rotation
         else:
-            drive_time = self.calculate_time(self.robot_position, target, speed)
-            direction = math.atan2(target[1]-self.robot_position[1], target[0]-self.robot_position[0])
-            distance = math.sqrt((target[0]-self.robot_position[0])**2+(target[1]-self.robot_position[1]))
-            avg_speed = distance/drive_time
-            time_now = 0
-            while time_now < drive_time:
-                time_now += 0.02
-                x = self.robot_position[0] + math.cos(direction) * time_now * avg_speed
-                y = self.robot_position[1] + math.sin(direction) * time_now * avg_speed
-                self.send_position((x, y), self.robot_angle)
-                time.sleep(0.02)
+            if len(path) == 0:
+                self.drive_line(self.robot_position, target, speed)
+            else:
+                point, path_speed = path[0]
+                self.drive_line(self.robot_position, point, path_speed)
+                time.sleep(1)
+                if len(path) > 1:
+                    for i in range(len(path)-1):
+                        point1, path_speed = path[i]
+                        point2, _ = path[i+1]
+                        self.drive_line(point1, point2, path_speed)
+                        time.sleep(1)  # TODO: calculate rotation
+                    point, path_speed = path[len(path)-1]
+                    self.drive_line(point, target, speed)
             self.robot_position = target
+
+    def drive_line(self, start_point, target, speed):
+        drive_time = self.calculate_time(start_point, target, speed)
+        direction = math.atan2(target[1]-start_point[1], target[0]-start_point[0])
+        distance = math.sqrt((target[0]-start_point[0])**2+(target[1]-start_point[1])**2)
+        avg_speed = distance/drive_time
+        time_now = 0
+        while time_now < drive_time:
+            time_now += 0.02
+            x = start_point[0] + math.cos(direction) * time_now * avg_speed
+            y = start_point[1] + math.sin(direction) * time_now * avg_speed
+            self.send_position((x, y), self.robot_angle)
+            time.sleep(0.02)
+
+    def drive_angle(self):
+        pass
 
     def send_arrived(self):
         can_msg = {
@@ -103,7 +165,6 @@ class RobotSimulation():
             distance -= (speed**2/self.accel)
             drive_time = distance / speed
             drive_time += 2*acc_time
-        print(drive_time)
         return drive_time
 
 if __name__ == "__main__":
