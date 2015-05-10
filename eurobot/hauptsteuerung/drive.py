@@ -27,6 +27,7 @@ class Drive():
         self.robots = []
         self.rotation_direction = None
         self.stop = False
+        self.running = True
 
     def add_my_robot(self, robot):
         """ adds a reference to the robot
@@ -70,6 +71,10 @@ class Drive():
         :return: None
         """
         self.enemy_detection = activate
+
+    def turn_off(self):
+        """ deactivate the drive at game end """
+        self.running = False
 
     def drive_route(self, destination, angle, timeout=15):
         """ drives to a given location
@@ -124,93 +129,94 @@ class Drive():
         :return: destination reached
         :rtype: bool
         """
-        if destination is None and angle_in is None:
-            return True
-        if destination:
-            if len(destination) == 2:
-                x, y = destination
-                angle = None
-            elif len(destination) == 3:
-                x, y, angle = destination
+        if self.running:
+            if destination is None and angle_in is None:
+                return True
+            if destination:
+                if len(destination) == 2:
+                    x, y = destination
+                    angle = None
+                elif len(destination) == 3:
+                    x, y, angle = destination
+                else:
+                    raise Exception('Destination formatted wrong')
+                x, y = int(x), int(y)
             else:
-                raise Exception('Destination formatted wrong')
-            x, y = int(x), int(y)
-        else:
-            x, y = 65535, 65535
-        if angle_in is not None:
-            angle = int((abs(angle_in) % 360)*100)
-        elif angle is not None:
-            angle = int((abs(angle) % 360)*100)
-        else:
-            angle = 65535
-        if end_speed is None:
-            end_speed = self.speed
-        if path_speed is None:
-            path_speed = self.speed
-        in_save_zone = True
-        wrong_point = None
-        filtered_path = copy.copy(path)
-        self.filter_path(filtered_path)
-        self.filter_path2(filtered_path)
-        self.filter_path3(filtered_path, 7)
-        save_zone = [[300, 2700], [300, 2700]]
-        for point in filtered_path:  # checks if all waypoints are on the table
-            if save_zone[0][0] > point[0] > save_zone[0][1] or save_zone[1][0] > point[1] > save_zone[1][1]:
+                x, y = 65535, 65535
+            if angle_in is not None:
+                angle = int((abs(angle_in) % 360)*100)
+            elif angle is not None:
+                angle = int((abs(angle) % 360)*100)
+            else:
+                angle = 65535
+            if end_speed is None:
+                end_speed = self.speed
+            if path_speed is None:
+                path_speed = self.speed
+            in_save_zone = True
+            wrong_point = None
+            filtered_path = copy.copy(path)
+            self.filter_path(filtered_path)
+            self.filter_path2(filtered_path)
+            self.filter_path3(filtered_path, 7)
+            save_zone = [[300, 2700], [300, 2700]]
+            for point in filtered_path:  # checks if all waypoints are on the table
+                if save_zone[0][0] > point[0] > save_zone[0][1] or save_zone[1][0] > point[1] > save_zone[1][1]:
+                    in_save_zone = False
+                    wrong_point = point
+            if save_zone[0][0] > x > save_zone[0][1] or save_zone[1][0] > y > save_zone[1][1]:
                 in_save_zone = False
-                wrong_point = point
-        if save_zone[0][0] > x > save_zone[0][1] or save_zone[1][0] > y > save_zone[1][1]:
-            in_save_zone = False
-            wrong_point = x, y
-        if in_save_zone or x == 65535 and y == 65535:
-            if len(path) > 0:  # wait for first rotation to finish.
-                my_x, my_y = self.my_robot.get_position()
-                path_x, path_y = path[0]
-                dx, dy = path_x - my_x, path_y - my_y
-                rotate_angle = math.atan2(dy, dx) / (2 * math.pi) * 360
-                rotate_angle = int((abs(rotate_angle) % 360)*100)
-                if abs(angle - rotate_angle) > 20 * 100:
-                    can_msg = {
-                        'type': can.MsgTypes.Goto_Position.value,
-                        'x_position': 65535,
-                        'y_position': 65535,
-                        'angle': rotate_angle,
-                        'speed': int(self.speed),
-                        'path_length': 0,
-                    }
-                    drive_queue = queue.Queue()
-                    drive_queue_number = self.can_socket.create_queue(can.MsgTypes.Drive_Status.value, drive_queue)
-                    self.can_socket.send(can_msg)
-                    drive_msg = drive_queue.get()
-                    self.can_socket.remove_queue(drive_queue_number)
-            can_msg = {
-                'type': can.MsgTypes.Goto_Position.value,
-                'x_position': x + 0,  # TODO: remove offset
-                'y_position': y,
-                'angle': angle,
-                'speed': end_speed,
-                'path_length': len(filtered_path),
-            }
-            self.can_socket.send(can_msg)
-            time.sleep(0.002)   # necessary because software on the drive board is slow
-            if len(filtered_path) > 0:
-                for point in filtered_path:
-                    can_msg = {
-                        'type': can.MsgTypes.Path.value,
-                        'x': point[0] + 0,  # TODO: remove offset
-                        'y': point[1],
-                        'speed': path_speed
-                    }
-                    self.can_socket.send(can_msg)
-            if blocking:   # TODO: add timeout
-                return self.wait_for_arrival(path, speed=max(path_speed, end_speed))
-        else:
-            can_msg = {
-                'type': can.MsgTypes.Emergency_Stop.value,
-                'code': 0,
-            }
-            self.can_socket.send(can_msg)
-            raise Exception('Coordinates outside the table:' + str(wrong_point[0]) + str(wrong_point[1]))
-        return True
+                wrong_point = x, y
+            if in_save_zone or x == 65535 and y == 65535:
+                if len(path) > 0:  # wait for first rotation to finish.
+                    my_x, my_y = self.my_robot.get_position()
+                    path_x, path_y = path[0]
+                    dx, dy = path_x - my_x, path_y - my_y
+                    rotate_angle = math.atan2(dy, dx) / (2 * math.pi) * 360
+                    rotate_angle = int((abs(rotate_angle) % 360)*100)
+                    if abs(angle - rotate_angle) > 20 * 100:
+                        can_msg = {
+                            'type': can.MsgTypes.Goto_Position.value,
+                            'x_position': 65535,
+                            'y_position': 65535,
+                            'angle': rotate_angle,
+                            'speed': int(self.speed),
+                            'path_length': 0,
+                        }
+                        drive_queue = queue.Queue()
+                        drive_queue_number = self.can_socket.create_queue(can.MsgTypes.Drive_Status.value, drive_queue)
+                        self.can_socket.send(can_msg)
+                        drive_msg = drive_queue.get()
+                        self.can_socket.remove_queue(drive_queue_number)
+                can_msg = {
+                    'type': can.MsgTypes.Goto_Position.value,
+                    'x_position': x + 0,  # TODO: remove offset
+                    'y_position': y,
+                    'angle': angle,
+                    'speed': end_speed,
+                    'path_length': len(filtered_path),
+                }
+                self.can_socket.send(can_msg)
+                time.sleep(0.002)   # necessary because software on the drive board is slow
+                if len(filtered_path) > 0:
+                    for point in filtered_path:
+                        can_msg = {
+                            'type': can.MsgTypes.Path.value,
+                            'x': point[0] + 0,  # TODO: remove offset
+                            'y': point[1],
+                            'speed': path_speed
+                        }
+                        self.can_socket.send(can_msg)
+                if blocking:   # TODO: add timeout
+                    return self.wait_for_arrival(path, speed=max(path_speed, end_speed))
+            else:
+                can_msg = {
+                    'type': can.MsgTypes.Emergency_Stop.value,
+                    'code': 0,
+                }
+                self.can_socket.send(can_msg)
+                raise Exception('Coordinates outside the table:' + str(wrong_point[0]) + str(wrong_point[1]))
+            return True
 
     def filter_path(self, path):
         """ filters a path to cause less CAN traffic

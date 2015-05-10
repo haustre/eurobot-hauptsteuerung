@@ -139,6 +139,7 @@ class Server(_TcpConnection):
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((host, port))
         self.s.listen(3)
+        self.clients = []
         # creates new thread that waits for incoming new connections
         self.t_connection = threading.Thread(target=self.wait_connections, args=[self.s])
         self.t_connection.setDaemon(1)
@@ -160,20 +161,28 @@ class Server(_TcpConnection):
         :param s: tcp socket for the connection
         :return: None
         """
-        clients = []
+        self.clients = []
         while 1:
             print("Waiting for Connections")
             try:
                 clientsock, clientaddr = s.accept()
             except KeyboardInterrupt:
                 s.close()
-                for sock in clients:
+                for sock in self.clients:
                     sock.close()
                 break
-            clients.append(clientsock)
+            self.clients.append(clientsock)
             t = threading.Thread(target=self._connection, args=[clientsock])
             t.setDaemon(1)
             t.start()
+
+    def stop(self):
+        self.s.shutdown(socket.SHUT_RDWR)
+        self.s.close()
+        for client in self.clients:
+            client.shutdown(socket.SHUT_RDWR)
+            client.close()
+        print("Sockets closed")
 
 
 class Client(_TcpConnection):
