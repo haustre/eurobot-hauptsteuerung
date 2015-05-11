@@ -10,6 +10,7 @@ import socket
 import queue
 import subprocess
 import math
+import gc
 from libraries import can
 from hauptsteuerung import drive
 from hauptsteuerung import debug
@@ -39,7 +40,7 @@ class Main():
         self.can_socket = can.Can(can_connection, can.MsgSender.Hauptsteuerung)
         if self.debug:
             self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
-            self.enemy_simulation.start()
+            #self.enemy_simulation.start()
         else:
             self.clear_config('/root/gui_config')   # delete the old configuration file
             subprocess.Popen(['software/robo_gui'])     # start the GUI program
@@ -107,7 +108,7 @@ class Main():
         if self.debug:
             strategy = {
                 'robot_small': True, 'robot_big': True, 'enemy_small': True, 'enemy_big': True,
-                'robot_name': None, 'side': 'left', 'strategy': 0
+                'robot_name': None, 'side': 'right', 'strategy': 'C'
             }
             print("!!!! Debug Program !!!!")
             return strategy
@@ -207,17 +208,17 @@ class Main():
         :return: None
         """
         if time_string is 'game_end':
+            self.reset = True
+            self.game_logic.stop()
+            self.drive.turn_off()
+            self.debugger.stop()
             can_msg = {
                 'type': can.MsgTypes.EmergencyShutdown.value,
                 'code': 0,
             }
             self.can_socket.send(can_msg)
-            self.game_logic.stop()
             time.sleep(2)  # TODO: make longer
             print("Game End")
-            self.reset = True
-            time.sleep(0.5)
-            sys.exit()
 
     def strategy_start(self):  # TODO: Contains multiple test scenarios which will be removed
         """ Executes the chosen start strategy
@@ -284,14 +285,8 @@ class Main():
                     self.drive.set_close_range_detection(True)
                     self.drive.set_enemy_detection(True)
                     self.drive.set_speed(40)
-                    #if self.strategy['side'] == 'left':
-                    #    self.drive.drive_path([], (800, 1000), None)
-                    #else:
-                    #    self.drive.drive_path([], (3000-800, 1000), None)
                     self.game_tasks['stand'].do_task(3)
                     self.game_logic.start()
-                    time.sleep(60)
-                    self.game_logic.stop()
 
         if self.strategy['robot_name'] == 'Roboter-klein':
             # Wait until big robot is away
@@ -435,4 +430,7 @@ class Main():
 if __name__ == "__main__":
     while True:
         main_program = Main()
+        del main_program
         print("Robot Resets")
+        gc.collect()
+        time.sleep(10)
