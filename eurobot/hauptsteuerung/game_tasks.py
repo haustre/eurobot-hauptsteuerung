@@ -190,17 +190,17 @@ class StairTask(Task):
         super().__init__(robots, can_socket, can.MsgTypes.Climbing_Command.value, drive)
         self.climbing_command = {'up': 0, 'bottom': 1, 'middle': 2, 'top': 3}
         self.carpet_command = {'fire right': 0, 'fire left': 1}
-        path_left = {'in_front': (1250, 740, 270),
-                     'bottom': (1250, 700, 270),
-                     'beginning': (1250, 650, 270),
-                     'top': (1250, 200, 270),
-                     'top not reached': (1250, 240, 270),
-                     'carpet 1': (1080, 240, 185),
+        path_left = {'in_front': (1240, 740, 270),
+                     'bottom': (1240, 700, 270),
+                     'beginning': (1240, 650, 270),
+                     'top': (1240, 200, 270),
+                     'top not reached': (1240, 220, 270),
+                     'carpet 1': (1100, 240, 185),
                      'fire 1': self.carpet_command['fire left'],
-                     'turning point': (1250, 240, 270),
-                     'carpet 2': (1400, 240, 355),
+                     'turning point': (1240, 240, 270),
+                     'carpet 2': (1380, 240, 355),
                      'fire 2': self.carpet_command['fire right'],
-                     'end point': (1250, 210, 90)
+                     'end point': (1240, 210, 90)
                      }
         path_right = {}
         for key, value in path_left.items():
@@ -241,7 +241,7 @@ class StairTask(Task):
         timer.start()
         self.drive.drive_path([], self.my_path['top'], None)
 
-        myY, myY = self.robots['me'].get_position()
+        myX, myY = self.robots['me'].get_position()
 
         while myY > 290:
             self.drive.drive_path([], self.my_path['top'], None)

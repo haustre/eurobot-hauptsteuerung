@@ -265,7 +265,7 @@ class Drive():
         if robot_big:
             break_distance = 250 + (300 / 100 * speed)  # TODO: not tested
         else:
-            break_distance = 200
+            break_distance = 300
         drive_queue = queue.Queue()
         close_range_queue = queue.Queue()
         drive_queue_number = self.can_socket.create_queue(can.MsgTypes.Drive_Status.value, drive_queue)
