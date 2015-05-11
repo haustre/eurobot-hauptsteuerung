@@ -147,8 +147,8 @@ class RobotSimulation():
                         point2, _ = path[i+1]
                         self.drive_line(point1, point2, path_speed)
                         time.sleep(rotation_time)  # TODO: calculate rotation
-                    point, path_speed = path[len(path)-1]
-                    self.drive_line(point, target, speed)
+                point, path_speed = path[len(path)-1]
+                self.drive_line(point, target, speed)
             self.robot_position = target
 
     def drive_line(self, start_point, target, speed):

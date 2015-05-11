@@ -268,7 +268,7 @@ class StandsTask(Task):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
         self.distance_to_stand = 200
         self.points_game_element = 8
-        empty_position = {'start_position': (1300, 1650, 90), 'position': (1300, 1760, 90)}
+        empty_position = {'start_position': (1300, 1650, 90), 'position': (1300, 1770, 90)}
         self.command = {'blocked': 0, 'ready collect': 1, 'ready platform': 2, 'open case': 3}
         stands_left = [{'position': (90, 200), 'start position': (300, 490)},
                        {'position': (90, 1750), 'start position': (300, 1460)},

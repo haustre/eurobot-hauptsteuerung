@@ -166,7 +166,7 @@ class Server(_TcpConnection):
             print("Waiting for Connections")
             try:
                 clientsock, clientaddr = s.accept()
-            except KeyboardInterrupt:
+            except KeyboardInterrupt or OSError:
                 s.close()
                 for sock in self.clients:
                     sock.close()

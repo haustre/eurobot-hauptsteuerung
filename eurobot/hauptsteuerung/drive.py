@@ -173,7 +173,7 @@ class Drive():
                     path_x, path_y = path[0]
                     dx, dy = path_x - my_x, path_y - my_y
                     rotate_angle = math.atan2(dy, dx) / (2 * math.pi) * 360
-                    rotate_angle = int((abs(rotate_angle) % 360)*100)
+                    rotate_angle = int((rotate_angle % 360)*100)
                     if abs(angle - rotate_angle) > 20 * 100:
                         can_msg = {
                             'type': can.MsgTypes.Goto_Position.value,
