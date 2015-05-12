@@ -164,6 +164,7 @@ class Main():
         :return: None
         """
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
+        time.sleep(0.02)    # wait for gyro
         self.countdown.start()
         self.can_socket.create_interrupt(can.MsgTypes.Peripherie_inputs.value, self.periphery_input)
         self.countdown.set_interrupt(self.game_end, 'game_end', 3)
