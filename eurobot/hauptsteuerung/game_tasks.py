@@ -326,6 +326,7 @@ class StandsTask(Task):
         time.sleep(0.3)
         if object_number == 2:
             self.drive.drive_path([], self.my_game_elements[object_number]['start position'], None,  end_speed=-10)
+        self.my_game_elements[object_number]['moved'] = True
         #threading.Timer(0.5, self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['blocked'])).start()
 
     def calculate_stopping_point(self, from_pos, to_pos, distance):
@@ -403,6 +404,7 @@ class CupTask(Task):
         self.send_task_command(can.MsgTypes.Cup_Command.value, self.command['ready collect'])
         point1, point2, angle = self.calculate_stopping_points(starting_point, stand_point, self.sides['right'])
         self.drive.drive_path([point1], point2, angle, end_speed=10)
+        self.my_game_elements[object_number]['moved'] = True
         time.sleep(0.2)
 
     def calculate_stopping_points(self, from_pos, to_pos, side):
@@ -488,24 +490,23 @@ class ClapperTask(Task):
 
         :param clapper_number:  specifies which game element is chosen
         """
-        old_close_range_detection = self.drive.close_range_detection
-        self.drive.close_range_detection = False
         side = self.my_game_elements[clapper_number]['side']
         self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command[side], blocking=True)
         if side == 'right':
             angle = 0
         else:
             angle = 180
-        self.drive.drive_path([], None, angle, end_speed=10)
+        self.drive.drive_path([], None, angle, end_speed=100)
         self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command['up'])
         self.my_game_elements[clapper_number]['moved'] = True
-        self.drive.close_range_detection = old_close_range_detection
 
 
 class PopcornTask(Task):
     """ Class for collecting the popcorn from the popcorn machine """
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Popcorn_Command.value, drive)
+        self.calibrated = False
+        self.calibration_point = 160
         self.angle = 90
         self.distance = 130
         empty_position = {'start_position': (800, 1000, 0), 'position': (220, 1000, 0)}
@@ -535,7 +536,7 @@ class PopcornTask(Task):
             self.empty_position['start_position'] = 3000 - x, y, 180
             x, y, angle = empty_position['position']
             self.empty_position['position'] = 3000 - x, y, 180
-
+            self.calibration_point = 3000 - self.calibration_point
         else:
             raise Exception("Unknown team color")
 
@@ -545,37 +546,39 @@ class PopcornTask(Task):
         :param object_number: specifies which game element is chosen
         :return: position, angle
         """
-        if object_number < 2:
-            return self.my_game_elements[object_number]['start_position'], self.angle
-        else:
-            object_number -= 2
-            return self.enemy_game_elements[object_number]['start_position'], self.angle
+        return self.my_game_elements[object_number]['start_position'], self.angle
 
     def do_task(self, object_number):
         """ collecting the popcorn from the chosen popcorn machine
 
         :param object_number:  specifies which game element is chosen
         """
-        if object_number < 2:
+        if self.calibrated is False:
+            x, y = self.my_game_elements[object_number]['start_position']
+            self.drive.drive_path([], (2900, y), None, end_speed=-20)
+            x, y = self.robots['me'].get_position()
+            offset = self.calibration_point - x
+            if abs(offset) < 50:
+                self.drive.set_offset_x(offset, 0)
+                self.calibrated = True
+            else:
+                print("Calibration failed")
+                self.my_game_elements[0]['moved'] = True
+                self.my_game_elements[1]['moved'] = True
+                return
+            self.drive.drive_path([], self.my_game_elements[object_number]['start_position'], None)
+
+        if self.calibrated:
             self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['ready collect'], blocking=False)
             x, y = self.my_game_elements[object_number]['position']
             y += self.distance
-            path_point = x, y + 70
-            self.drive.drive_path([path_point], (x, y), self.angle,  end_speed=-5, blocking=False)
+            path_point = x, y + 80
+            self.drive.drive_path([path_point], (x, y), self.angle, path_speed=-30, end_speed=-5, blocking=False)
             self.wait_for_task(can.MsgTypes.Popcorn_Command.value+1)
             self.drive.request_stop()
             self.wait_for_task(can.MsgTypes.Popcorn_Command.value+1)
-            self.drive.drive_path([], self.my_game_elements[object_number]['start_position'], self.angle)
-        else:
-            object_number -= 2
-            self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['ready collect'], blocking=False)
-            x, y = self.enemy_game_elements[object_number]['position']
-            y += self.distance
-            self.drive.drive_path([], (x, y), self.angle,  end_speed=-5, blocking=False)
-            self.wait_for_task(can.MsgTypes.Popcorn_Command.value+1)
-            self.drive.request_stop()
-            self.wait_for_task(can.MsgTypes.Popcorn_Command.value+1)
-            self.drive.drive_path([], self.enemy_game_elements[object_number]['start_position'], self.angle,  end_speed=5)
+            self.drive.drive_path([], self.my_game_elements[object_number]['start_position'], None)
+            self.my_game_elements[object_number]['moved'] = True
 
     def goto_empty(self):
         """ returns the position information of the place to empty the popcorn
