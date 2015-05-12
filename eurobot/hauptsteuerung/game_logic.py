@@ -9,6 +9,10 @@ import math
 
 class GameLogic():
     def __init__(self, game_tasks, drive, countdown, robots):
+        self.points = {'stand': [10, 8, 6, 8, 8, 8],
+                       'cup': [-100, -100, -100, -100, -100],
+                       'clapper': [5, 5, 1],
+                       'popcorn': [3, 3]}
         self.game_tasks = game_tasks
         self.drive = drive
         self.countdown = countdown
@@ -23,7 +27,8 @@ class GameLogic():
                 print("Empty Stands")
                 if self.drive_fast(point, angle):
                     self.game_tasks['stand'].do_empty()
-                    self.game_tasks['stand'].points_game_element /= 2
+                    for i in range(len(self.points['stand'])):
+                        self.points['stand'][i] /= 2
 
             collected = self.game_tasks['popcorn'].collected
             if (collected >= 10) or (self.countdown.time_left() <= 20 and collected >= 5):
@@ -36,9 +41,10 @@ class GameLogic():
             for task_name, task in self.game_tasks.items():
                 if task_name != 'stair':
                     distance, element_number = task.estimate_distance()
-                    points = task.points_game_element
-                    if task_name == 'clapper' and element_number == 2:
-                        points /= 2
+                    if element_number:
+                        points = self.points[task_name][element_number]
+                    else:
+                        points = -99
                     rating = points - distance / 300
                     ratings.append((rating, task_name, element_number))
             index_of_task = ratings.index(max(ratings))
@@ -56,6 +62,7 @@ class GameLogic():
                 arrived = self.drive_fast(point, angle)
             if arrived:
                 self.game_tasks[task_name].do_task(element_number)
+                self.game_tasks[task_name].my_game_elements[element_number]['moved'] = True
 
     def calculate_distance(self, point1, point2):
         x1, y1 = point1
@@ -64,8 +71,6 @@ class GameLogic():
 
     def drive_fast(self, destination, angle):
         y_border = 800
-        print("Test")
-        print(destination, self.robots['me'].get_position())
         if (self.robots['me'].get_position()[1] > y_border) == (destination[1] > y_border):
             return self.drive.drive_path([], destination, angle)
         else:

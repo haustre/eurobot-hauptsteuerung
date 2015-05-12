@@ -267,7 +267,6 @@ class StandsTask(Task):
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
         self.distance_to_stand = 200
-        self.points_game_element = 8
         empty_position = {'start_position': (1300, 1650, 90), 'position': (1300, 1770, 90)}
         self.command = {'blocked': 0, 'ready collect': 1, 'ready platform': 2, 'open case': 3}
         stands_left = [{'position': (90, 200), 'start position': (300, 490)},
@@ -372,7 +371,6 @@ class CupTask(Task):
         self.my_color = my_color
         self.distance = 150
         self.shift = 100
-        self.points_game_element = -1000  # TODO: points = 3
         self.free_arms = {'right': True, 'left': True}
         self.command = {'blocked': 0, 'ready collect': 1, 'open case': 2}
         self.sides = {'left': 0, 'right': 1}
@@ -446,7 +444,6 @@ class ClapperTask(Task):
     """ Class for closing the clappers """
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Clapper_Command.value, drive)
-        self.points_game_element = 5  # TODO: change to 5
         self.movable = False
         self.command = {'up': 0, 'right': 1, 'left': 2}
         self.angle = 90
@@ -509,10 +506,9 @@ class PopcornTask(Task):
     """ Class for collecting the popcorn from the popcorn machine """
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Popcorn_Command.value, drive)
-        self.points_game_element = 3
         self.angle = 90
         self.distance = 130
-        empty_position = {'start_position': (500, 1000, 0), 'position': (220, 1000, 0)}
+        empty_position = {'start_position': (800, 1000, 0), 'position': (220, 1000, 0)}
         self.command = {'ready collect': 0, 'open case': 1, }
         popcorn_left = [{'start_position': (300, 400), 'position': (300, 0)},
                         {'start_position': (600, 400), 'position': (600, 0)}
@@ -564,11 +560,12 @@ class PopcornTask(Task):
             self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['ready collect'], blocking=False)
             x, y = self.my_game_elements[object_number]['position']
             y += self.distance
-            self.drive.drive_path([], (x, y), self.angle,  end_speed=-5, blocking=False)
+            path_point = x, y + 70
+            self.drive.drive_path([path_point], (x, y), self.angle,  end_speed=-5, blocking=False)
             self.wait_for_task(can.MsgTypes.Popcorn_Command.value+1)
             self.drive.request_stop()
             self.wait_for_task(can.MsgTypes.Popcorn_Command.value+1)
-            self.drive.drive_path([], self.my_game_elements[object_number]['start_position'], self.angle,  end_speed=5)
+            self.drive.drive_path([], self.my_game_elements[object_number]['start_position'], self.angle)
         else:
             object_number -= 2
             self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['ready collect'], blocking=False)
