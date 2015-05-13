@@ -165,6 +165,7 @@ class Main():
         :return: None
         """
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
+        time.sleep(0.02)    # wait for gyro
         self.countdown.start()
         self.can_socket.create_interrupt(can.MsgTypes.Peripherie_inputs.value, self.periphery_input)
         self.countdown.set_interrupt(self.game_end, 'game_end', 3)
@@ -271,16 +272,6 @@ class Main():
                 self.drive.drive_route(point, None)
                 self.game_tasks['popcorn'].do_empty()
             elif self.strategy['strategy'] == 'C':  # Test strategy
-                if False:
-                    self.drive.set_close_range_detection(True)
-                    self.drive.set_enemy_detection(True)
-                    self.drive.set_speed(30)
-                    self.drive.drive_path([], (800, 1000), None)
-                    while self.reset is False:
-                        points = [(900, 1400), (2100, 900), (900, 900), (2100, 1400)]
-                        for point in points:
-                            for i in range(1):
-                                self.drive.drive_route(point, None, timeout=20)
                 if True:
                     self.drive.set_close_range_detection(True)
                     self.drive.set_enemy_detection(True)

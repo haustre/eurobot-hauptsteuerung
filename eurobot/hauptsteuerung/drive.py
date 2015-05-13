@@ -28,6 +28,7 @@ class Drive():
         self.rotation_direction = None
         self.stop = False
         self.running = True
+        self.offset = [0, 0]
 
     def add_my_robot(self, robot):
         """ adds a reference to the robot
@@ -75,6 +76,12 @@ class Drive():
     def turn_off(self):
         """ deactivate the drive at game end """
         self.running = False
+
+    def set_offset_x(self, x):
+        self.offset[0] = x
+
+    def set_offset_y(self, y):
+        self.offset[1] = y
 
     def drive_route(self, destination, angle, timeout=15):
         """ drives to a given location
@@ -173,7 +180,7 @@ class Drive():
                     path_x, path_y = path[0]
                     dx, dy = path_x - my_x, path_y - my_y
                     rotate_angle = math.atan2(dy, dx) / (2 * math.pi) * 360
-                    rotate_angle = int((abs(rotate_angle) % 360)*100)
+                    rotate_angle = int((rotate_angle % 360)*100)
                     if abs(angle - rotate_angle) > 20 * 100:
                         can_msg = {
                             'type': can.MsgTypes.Goto_Position.value,
@@ -190,8 +197,8 @@ class Drive():
                         self.can_socket.remove_queue(drive_queue_number)
                 can_msg = {
                     'type': can.MsgTypes.Goto_Position.value,
-                    'x_position': x + 0,  # TODO: remove offset
-                    'y_position': y,
+                    'x_position': x - self.offset[0],
+                    'y_position': y - self.offset[1],
                     'angle': angle,
                     'speed': end_speed,
                     'path_length': len(filtered_path),
@@ -202,8 +209,8 @@ class Drive():
                     for point in filtered_path:
                         can_msg = {
                             'type': can.MsgTypes.Path.value,
-                            'x': point[0] + 0,  # TODO: remove offset
-                            'y': point[1],
+                            'x': point[0] - self.offset[0],
+                            'y': point[1] - self.offset[1],
                             'speed': path_speed
                         }
                         self.can_socket.send(can_msg)
@@ -266,7 +273,8 @@ class Drive():
         :return: destination reached
         :rtype: bool
         """
-        path_pointer = 0
+        x_min, x_max = 150, 2850
+        y_min, y_max = 150, 1850
         robot_big = self.my_robot.name == 'Roboter-gross'
         if robot_big:
             break_distance = 250 + (300 / 100 * speed)  # TODO: not tested
@@ -279,10 +287,13 @@ class Drive():
         arrived = False
         emergency = False
         while arrived is False and emergency is False and self.stop is False:
+            my_angle = math.radians(self.my_robot.get_angle())
+            my_position = self.my_robot.get_position()
             try:
                 drive_msg = drive_queue.get_nowait()
                 if drive_msg['status'] == 0:
                     arrived = True
+                    break
             except queue.Empty:
                 pass
             if self.close_range_detection:
@@ -290,44 +301,51 @@ class Drive():
                     range_msg = close_range_queue.get_nowait()
                     while close_range_queue.empty() is False:
                         close_range_queue.get_nowait()
-                    if ((range_msg['front_middle_correct'] and range_msg['distance_front_middle'] < break_distance) and robot_big or
-                       (range_msg['front_left_correct'] and range_msg['distance_front_left'] < break_distance) or
-                       (range_msg['front_right_correct'] and range_msg['distance_front_right'] < break_distance)):
-                        distance = 350
-                        my_x, my_y = self.my_robot.get_position()
-                        my_angle = self.my_robot.get_angle()
-                        if my_y > 2000 - distance and 45 < my_angle < 135:
-                            print("Close detection to close to edge")
-                        else:
+                    if (range_msg['front_middle_correct'] and range_msg['distance_front_middle'] < break_distance) and robot_big:
+                        sensor_angle = 0
+                        x = my_position[0] + math.cos(my_angle+sensor_angle)*range_msg['distance_front_middle']
+                        y = my_position[1] + math.sin(my_angle+sensor_angle)*range_msg['distance_front_middle']
+                        if x_min < x < x_max and y_min < y < y_max:
                             emergency = True
-                            can_msg = {
-                                'type': can.MsgTypes.Emergency_Stop.value,
-                                'code': 0,
-                            }
-                            self.can_socket.send(can_msg)
+                            break
+                    if range_msg['front_left_correct'] and range_msg['distance_front_left'] < break_distance:
+                        sensor_angle = -20
+                        x = my_position[0] + math.cos(my_angle+sensor_angle)*range_msg['distance_front_left']
+                        y = my_position[1] + math.sin(my_angle+sensor_angle)*range_msg['distance_front_left']
+                        if x_min < x < x_max and y_min < y < y_max:
+                            emergency = True
+                            break
+                    if range_msg['front_right_correct'] and range_msg['distance_front_middle'] < break_distance:
+                        sensor_angle = +20
+                        x = my_position[0] + math.cos(my_angle+sensor_angle)*range_msg['distance_front_right']
+                        y = my_position[1] + math.sin(my_angle+sensor_angle)*range_msg['distance_front_right']
+                        if x_min < x < x_max and y_min < y < y_max:
+                            emergency = True
+                            break
                 except queue.Empty:
                     pass
-            if self.my_robot_new_position.acquire(False):   # TODO: Not tested
-                my_position = self.my_robot.get_position()
-                for i, point in enumerate(path[path_pointer:path_pointer+6]):
-                    if math.sqrt((my_position[0] - point[0])**2 + (my_position[1] - point[1])**2) < 200:
-                        path_pointer += (i+1)
             if self.enemy_detection:
                 for robot in self.robots:
                     position = robot.get_position()
                     if position:
-                        for point in path[path_pointer:path_pointer+20]:
-                            if math.sqrt((position[0] - point[0])**2 + (position[1] - point[1])**2) < 300:
-                                emergency = True
-                                can_msg = {
-                                    'type': can.MsgTypes.Emergency_Stop.value,
-                                    'code': 0,
-                                }
-                                self.can_socket.send(can_msg)
+                        drive_direction = []
+                        drive_direction[0] = my_position[0] + math.cos(my_angle) * break_distance
+                        drive_direction[1] = my_position[1] + math.sin(my_angle) * break_distance
+                        line = LineString([my_position, drive_direction])
+                        point = Point(position)
+                        distance_from_line = point.distance(line)
+                        if distance_from_line < 300:
+                            emergency = True
+                            break
             time.sleep(0.005)
         self.can_socket.remove_queue(close_range_queue_number)
         self.can_socket.remove_queue(drive_queue_number)
         if emergency:
+            can_msg = {
+                'type': can.MsgTypes.Emergency_Stop.value,
+                'code': 0,
+            }
+            self.can_socket.send(can_msg)
             return False
         else:
             self.rotation_direction = None
