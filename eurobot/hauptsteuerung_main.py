@@ -261,7 +261,7 @@ class Main():
                     # Set start values
                     self.drive.set_close_range_detection(True)
                     self.drive.set_enemy_detection(True)
-                    self.drive.set_speed(40)
+                    self.drive.set_speed(50)
 
                     # Collect stand 1, 3 and 4
                     self.game_tasks['stand'].do_task(3)
