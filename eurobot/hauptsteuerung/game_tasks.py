@@ -277,9 +277,9 @@ class StandsTask(Task):
                        {'position': (1300, 1400), 'start position': None},
                        ]
 
-        self.second_stand = [{'position': (90, 1850), 'start position': None},
-                        {'position': (850, 100), 'start position': None},
-                        ]
+        self.second_stands = [{'position': (90, 1850), 'start position': None},
+                              {'position': (850, 100), 'start position': None},
+                              ]
 
         for stand in stands_left:
             stand['moved'] = False
@@ -303,9 +303,9 @@ class StandsTask(Task):
             self.empty_position['start_position'] = 3000 - x, y, angle
             x, y, angle = empty_position['position']
             self.empty_position['position'] = 3000 - x, y, angle
-            x, y = self.second_stand[0]['position']
+            x, y = self.second_stands[0]['position']
             self.second_stands[0]['position'] = 3000 - x, y
-            x, y = self.second_stand[1]['position']
+            x, y = self.second_stands[1]['position']
             self.second_stands[1]['position'] = 3000 - x, y
         else:
             raise Exception("Unknown team color")
@@ -332,7 +332,7 @@ class StandsTask(Task):
         time.sleep(0.3)
 
         # Take also the second stand (Only for stand 1 and 2)
-        if object_number == 1 or object_number == 2:
+        if (object_number == 1 or object_number == 2) and False:
             starting_point = self.robots['me'].get_position()
             if object_number == 1:
                 stand_point = self.second_stands[0]['position']
@@ -535,9 +535,9 @@ class PopcornTask(Task):
         self.angle = 90
         self.distance = 130
         empty_position = {'start_position': (800, 1000, 0), 'position': (220, 1000, 0)}
-        self.command = {'ready collect': 0, 'open case': 1, }
-        popcorn_left = [{'start_position': (300, 400), 'position': (300, 0)},
-                        {'start_position': (600, 400), 'position': (600, 0)}
+        self.command = {'ready collect': 0, 'open case': 1,  'collect': 2}
+        popcorn_left = [{'start_position': (300, 400), 'position': (300, 120)},
+                        {'start_position': (600, 400), 'position': (600, 120)}
                         ]
 
         for popcorn in popcorn_left:
@@ -597,11 +597,11 @@ class PopcornTask(Task):
             self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['ready collect'], blocking=False)
             x, y = self.my_game_elements[object_number]['position']
             y += self.distance
-            path_point = x, y + 80
-            self.drive.drive_path([path_point], (x, y), self.angle, path_speed=-30, end_speed=-5, blocking=False)
-            self.wait_for_task(can.MsgTypes.Popcorn_Command.value+1)
-            self.drive.request_stop()
-            self.wait_for_task(can.MsgTypes.Popcorn_Command.value+1)
+            path_point = x, y + 90
+            self.drive.drive_path([path_point], (x, y), self.angle, path_speed=-30, end_speed=-5, blocking=True)
+            # self.wait_for_task(can.MsgTypes.Popcorn_Command.value+1)
+            # self.drive.request_stop()
+            self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['collect'], blocking=True)
             self.drive.drive_path([], self.my_game_elements[object_number]['start_position'], None)
             self.my_game_elements[object_number]['moved'] = True
 

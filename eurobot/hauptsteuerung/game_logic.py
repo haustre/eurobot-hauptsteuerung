@@ -12,7 +12,7 @@ class GameLogic():
         self.points = {'stand': [10, 8, 6, 8, 8, 8],
                        'cup': [-100, -100, -100, -100, -100],
                        'clapper': [5, 5, 1],
-                       'popcorn': [4, 3]}
+                       'popcorn': [5, 3]}
         self.game_tasks = game_tasks
         self.drive = drive
         self.countdown = countdown

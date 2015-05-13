@@ -313,7 +313,6 @@ class Drive():
                     for i, sensor in enumerate(sensors):
                         distance = max(range_msg[sensor], sensor_min)
                         if distance < break_distance:
-                            print("Distance:" + str(distance))
                             if robot_big is False:
                                 emergency = True
                                 break
@@ -324,7 +323,7 @@ class Drive():
                             x += sensor_offset_x
                             y += sensor_offset_y
                             if (x_min < x < x_max and y_min < y < y_max) and not (stair_x[0] < x < stair_x[1] and stair_y[0] < y < stair_y[1]):
-                                print(str(sensor) + " x: " + str(x) + " y: " + str(y))
+                                #print(str(sensor) + " x: " + str(x) + " y: " + str(y))
                                 emergency = True
                                 break
                 except queue.Empty:
