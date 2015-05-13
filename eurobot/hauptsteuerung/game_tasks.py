@@ -516,7 +516,7 @@ class ClapperTask(Task):
         :param clapper_number:  specifies which game element is chosen
         """
         side = self.my_game_elements[clapper_number]['side']
-        self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command[side], blocking=True)
+        self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command[side], blocking=False)
         if side == 'right':
             angle = 0
         else:
@@ -524,6 +524,41 @@ class ClapperTask(Task):
         self.drive.drive_path([], None, angle, end_speed=40)
         self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command['up'])
         self.my_game_elements[clapper_number]['moved'] = True
+
+    def goto_both_clapper_fast(self):
+        """ returns the position information of the specified clapper
+
+        :return: position, angle
+        """
+        (x, y), angle = self.my_game_elements[0]['position'], self.angle
+        y -= self.distance
+        return (x, y), angle
+
+    def do_both_clapper_fast(self):
+        # Close first clapper
+        side = self.my_game_elements[0]['side']
+        self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command[side], blocking=True)
+        if side == 'right':
+            angle = 0
+        else:
+            angle = 180
+        self.drive.drive_path([], None, angle, end_speed=40)
+        self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command['up'])
+        self.my_game_elements[0]['moved'] = True
+
+        # Drive to next clapper
+        (x0, y0), angle0 = self.my_game_elements[0]['position'], self.angle
+        (x1, y1), angle1 = self.my_game_elements[1]['position'], self.angle
+        y0 -= self.distance
+        y1 -= self.distance
+
+        if self.drive.drive_path([], ((x0 + x1)/2, y0), None):
+            #Close second clapper
+            self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command[side], blocking=True)
+            self.drive.drive_path([], (x1, y1), None)
+            self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command['up'])
+            self.my_game_elements[1]['moved'] = True
+
 
 
 class PopcornTask(Task):
