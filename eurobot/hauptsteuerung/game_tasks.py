@@ -277,7 +277,7 @@ class StandsTask(Task):
                        {'position': (1300, 1400), 'start position': None},
                        ]
 
-        second_stand = [{'position': (90, 1850), 'start position': None},
+        self.second_stand = [{'position': (90, 1850), 'start position': None},
                         {'position': (850, 100), 'start position': None},
                         ]
 
@@ -303,9 +303,9 @@ class StandsTask(Task):
             self.empty_position['start_position'] = 3000 - x, y, angle
             x, y, angle = empty_position['position']
             self.empty_position['position'] = 3000 - x, y, angle
-            x, y = second_stand[0]['position']
+            x, y = self.second_stand[0]['position']
             self.second_stands[0]['position'] = 3000 - x, y
-            x, y = second_stand[1]['position']
+            x, y = self.second_stand[1]['position']
             self.second_stands[1]['position'] = 3000 - x, y
         else:
             raise Exception("Unknown team color")
