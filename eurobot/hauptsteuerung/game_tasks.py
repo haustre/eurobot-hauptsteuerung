@@ -190,17 +190,17 @@ class StairTask(Task):
         super().__init__(robots, can_socket, can.MsgTypes.Climbing_Command.value, drive)
         self.climbing_command = {'up': 0, 'bottom': 1, 'middle': 2, 'top': 3}
         self.carpet_command = {'fire right': 0, 'fire left': 1}
-        path_left = {'in_front': (1250, 740, 270),
-                     'bottom': (1250, 700, 270),
-                     'beginning': (1250, 650, 270),
-                     'top': (1250, 200, 270),
-                     'top not reached': (1250, 240, 270),
-                     'carpet 1': (1080, 240, 185),
+        path_left = {'in_front': (1240, 740, 270),
+                     'bottom': (1240, 700, 270),
+                     'beginning': (1240, 650, 270),
+                     'top': (1240, 200, 270),
+                     'top not reached': (1240, 220, 270),
+                     'carpet 1': (1100, 240, 185),
                      'fire 1': self.carpet_command['fire left'],
-                     'turning point': (1250, 240, 270),
-                     'carpet 2': (1400, 240, 355),
+                     'turning point': (1240, 240, 270),
+                     'carpet 2': (1380, 240, 355),
                      'fire 2': self.carpet_command['fire right'],
-                     'end point': (1250, 210, 90)
+                     'end point': (1240, 210, 90)
                      }
         path_right = {}
         for key, value in path_left.items():
@@ -241,7 +241,7 @@ class StairTask(Task):
         timer.start()
         self.drive.drive_path([], self.my_path['top'], None)
 
-        myY, myY = self.robots['me'].get_position()
+        myX, myY = self.robots['me'].get_position()
 
         while myY > 290:
             self.drive.drive_path([], self.my_path['top'], None)
@@ -271,13 +271,15 @@ class StandsTask(Task):
         self.command = {'blocked': 0, 'ready collect': 1, 'ready platform': 2, 'open case': 3}
         stands_left = [{'position': (90, 200), 'start position': (300, 490)},
                        {'position': (90, 1750), 'start position': (300, 1460)},
-                       #{'position': (90, 1850), 'start position': None},
-                       #{'position': (850, 100), 'start position': None},
                        {'position': (850, 200), 'start position': (650, 490)},
                        {'position': (870, 1355), 'start position': None},
                        {'position': (1100, 1770), 'start position': None},
                        {'position': (1300, 1400), 'start position': None},
                        ]
+
+        self.second_stand = [{'position': (90, 1850), 'start position': None},
+                        {'position': (850, 100), 'start position': None},
+                        ]
 
         for stand in stands_left:
             stand['moved'] = False
@@ -301,6 +303,10 @@ class StandsTask(Task):
             self.empty_position['start_position'] = 3000 - x, y, angle
             x, y, angle = empty_position['position']
             self.empty_position['position'] = 3000 - x, y, angle
+            x, y = self.second_stand[0]['position']
+            self.second_stands[0]['position'] = 3000 - x, y
+            x, y = self.second_stand[1]['position']
+            self.second_stands[1]['position'] = 3000 - x, y
         else:
             raise Exception("Unknown team color")
 
@@ -324,8 +330,23 @@ class StandsTask(Task):
         point2 = self.calculate_stopping_point(starting_point, stand_point, -50)
         self.drive.drive_path([point1[0:2]], point2[0:2], None,  end_speed=10)
         time.sleep(0.3)
-        if object_number == 2:
+
+        # Take also the second stand (Only for stand 1 and 2)
+        if object_number == 1 or object_number == 2:
+            starting_point = self.robots['me'].get_position()
+            if object_number == 1:
+                stand_point = self.second_stands[0]['position']
+            else:
+                stand_point = self.second_stands[1]['position']
+            self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready collect'])
+            point1 = self.calculate_stopping_point(starting_point, stand_point, 30)
+            point2 = self.calculate_stopping_point(starting_point, stand_point, -50)
+            self.drive.drive_path([point1[0:2]], point2[0:2], None,  end_speed=10)
+            time.sleep(0.3)
+
+            # Drive back
             self.drive.drive_path([], self.my_game_elements[object_number]['start position'], None,  end_speed=-10)
+
         self.my_game_elements[object_number]['moved'] = True
         #threading.Timer(0.5, self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['blocked'])).start()
 
