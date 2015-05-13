@@ -275,11 +275,19 @@ class Drive():
         """
         x_min, x_max = 150, 2850
         y_min, y_max = 150, 1850
+        stair_x = (967 - 15, 2033 + 15)
+        stair_y = (0, 580 + 15)
         robot_big = self.my_robot.name == 'Roboter-gross'
         if robot_big:
             break_distance = 250 + (300 / 100 * speed)  # TODO: not tested
+            sensor_min = 150
+            sensors = ['distance_front_middle', 'distance_front_left', 'distance_front_right']
+            sensor_offset = [0, -15, 15]
         else:
             break_distance = 200
+            sensor_min = 0
+            sensors = ['distance_front_left', 'distance_front_right']
+            sensor_offset = [0, -10, 10]
         drive_queue = queue.Queue()
         close_range_queue = queue.Queue()
         drive_queue_number = self.can_socket.create_queue(can.MsgTypes.Drive_Status.value, drive_queue)
@@ -301,27 +309,23 @@ class Drive():
                     range_msg = close_range_queue.get_nowait()
                     while close_range_queue.empty() is False:
                         close_range_queue.get_nowait()
-                    if (range_msg['front_middle_correct'] and range_msg['distance_front_middle'] < break_distance) and robot_big:
-                        sensor_angle = 0
-                        x = my_position[0] + math.cos(my_angle+sensor_angle)*range_msg['distance_front_middle']
-                        y = my_position[1] + math.sin(my_angle+sensor_angle)*range_msg['distance_front_middle']
-                        if x_min < x < x_max and y_min < y < y_max:
-                            emergency = True
-                            break
-                    if range_msg['front_left_correct'] and range_msg['distance_front_left'] < break_distance:
-                        sensor_angle = -20
-                        x = my_position[0] + math.cos(my_angle+sensor_angle)*range_msg['distance_front_left']
-                        y = my_position[1] + math.sin(my_angle+sensor_angle)*range_msg['distance_front_left']
-                        if x_min < x < x_max and y_min < y < y_max:
-                            emergency = True
-                            break
-                    if range_msg['front_right_correct'] and range_msg['distance_front_middle'] < break_distance:
-                        sensor_angle = +20
-                        x = my_position[0] + math.cos(my_angle+sensor_angle)*range_msg['distance_front_right']
-                        y = my_position[1] + math.sin(my_angle+sensor_angle)*range_msg['distance_front_right']
-                        if x_min < x < x_max and y_min < y < y_max:
-                            emergency = True
-                            break
+                    for i, sensor in enumerate(sensors):
+                        distance = max(range_msg[sensor], sensor_min)
+                        if distance < break_distance:
+                            print("Distance:" + str(distance))
+                            if robot_big is False:
+                                emergency = True
+                                break
+                            x = my_position[0] + math.cos(my_angle)*(distance + 90)
+                            y = my_position[1] + math.sin(my_angle)*(distance + 90)
+                            sensor_offset_x = math.cos(my_angle+90)*(sensor_offset[i])
+                            sensor_offset_y = math.sin(my_angle+90)*(sensor_offset[i])
+                            x += sensor_offset_x
+                            y += sensor_offset_y
+                            if (x_min < x < x_max and y_min < y < y_max) and not (stair_x[0] < x < stair_x[1] and stair_y[0] < y < stair_y[1]):
+                                print(str(sensor) + " x: " + str(x) + " y: " + str(y))
+                                emergency = True
+                                break
                 except queue.Empty:
                     pass
             if self.enemy_detection:

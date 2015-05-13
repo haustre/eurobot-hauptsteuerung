@@ -267,7 +267,7 @@ class StandsTask(Task):
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
         self.distance_to_stand = 200
-        empty_position = {'start_position': (1300, 1650, 90), 'position': (1300, 1770, 90)}
+        empty_position = {'start_position': (1300, 1650, 90), 'position': (1300, 1750, 90)}
         self.command = {'blocked': 0, 'ready collect': 1, 'ready platform': 2, 'open case': 3}
         stands_left = [{'position': (90, 200), 'start position': (300, 490)},
                        {'position': (90, 1750), 'start position': (300, 1460)},
@@ -357,12 +357,16 @@ class StandsTask(Task):
 
     def do_empty(self):
         """ puts down the stands """
+        old_close_range_detecion_state = self.drive.close_range_detection
+        self.drive.set_close_range_detection(False)
         self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready platform'], blocking=True)
         self.drive.drive_path([], self.empty_position['position'], None, end_speed=15)
         self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['open case'], blocking=True)
         self.drive.drive_path([], self.empty_position['start_position'], None, end_speed=-15)
         self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready collect'])
         self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['blocked'])
+        time.sleep(0.5)
+        self.drive.set_close_range_detection(old_close_range_detecion_state)
 
 
 class CupTask(Task):
@@ -496,7 +500,7 @@ class ClapperTask(Task):
             angle = 0
         else:
             angle = 180
-        self.drive.drive_path([], None, angle, end_speed=100)
+        self.drive.drive_path([], None, angle, end_speed=40)
         self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command['up'])
         self.my_game_elements[clapper_number]['moved'] = True
 
@@ -559,7 +563,7 @@ class PopcornTask(Task):
             x, y = self.robots['me'].get_position()
             offset = self.calibration_point - x
             if abs(offset) < 50:
-                self.drive.set_offset_x(offset, 0)
+                self.drive.set_offset_x(offset)
                 self.calibrated = True
             else:
                 print("Calibration failed")
