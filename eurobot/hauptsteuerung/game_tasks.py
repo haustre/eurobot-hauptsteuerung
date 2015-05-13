@@ -568,11 +568,11 @@ class PopcornTask(Task):
         self.calibrated = False
         self.calibration_point = 160
         self.angle = 90
-        self.distance = 130
+        self.distance = 120
         empty_position = {'start_position': (800, 1000, 0), 'position': (220, 1000, 0)}
         self.command = {'ready collect': 0, 'open case': 1,  'collect': 2}
-        popcorn_left = [{'start_position': (300, 400), 'position': (300, 120)},
-                        {'start_position': (600, 400), 'position': (600, 120)}
+        popcorn_left = [{'start_position': (300, 400), 'position': (300, 0)},
+                        {'start_position': (600, 400), 'position': (600, 0)}
                         ]
 
         for popcorn in popcorn_left:
@@ -632,7 +632,7 @@ class PopcornTask(Task):
             self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['ready collect'], blocking=False)
             x, y = self.my_game_elements[object_number]['position']
             y += self.distance
-            path_point = x, y + 90
+            path_point = x, y + 80
             self.drive.drive_path([path_point], (x, y), self.angle, path_speed=-30, end_speed=-5, blocking=True)
             # self.wait_for_task(can.MsgTypes.Popcorn_Command.value+1)
             # self.drive.request_stop()
