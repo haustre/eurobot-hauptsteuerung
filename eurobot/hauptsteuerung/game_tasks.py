@@ -271,13 +271,15 @@ class StandsTask(Task):
         self.command = {'blocked': 0, 'ready collect': 1, 'ready platform': 2, 'open case': 3}
         stands_left = [{'position': (90, 200), 'start position': (300, 490)},
                        {'position': (90, 1750), 'start position': (300, 1460)},
-                       #{'position': (90, 1850), 'start position': None},
-                       #{'position': (850, 100), 'start position': None},
                        {'position': (850, 200), 'start position': (650, 490)},
                        {'position': (870, 1355), 'start position': None},
                        {'position': (1100, 1770), 'start position': None},
                        {'position': (1300, 1400), 'start position': None},
                        ]
+
+        second_stand = [{'position': (90, 1850), 'start position': None},
+                        {'position': (850, 100), 'start position': None},
+                        ]
 
         for stand in stands_left:
             stand['moved'] = False
@@ -301,6 +303,10 @@ class StandsTask(Task):
             self.empty_position['start_position'] = 3000 - x, y, angle
             x, y, angle = empty_position['position']
             self.empty_position['position'] = 3000 - x, y, angle
+            x, y = second_stand[0]['position']
+            self.second_stands[0]['position'] = 3000 - x, y
+            x, y = second_stand[1]['position']
+            self.second_stands[1]['position'] = 3000 - x, y
         else:
             raise Exception("Unknown team color")
 
@@ -324,8 +330,23 @@ class StandsTask(Task):
         point2 = self.calculate_stopping_point(starting_point, stand_point, -50)
         self.drive.drive_path([point1[0:2]], point2[0:2], None,  end_speed=10)
         time.sleep(0.3)
-        if object_number == 2:
+
+        # Take also the second stand (Only for stand 1 and 2)
+        if object_number == 1 or object_number == 2:
+            starting_point = self.robots['me'].get_position()
+            if object_number == 1:
+                stand_point = self.second_stands[0]['position']
+            else:
+                stand_point = self.second_stands[1]['position']
+            self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready collect'])
+            point1 = self.calculate_stopping_point(starting_point, stand_point, 30)
+            point2 = self.calculate_stopping_point(starting_point, stand_point, -50)
+            self.drive.drive_path([point1[0:2]], point2[0:2], None,  end_speed=10)
+            time.sleep(0.3)
+
+            # Drive back
             self.drive.drive_path([], self.my_game_elements[object_number]['start position'], None,  end_speed=-10)
+
         self.my_game_elements[object_number]['moved'] = True
         #threading.Timer(0.5, self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['blocked'])).start()
 
