@@ -264,8 +264,12 @@ class StandsTask(Task):
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
         self.distance_to_stand = 200
+        self.special_cup = 0
         empty_position = {'start_position': (1300, 1620, 90), 'position': (1300, 1750, 90)}
         self.command = {'blocked': 0, 'ready collect': 1, 'ready platform': 2, 'open case': 3}
+        self.commandCup = {'blocked': 0, 'ready collect left': 1, 'ready collect right': 2, 'collect left': 3,
+                           'collect right': 4,'open case left': 5,'open case right': 6,'close case left': 7,
+                           'close case right': 8}
         stands_left = [{'position': (90, 200), 'start position': (300, 490)},
                        {'position': (90, 1750), 'start position': (300, 1460)},
                        {'position': (850, 200), 'start position': (650, 490)},
@@ -292,6 +296,8 @@ class StandsTask(Task):
             self.my_game_elements = stands_left
             self.enemy_game_elements = stands_right
             self.empty_position = empty_position
+            self.side = 'left'
+
         elif my_color == 'right':
             self.empty_position = {}
             self.my_game_elements = stands_right
@@ -304,6 +310,8 @@ class StandsTask(Task):
             self.second_stands[0]['position'] = 3000 - x, y
             x, y = self.second_stands[1]['position']
             self.second_stands[1]['position'] = 3000 - x, y
+
+            self.side = 'right'
         else:
             raise Exception("Unknown team color")
 
@@ -329,6 +337,14 @@ class StandsTask(Task):
         point1 = self.calculate_stopping_point(starting_point, stand_point, 30)
 
         if object_number == 1 or object_number == 2:
+
+            #Make ready also for the cup
+            if object_number == 1:
+                if self.side == 'left':
+                    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['ready collect left'])
+                else:
+                    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['ready collect right'])
+
             point2 = self.calculate_stopping_point(starting_point, stand_point, -20)
         else:
             point2 = self.calculate_stopping_point(starting_point, stand_point, -50)
@@ -340,6 +356,11 @@ class StandsTask(Task):
             starting_point = self.robots['me'].get_position()
             if object_number == 1:
                 stand_point = self.second_stands[0]['position']
+                #Take also the cup
+                if (self.side == 'left'):
+                    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['collect left'])
+                else:
+                    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['collect right'])
             else:
                 stand_point = self.second_stands[1]['position']
             self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready collect'])
@@ -401,13 +422,16 @@ class CupTask(Task):
         self.distance = 150
         self.shift = 100
         self.free_arms = {'right': True, 'left': True}
-        self.command = {'blocked': 0, 'ready collect': 1, 'open case': 2}
-        self.sides = {'left': 0, 'right': 1}
-        cups_left = [{'position': (250, 1750)},
-                     {'position': (910, 830)},
-                     {'position': (1500, 1650)},
-                     {'position': (2090, 830)},
-                     {'position': (2750, 1750)}
+        self.command = {'blocked': 0, 'ready collect left': 1, 'ready collect right': 2, 'collect left': 3,
+                        'collect right': 4,'open case left': 5,'open case right': 6,'close case left': 7,
+                        'close case right': 8}
+
+
+        cups_left = [{'position': (250, 1750), 'pick up side': 'left'},
+                     {'position': (910, 830), 'pick up side': 'right'},
+                     {'position': (1500, 1650), 'pick up side': 'right'},
+                     {'position': (2090, 830), 'pick up side': 'left'},
+                     {'position': (2750, 1750), 'pick up side': 'right'}
                      ]
 
         for stand in cups_left:
@@ -429,18 +453,43 @@ class CupTask(Task):
         """
         starting_point = self.robots['me'].get_position()
         stand_point = self.my_game_elements[object_number]['position']
-        self.send_task_command(can.MsgTypes.Cup_Command.value, self.command['ready collect'])
-        point1, point2, angle = self.calculate_stopping_points(starting_point, stand_point, self.sides['right'])
+
+        self.make_ready_for_cup(object_number)
+        point1, point2, angle = self.calculate_stopping_points(starting_point, stand_point, object_number)
         self.drive.drive_path([point1], point2, angle, end_speed=10)
+        self.take_cup(object_number)
         self.my_game_elements[object_number]['moved'] = True
         time.sleep(0.2)
 
-    def calculate_stopping_points(self, from_pos, to_pos, side):
+
+    def make_ready_for_cup(self, object_number):
+        if self.my_game_elements[object_number]['pick up side'] == 'left':
+            self.send_task_command(can.MsgTypes.Cup_Command.value, self.command['ready collect left'])
+        else:
+            self.send_task_command(can.MsgTypes.Cup_Command.value, self.command['ready collect right'])
+
+
+    def take_cup(self, object_number):
+        if self.my_game_elements[object_number]['pick up side'] == 'left':
+            self.send_task_command(can.MsgTypes.Cup_Command.value, self.command['collect left'])
+        else:
+            self.send_task_command(can.MsgTypes.Cup_Command.value, self.command['collect right'])
+
+    def release_cup(self):
+        self.send_task_command(can.MsgTypes.Cup_Command.value, self.command['open case left'])
+        self.send_task_command(can.MsgTypes.Cup_Command.value, self.command['open case right'])
+
+    def close_case(self):
+        self.send_task_command(can.MsgTypes.Cup_Command.value, self.command['close case left'])
+        self.send_task_command(can.MsgTypes.Cup_Command.value, self.command['close case right'])
+
+
+    def calculate_stopping_points(self, from_pos, to_pos, object_number):
         """ calculates the correct position to collect the cup
 
         :param from_pos: position of the robot
         :param to_pos: position of the stand
-        :param side: which side is used to collect the cup
+        :param object_number: specifies which game element is chosen
         :return: point to drive to, angle
         """
         point1 = [0, 0]
@@ -454,7 +503,7 @@ class CupTask(Task):
         point1[0] = int(to_pos[0] - x)
         point1[1] = int(to_pos[1] - y)
 
-        if side == self.sides['left']:
+        if self.my_game_elements[object_number]['pick up side'] == 'left':
             x = math.cos(angle-math.pi/2) * self.shift
             y = math.sin(angle-math.pi/2) * self.shift
         else:
