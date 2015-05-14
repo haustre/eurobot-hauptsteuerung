@@ -91,23 +91,20 @@ class Task():
         self.moved_thread.setDaemon(1)
         self.moved_thread.start()
 
-    def estimate_distance(self):
+    def estimate_distances(self):
         """ gives back the nearest game element and an estimated distance to it
 
         :param robot: robot to estimate the distance to
         :return: distance to the game element, number of the element
         """
         robot_x, robot_y = self.robots['me'].get_position()
-        shortest_distance = 9000  # Not on the Table
-        nearest_element = None
+        distance_list = []
         for i, game_element in enumerate(self.my_game_elements):
             if game_element['moved'] is False:
                 stand_x, stand_y = game_element['position']
                 distance = math.sqrt((robot_x - stand_x)**2 + (robot_y - stand_y)**2)
-                if distance < shortest_distance:
-                    shortest_distance = distance
-                    nearest_element = i
-        return shortest_distance, nearest_element
+                distance_list.append((distance, i))
+        return distance_list
 
     def check_if_moved(self):
         """ loop checking which game elements have been moved """
@@ -323,21 +320,23 @@ class StandsTask(Task):
 
         :param object_number:  specifies which game element is chosen
         """
+        old_close_range_detecion_state = self.drive.close_range_detection
+        if object_number == 0 or object_number == 1 or object_number == 2:
+            self.drive.set_close_range_detection(False)
         starting_point = self.robots['me'].get_position()
         stand_point = self.my_game_elements[object_number]['position']
         self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready collect'])
         point1 = self.calculate_stopping_point(starting_point, stand_point, 30)
 
-        if (object_number == 1 or object_number == 2):
+        if object_number == 1 or object_number == 2:
             point2 = self.calculate_stopping_point(starting_point, stand_point, -20)
         else:
             point2 = self.calculate_stopping_point(starting_point, stand_point, -50)
 
         self.drive.drive_path([point1[0:2]], point2[0:2], None,  end_speed=10)
         time.sleep(0.3)
-
         # Take also the second stand (Only for stand 1 and 2)
-        if (object_number == 1 or object_number == 2):
+        if object_number == 1 or object_number == 2:
             starting_point = self.robots['me'].get_position()
             if object_number == 1:
                 stand_point = self.second_stands[0]['position']
@@ -348,11 +347,10 @@ class StandsTask(Task):
             point2 = self.calculate_stopping_point(starting_point, stand_point, -40)
             self.drive.drive_path([point1[0:2]], point2[0:2], None,  end_speed=10)
             time.sleep(0.3)
-
             # Drive back
             self.drive.drive_path([], self.my_game_elements[object_number]['start position'], None,  end_speed=-30)
-
         self.my_game_elements[object_number]['moved'] = True
+        self.drive.set_close_range_detection(old_close_range_detecion_state)
         #threading.Timer(0.5, self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['blocked'])).start()
 
     def calculate_stopping_point(self, from_pos, to_pos, distance):
@@ -520,6 +518,8 @@ class ClapperTask(Task):
 
         :param clapper_number:  specifies which game element is chosen
         """
+        old_close_range_detecion_state = self.drive.close_range_detection
+        self.drive.set_close_range_detection(False)
         side = self.my_game_elements[clapper_number]['side']
         self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command[side], blocking=False)
         if side == 'right':
@@ -529,6 +529,7 @@ class ClapperTask(Task):
         self.drive.drive_path([], None, angle, end_speed=40)
         self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command['up'])
         self.my_game_elements[clapper_number]['moved'] = True
+        self.drive.set_close_range_detection(old_close_range_detecion_state)
 
     def goto_both_clapper_fast(self):
         """ returns the position information of the specified clapper
@@ -565,13 +566,11 @@ class ClapperTask(Task):
             self.my_game_elements[1]['moved'] = True
 
 
-
 class PopcornTask(Task):
     """ Class for collecting the popcorn from the popcorn machine """
     def __init__(self, robots, my_color, can_socket, drive):
         super().__init__(robots, can_socket, can.MsgTypes.Popcorn_Command.value, drive)
         self.calibrated = False
-        self.calibration_point = 160
         self.angle = 90
         self.distance = 120
         empty_position = {'start_position': (800, 1000, 0), 'position': (220, 1000, 0)}
@@ -579,6 +578,8 @@ class PopcornTask(Task):
         popcorn_left = [{'start_position': (300, 400), 'position': (300, 0)},
                         {'start_position': (600, 400), 'position': (600, 0)}
                         ]
+        self.calibration_point = [100, popcorn_left[0]['start_position'][1]]
+        self.calibration_value = 160
 
         for popcorn in popcorn_left:
             popcorn['moved'] = False
@@ -601,7 +602,8 @@ class PopcornTask(Task):
             self.empty_position['start_position'] = 3000 - x, y, 180
             x, y, angle = empty_position['position']
             self.empty_position['position'] = 3000 - x, y, 180
-            self.calibration_point = 3000 - self.calibration_point
+            self.calibration_value = 3000 - self.calibration_value
+            self.calibration_point[0] = 3000 - self.calibration_point[0]
         else:
             raise Exception("Unknown team color")
 
@@ -618,11 +620,12 @@ class PopcornTask(Task):
 
         :param object_number:  specifies which game element is chosen
         """
+        old_close_range_detecion_state = self.drive.close_range_detection
         if self.calibrated is False:
-            x, y = self.my_game_elements[object_number]['start_position']
-            self.drive.drive_path([], (2900, y), None, end_speed=-20)
+            self.drive.set_close_range_detection(False)
+            self.drive.drive_path([], self.calibration_point, None, end_speed=-20)
             x, y = self.robots['me'].get_position()
-            offset = self.calibration_point - x
+            offset = self.calibration_value - x
             if abs(offset) < 50:
                 self.drive.set_offset_x(offset)
                 self.calibrated = True
@@ -630,10 +633,14 @@ class PopcornTask(Task):
                 print("Calibration failed")
                 self.my_game_elements[0]['moved'] = True
                 self.my_game_elements[1]['moved'] = True
+                self.drive.set_close_range_detection(old_close_range_detecion_state)
                 return
-            self.drive.drive_path([], self.my_game_elements[object_number]['start_position'], None)
+            self.drive.set_close_range_detection(old_close_range_detecion_state)
+            while self.drive.drive_path([], self.my_game_elements[object_number]['start_position'], None) is False:
+                pass
 
         if self.calibrated:
+            self.drive.set_close_range_detection(False)
             self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['ready collect'], blocking=False)
             x, y = self.my_game_elements[object_number]['position']
             y += self.distance
@@ -642,7 +649,9 @@ class PopcornTask(Task):
             # self.wait_for_task(can.MsgTypes.Popcorn_Command.value+1)
             # self.drive.request_stop()
             self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['collect'], blocking=True)
-            self.drive.drive_path([], self.my_game_elements[object_number]['start_position'], None)
+            self.drive.set_close_range_detection(old_close_range_detecion_state)
+            while self.drive.drive_path([], self.my_game_elements[object_number]['start_position'], None) is False:
+                pass
             self.my_game_elements[object_number]['moved'] = True
 
     def goto_empty(self):
@@ -657,6 +666,9 @@ class PopcornTask(Task):
 
         :return: None
         """
+        old_close_range_detecion_state = self.drive.close_range_detection
+        self.drive.set_close_range_detection(False)
         self.drive.drive_path([], self.empty_position['position'], None, end_speed=-15)
         self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['open case'], blocking=True)
+        self.drive.set_close_range_detection(old_close_range_detecion_state)
         self.drive.drive_path([], self.empty_position['start_position'], None, end_speed=15)

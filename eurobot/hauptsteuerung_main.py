@@ -43,7 +43,7 @@ class Main():
             #self.enemy_simulation.start()
         else:
             self.clear_config('/root/gui_config')   # delete the old configuration file
-            subprocess.Popen(['software/robo_gui'])     # start the GUI program
+            subprocess.Popen(['software/robo_gui2'])     # start the GUI program
         self.countdown = game_tasks.Countdown(self.can_socket)
         self.debugger = debug.LaptopCommunication(self.can_socket)
         self.drive = drive.Drive(self.can_socket)
@@ -62,7 +62,7 @@ class Main():
              'cup': game_tasks.CupTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
              'popcorn': game_tasks.PopcornTask(self.robots, self.strategy['side'], self.can_socket, self.drive)
              }
-        self.game_logic = GameLogic(self.game_tasks, self.drive, self.countdown, self.robots)
+        self.game_logic = GameLogic(self.game_tasks, self.drive, self.countdown, self.robots, self.strategy['side'])
         self.debugger.add_game_tasks(self.game_tasks)
         #self.debugger.start_game_tasks()
         # create all robot objects and put them in a dictionary
@@ -105,30 +105,25 @@ class Main():
         :type file_name: str
         :return: configuration dictionary
         """
+        strategy = {
+            'robot_small': True, 'robot_big': True, 'enemy_small': True, 'enemy_big': True,
+            'robot_name': None, 'side': 'right', 'strategy': 'C'
+        }
         if self.debug:
-            strategy = {
-                'robot_small': True, 'robot_big': True, 'enemy_small': True, 'enemy_big': True,
-                'robot_name': None, 'side': 'right', 'strategy': 'C'
-            }
             print("!!!! Debug Program !!!!")
             return strategy
         else:
             while True:
-                strategy = {}
                 try:
                     with open(file_name) as f:
                         file_content = f.readlines()
                 except FileNotFoundError:
                     print('Configuration not found')
-                if len(file_content) == 7:
-                    complete = file_content[6].strip().strip('complete: ')
+                if len(file_content) == 3:
+                    complete = file_content[2].strip().strip('complete: ')
                     if complete == 'yes':
                         strategy['side'] = file_content[0].strip().strip('side: ')
                         strategy['strategy'] = file_content[1].strip().strip('strategy: ')
-                        strategy['enemy_small'] = file_content[2].strip().strip('enemy small: ')
-                        strategy['enemy_big'] = file_content[3].strip().strip('enemy big: ')
-                        strategy['robot_small'] = file_content[4].strip().strip('own_robot_small: ')
-                        strategy['robot_big'] = file_content[5].strip().strip('own_robot_big: ')
                         return strategy
                 else:
                     print('Configuration not finished')
