@@ -270,12 +270,12 @@ class StandsTask(Task):
         self.commandCup = {'blocked': 0, 'ready collect left': 1, 'ready collect right': 2, 'collect left': 3,
                            'collect right': 4, 'open case left': 5, 'open case right': 6, 'close case left': 7,
                            'close case right': 8}
-        stands_left = [{'position': (90, 200), 'start position': (300, 490)},
-                       {'position': (90, 1750), 'start position': (300, 1460)},
-                       {'position': (850, 200), 'start position': (650, 490)},
-                       {'position': (870, 1355), 'start position': None},
-                       {'position': (1100, 1770), 'start position': None},
-                       {'position': (1300, 1400), 'start position': None},
+        stands_left = [{'position': (90, 200), 'start position': (300, 490), 'end position': (300, 490)},
+                       {'position': (90, 1750), 'start position': (300, 1460), 'end position': (250, 1500)},
+                       {'position': (850, 200), 'start position': (650, 490), 'end position': (650, 490)},
+                       {'position': (870, 1355), 'start position': None, 'end position': None},
+                       {'position': (1100, 1770), 'start position': None, 'end position': None},
+                       {'position': (1300, 1400), 'start position': None, 'end position': None},
                        ]
 
         self.second_stands = [{'position': (90, 1850), 'start position': None},
@@ -292,6 +292,8 @@ class StandsTask(Task):
             if stand['start position'] is not None:
                 x, y = stand['start position']
                 stand['start position'] = (3000-x, y)
+                x, y = stand['end position']
+                stand['end position'] = (3000-x, y)
         if my_color == 'left':
             self.my_game_elements = stands_left
             self.enemy_game_elements = stands_right
@@ -368,8 +370,11 @@ class StandsTask(Task):
             point2 = self.calculate_stopping_point(starting_point, stand_point, -40)
             self.drive.drive_path([point1[0:2]], point2[0:2], None,  end_speed=10)
             time.sleep(0.3)
+
+        if object_number == 1 or object_number == 2 or object_number == 3:
             # Drive back
-            self.drive.drive_path([], self.my_game_elements[object_number]['start position'], None,  end_speed=-30)
+            self.drive.drive_path([], self.my_game_elements[object_number]['end position'], None,  end_speed=-30)
+
         self.my_game_elements[object_number]['moved'] = True
         self.drive.set_close_range_detection(old_close_range_detecion_state)
         #threading.Timer(0.5, self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['blocked'])).start()
