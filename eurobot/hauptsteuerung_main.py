@@ -232,12 +232,12 @@ class Main():
                 self.game_tasks['stand'].do_task(3)
                 self.game_tasks['stand'].do_task(4)
                 point, angle = self.game_tasks['stand'].goto_task(1)
-                self.drive.drive_path([],point, angle)
+                self.drive.drive_path([], point, angle)
                 self.game_tasks['stand'].do_task(1)
 
                 # Close clapper 0 and 1
-                point, angle = self.game_tasks['clapper'].goto_both_clapper_fast()
-                self.drive.drive_path([],point, angle)
+                point, angle = self.game_tasks['clapper'][0].goto_task()
+                self.drive.drive_path([], point, angle)
                 self.game_tasks['clapper'].do_both_clapper_fast()
 
                 # Collect stand stand 5, when space left
@@ -246,12 +246,11 @@ class Main():
 
                 # Empty stand case
                 point, angle = self.game_tasks['stand'].goto_empty()
-                self.drive.drive_path([],point, angle)
+                self.drive.drive_path([], point, angle)
                 self.game_tasks['stand'].do_empty()
 
                 # Start logic
                 self.game_logic.start()
-
 
             elif self.strategy['strategy'] == 'B':
                 if True:
@@ -286,7 +285,7 @@ class Main():
             elif self.strategy['strategy'] == 'C':  # Test strategy
                 if True:
                     self.drive.set_close_range_detection(True)
-                    self.drive.set_enemy_detection(True)
+                    self.drive.set_enemy_detection(False)
                     self.drive.set_speed(40)
                     self.game_tasks['stand'].do_task(3)
                     self.game_logic.start()

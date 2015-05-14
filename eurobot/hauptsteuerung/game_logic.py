@@ -22,22 +22,6 @@ class GameLogic():
 
     def start(self):
         while self.running:
-            collected = self.game_tasks['stand'].collected
-            if (collected >= 4) or (self.countdown.time_left() <= 20 and collected >= 2):
-                point, angle = self.game_tasks['stand'].goto_empty()
-                print("Empty Stands")
-                if self.drive_fast(point, angle):
-                    self.game_tasks['stand'].do_empty()
-                    for i in range(len(self.points['stand'])):
-                        self.points['stand'][i] /= 2
-
-            collected = self.game_tasks['popcorn'].collected
-            if (collected >= 10) or (self.countdown.time_left() <= 20 and collected >= 5):
-                point, angle = self.game_tasks['popcorn'].goto_empty()
-                print("Empty Popcorn")
-                if self.drive_fast(point, angle):
-                    self.game_tasks['popcorn'].do_empty()
-
             ratings = []
             for task_name, task in self.game_tasks.items():
                 if task_name != 'stair':
@@ -49,18 +33,28 @@ class GameLogic():
                         ratings.append((rating, task_name, element_number))
             index_of_task = ratings.index(max(ratings))
             _, task_name, element_number = ratings[index_of_task]
+
+            stands_collected = self.game_tasks['stand'].collected
+            popcorn_collected = self.game_tasks['popcorn'].collected
+            if stands_collected >= 4 and not(task_name == 'clapper' and element_number == 0):
+                point, angle = self.game_tasks['stand'].goto_empty()
+                print("Empty Stands")
+                if self.drive_fast(point, angle):
+                    self.game_tasks['stand'].do_empty()
+                continue
+            if (popcorn_collected >= 10) or \
+                    (self.countdown.time_left() <= 20):
+                point, angle = self.game_tasks['popcorn'].goto_empty()
+                print("Empty Popcorn")
+                if self.drive_fast(point, angle):
+                    self.game_tasks['popcorn'].do_empty()
+                continue
             point, angle = self.game_tasks[task_name].goto_task(element_number)
             print("Doing Task: " + str(task_name) + ", Nr:" + str(element_number))
-            my_position = self.robots['me'].get_position()
             arrived = self.drive_fast(point, angle)
             if arrived:
                 self.game_tasks[task_name].do_task(element_number)
                 self.game_tasks[task_name].my_game_elements[element_number]['moved'] = True
-
-    def calculate_distance(self, point1, point2):
-        x1, y1 = point1
-        x2, y2 = point2
-        return math.sqrt((x1-x2)**2 + (y1-y2)**2)
 
     def drive_fast(self, destination, angle):
         path = []
