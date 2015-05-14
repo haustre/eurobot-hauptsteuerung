@@ -263,7 +263,7 @@ class Main():
                     self.drive.set_enemy_detection(True)
                     self.drive.set_speed(50)
 
-                    # Collect stand 1, 3 and 4
+                    # Collect stand 1(with cup), 3 and 4
                     self.game_tasks['stand'].do_task(3)
                     self.game_tasks['stand'].do_task(4)
                     point, angle = self.game_tasks['stand'].goto_task(1)
