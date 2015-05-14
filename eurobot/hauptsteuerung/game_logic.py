@@ -8,15 +8,16 @@ import math
 
 
 class GameLogic():
-    def __init__(self, game_tasks, drive, countdown, robots):
-        self.points = {'stand': [10, 8, 6, 8, 8, 8],
+    def __init__(self, game_tasks, drive, countdown, robots, side):
+        self.points = {'stand': [6, 8, 6, 8, 8, 8],
                        'cup': [-100, -100, -100, -100, -100],
                        'clapper': [5, 5, 1],
-                       'popcorn': [5, 3]}
+                       'popcorn': [6, 4]}
         self.game_tasks = game_tasks
         self.drive = drive
         self.countdown = countdown
         self.robots = robots
+        self.side = side
         self.running = True
 
     def start(self):
@@ -40,26 +41,18 @@ class GameLogic():
             ratings = []
             for task_name, task in self.game_tasks.items():
                 if task_name != 'stair':
-                    distance, element_number = task.estimate_distance()
-                    if element_number:
+                    distance_list = task.estimate_distances()
+                    for game_element in distance_list:
+                        distance, element_number = game_element
                         points = self.points[task_name][element_number]
-                    else:
-                        points = -99
-                    rating = points - distance / 300
-                    ratings.append((rating, task_name, element_number))
+                        rating = points - distance / 300
+                        ratings.append((rating, task_name, element_number))
             index_of_task = ratings.index(max(ratings))
             _, task_name, element_number = ratings[index_of_task]
             point, angle = self.game_tasks[task_name].goto_task(element_number)
             print("Doing Task: " + str(task_name) + ", Nr:" + str(element_number))
             my_position = self.robots['me'].get_position()
-            if point:
-                distance = self.calculate_distance(point, my_position)
-            else:
-                distance = 0
-            if distance < 200:
-                arrived = self.drive.drive_path([], point, angle)
-            else:
-                arrived = self.drive_fast(point, angle)
+            arrived = self.drive_fast(point, angle)
             if arrived:
                 self.game_tasks[task_name].do_task(element_number)
                 self.game_tasks[task_name].my_game_elements[element_number]['moved'] = True
@@ -70,11 +63,21 @@ class GameLogic():
         return math.sqrt((x1-x2)**2 + (y1-y2)**2)
 
     def drive_fast(self, destination, angle):
-        y_border = 800
-        if (self.robots['me'].get_position()[1] > y_border) == (destination[1] > y_border):
-            return self.drive.drive_path([], destination, angle)
+        path = []
+        if self.side == 'left':
+            path = [[700, 700], [700, 1300]]
+        elif self.side == 'right':
+            path = [[3000 - 700, 700], [3000 - 700, 1300]]
+        if not(destination is None and angle is None):
+            y_border = 800
+            if (self.robots['me'].get_position()[1] > y_border) == (destination[1] > y_border):
+                return self.drive.drive_path([], destination, angle)
+            elif self.robots['me'].get_position()[1] < y_border:
+                return self.drive.drive_path([path[0], path[1]], destination, angle)
+            elif self.robots['me'].get_position()[1] > y_border:
+                return self.drive.drive_path([path[1], path[0]], destination, angle)
         else:
-            return self.drive.drive_path([(2100, 1000)], destination, angle)
+            return True
 
     def stop(self):
         self.running = False
