@@ -270,9 +270,9 @@ class StandsTask(Task):
         self.commandCup = {'blocked': 0, 'ready collect left': 1, 'ready collect right': 2, 'collect left': 3,
                            'collect right': 4,'open case left': 5,'open case right': 6,'close case left': 7,
                            'close case right': 8}
-        stands_left = [{'position': (90, 200), 'start position': (300, 490), 'end position': (300, 490)},
-                       {'position': (90, 1750), 'start position': (300, 1460), 'end position': (250, 1500)},
-                       {'position': (850, 200), 'start position': (650, 490), 'end position': (650, 490)},
+        stands_left = [{'position': (90, 200), 'start position': (300, 490), 'end position': (260, 490)},
+                       {'position': (90, 1750), 'start position': (300, 1460), 'end position': (260, 1500)},
+                       {'position': (850, 200), 'start position': (650, 490), 'end position': (700, 300)},
                        {'position': (870, 1355), 'start position': None, 'end position': None},
                        {'position': (1100, 1770), 'start position': None, 'end position': None},
                        {'position': (1300, 1400), 'start position': None, 'end position': None},
