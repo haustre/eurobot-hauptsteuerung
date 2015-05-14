@@ -231,7 +231,7 @@ class Main():
                 # Set start values
                 self.drive.set_close_range_detection(True)
                 self.drive.set_enemy_detection(True)
-                self.drive.set_speed(50)
+                self.drive.set_speed(40)
 
                 # Collect stand 1(with cup), 3 and 4
                 self.game_tasks['stand'].do_task(3)
@@ -254,10 +254,8 @@ class Main():
                 self.drive.drive_path([],point, angle)
                 self.game_tasks['stand'].do_empty()
 
-                # Take Cup
-
+                # Start logic
                 self.game_logic.start()
-
 
 
             elif self.strategy['strategy'] == 'B':
