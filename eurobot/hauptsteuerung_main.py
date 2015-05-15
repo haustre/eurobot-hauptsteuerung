@@ -225,7 +225,7 @@ class Main():
             if self.strategy['strategy'] == 'A':
                 # Set start values
                 self.drive.set_close_range_detection(True)
-                self.drive.set_enemy_detection(True)
+                self.drive.set_enemy_detection(False)
                 self.drive.set_speed(40)
 
                 # Collect stand 1(with cup), 3 and 4
@@ -236,7 +236,7 @@ class Main():
                 self.game_tasks['stand'].do_task(1)
 
                 # Close clapper 0 and 1
-                point, angle = self.game_tasks['clapper'][0].goto_task()
+                point, angle = self.game_tasks['clapper'].goto_task(0)
                 self.drive.drive_path([], point, angle)
                 self.game_tasks['clapper'].do_both_clapper_fast()
 
@@ -254,33 +254,34 @@ class Main():
 
             elif self.strategy['strategy'] == 'B':
                 if True:
-                    self.drive.set_close_range_detection(True)
-                    self.drive.set_enemy_detection(True)
-                    self.drive.set_speed(15)
-                    self.game_tasks['stand'].do_task(3)
-                    self.game_tasks['stand'].do_task(4)
-                    self.game_tasks['stand'].goto_task(1)
-                    self.game_tasks['stand'].do_task(1)
-                    self.drive.drive_path([], (1000, 1000), None)
-                    point = self.game_tasks['stand'].goto_empty()
-                    self.drive.drive_route(point, None)
-                    self.game_tasks['stand'].do_empty()
-                    self.drive.drive_path([], (1000, 1000), None)
-                if False:
-                    point, angle = self.game_tasks['popcorn'].goto_task(0)
-                    self.drive.drive_route(point, angle)
-                    self.game_tasks['popcorn'].do_task(0)
-                    point, angle = self.game_tasks['popcorn'].goto_task(1)
-                    self.drive.drive_route(point, angle)
-                    self.game_tasks['popcorn'].do_task(1)
-                    point = self.game_tasks['popcorn'].goto_empty()
-                    self.drive.drive_route(point, None)
-                    self.game_tasks['popcorn'].do_empty()
-                if False:
-                    point, angle = self.game_tasks['clapper'].goto_task(1)
-                    self.drive.drive_route(point, angle)
-                    self.game_tasks['clapper'].do_task(1)
-                    self.drive.drive_path([], (1000, 1000), None)
+                    self.drive.set_close_range_detection(False)
+                    self.drive.set_enemy_detection(False)
+                    self.drive.set_speed(40)
+
+                    # Drive Test
+                    while True:
+                        if False:
+                            self.drive.drive_path([], (870, 1355), None)
+                            self.drive.drive_path([], (2130, 1355), None)
+                            self.drive.drive_path([], (2090, 900), None)
+                            self.drive.drive_path([], (910, 900), None)
+                            self.drive.drive_path([], None, 90)
+                            self.drive.drive_path([], None, 180)
+                            self.drive.drive_path([], None, 0)
+                            self.drive.drive_path([], None, 90)
+                            self.drive.drive_path([], None, 180)
+
+                        if True:
+                            self.drive.drive_path([(870, 1000)], (870, 1355), None)
+                            self.drive.drive_path([(1500, 1355)], (2130, 1355), None)
+                            self.drive.drive_path([(2090, 1000)], (2090, 900), None)
+                            self.drive.drive_path([(1500, 900)], (910, 900), None)
+                            self.drive.drive_path([], None, 90)
+                            self.drive.drive_path([], None, 180)
+                            self.drive.drive_path([], None, 0)
+                            self.drive.drive_path([], None, 90)
+                            self.drive.drive_path([], None, 180)
+                            self.drive.set_speed(-40)
 
             elif self.strategy['strategy'] == 'C':  # Test strategy
                 if True:

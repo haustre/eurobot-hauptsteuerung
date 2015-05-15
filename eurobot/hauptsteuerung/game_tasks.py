@@ -270,9 +270,9 @@ class StandsTask(Task):
         self.commandCup = {'blocked': 0, 'ready collect left': 1, 'ready collect right': 2, 'collect left': 3,
                            'collect right': 4, 'open case left': 5, 'open case right': 6, 'close case left': 7,
                            'close case right': 8}
-        stands_left = [{'position': (90, 200), 'start position': (300, 490), 'end position': (300, 490)},
-                       {'position': (90, 1750), 'start position': (300, 1460), 'end position': (250, 1500)},
-                       {'position': (850, 200), 'start position': (650, 490), 'end position': (650, 490)},
+        stands_left = [{'position': (90, 200), 'start position': (300, 490), 'end position': (230, 490)},
+                       {'position': (90, 1750), 'start position': (300, 1460), 'end position': (230, 1500)},
+                       {'position': (850, 200), 'start position': (650, 490), 'end position': (750, 300)},
                        {'position': (870, 1355), 'start position': None, 'end position': None},
                        {'position': (1100, 1770), 'start position': None, 'end position': None},
                        {'position': (1300, 1400), 'start position': None, 'end position': None},
@@ -347,12 +347,11 @@ class StandsTask(Task):
                 else:
                     self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['ready collect right'])
 
-            point2 = self.calculate_stopping_point(starting_point, stand_point, -20)
+            point2 = self.calculate_stopping_point(starting_point, stand_point, -35)
         else:
             point2 = self.calculate_stopping_point(starting_point, stand_point, -50)
 
         self.drive.drive_path([point1[0:2]], point2[0:2], None,  end_speed=10)
-        time.sleep(0.3)
         # Take also the second stand (Only for stand 1 and 2)
         if object_number == 1 or object_number == 2:
             starting_point = self.robots['me'].get_position()
@@ -365,11 +364,12 @@ class StandsTask(Task):
                     self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['collect right'])
             else:
                 stand_point = self.second_stands[1]['position']
+            time.sleep(0.5)
             self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready collect'])
             point1 = self.calculate_stopping_point(starting_point, stand_point, 30)
-            point2 = self.calculate_stopping_point(starting_point, stand_point, -40)
-            self.drive.drive_path([point1[0:2]], point2[0:2], None,  end_speed=10)
-            time.sleep(0.3)
+            point2 = self.calculate_stopping_point(starting_point, stand_point, -50)
+            self.drive.drive_path([point1[0:2]], point2[0:2], None,  end_speed=5)
+            time.sleep(0.5)
 
         if object_number == 1 or object_number == 2 or object_number == 3:
             # Drive back
@@ -377,7 +377,6 @@ class StandsTask(Task):
 
         self.my_game_elements[object_number]['moved'] = True
         self.drive.set_close_range_detection(old_close_range_detecion_state)
-        #threading.Timer(0.5, self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['blocked'])).start()
 
     def calculate_stopping_point(self, from_pos, to_pos, distance):
         """ calculates the correct position to collect the stand
@@ -624,8 +623,8 @@ class PopcornTask(Task):
         popcorn_left = [{'start_position': (300, 400), 'position': (300, 0)},
                         {'start_position': (600, 400), 'position': (600, 0)}
                         ]
-        self.calibration_point = [100, popcorn_left[0]['start_position'][1]]
-        self.calibration_value = 160
+        self.calibration_point = [120, popcorn_left[0]['start_position'][1]]
+        self.calibration_value = 148
 
         for popcorn in popcorn_left:
             popcorn['moved'] = False
@@ -661,7 +660,7 @@ class PopcornTask(Task):
         :param object_number: specifies which game element is chosen
         :return: position, angle
         """
-        return self.my_game_elements[object_number]['start_position'], self.angle
+        return self.my_game_elements[object_number]['start_position'], None
 
     def do_task(self, object_number):
         """ collecting the popcorn from the chosen popcorn machine
@@ -672,7 +671,7 @@ class PopcornTask(Task):
         if self.calibrated is False:
             self.drive.set_close_range_detection(False)
             print(self.calibration_point)
-            self.drive.drive_path([], self.calibration_point, None, end_speed=-20)
+            self.drive.drive_path([], self.calibration_point, None,  end_speed=-21)
             x, y = self.robots['me'].get_position()
             offset = self.calibration_value - x
             if abs(offset) < 50:
@@ -688,7 +687,7 @@ class PopcornTask(Task):
             while self.drive.drive_path([], self.my_game_elements[object_number]['start_position'], None) is False:
                 pass
 
-        if self.calibrated:
+        if self.calibrated is True:
             self.drive.set_close_range_detection(False)
             self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['ready collect'], blocking=False)
             x, y = self.my_game_elements[object_number]['position']
