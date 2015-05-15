@@ -166,7 +166,7 @@ class Drive():
             self.filter_path(filtered_path)
             self.filter_path2(filtered_path)
             self.filter_path3(filtered_path, 7)
-            save_zone = [[300, 2700], [300, 2700]]
+            save_zone = [[99, 2901], [99, 2901]]
             for point in filtered_path:  # checks if all waypoints are on the table
                 if save_zone[0][0] > point[0] > save_zone[0][1] or save_zone[1][0] > point[1] > save_zone[1][1]:
                     in_save_zone = False

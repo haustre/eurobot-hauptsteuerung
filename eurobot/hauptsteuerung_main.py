@@ -225,7 +225,7 @@ class Main():
             if self.strategy['strategy'] == 'A':
                 # Set start values
                 self.drive.set_close_range_detection(True)
-                self.drive.set_enemy_detection(True)
+                self.drive.set_enemy_detection(False)
                 self.drive.set_speed(40)
 
                 # Collect stand 1(with cup), 3 and 4
@@ -236,7 +236,7 @@ class Main():
                 self.game_tasks['stand'].do_task(1)
 
                 # Close clapper 0 and 1
-                point, angle = self.game_tasks['clapper'][0].goto_task()
+                point, angle = self.game_tasks['clapper'].goto_task(0)
                 self.drive.drive_path([], point, angle)
                 self.game_tasks['clapper'].do_both_clapper_fast()
 
