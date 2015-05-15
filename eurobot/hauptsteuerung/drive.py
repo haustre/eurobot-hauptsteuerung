@@ -124,7 +124,7 @@ class Drive():
         time.sleep(0.2)
         self.stop = False
 
-    def drive_path(self, path, destination, angle_in, path_speed=None, end_speed=None, blocking=True):
+    def drive_path(self, path, destination, angle_in, path_speed=None, end_speed=None, blocking=True, filter_path=False):
         """ drives a path to a point if the coordinates are outside the table an exception is raised
 
         :param path: waypoints
@@ -163,9 +163,10 @@ class Drive():
             in_save_zone = True
             wrong_point = None
             filtered_path = copy.copy(path)
-            self.filter_path(filtered_path)
-            self.filter_path2(filtered_path)
-            self.filter_path3(filtered_path, 7)
+            if filter_path:
+                self.filter_path(filtered_path)
+                self.filter_path2(filtered_path)
+                self.filter_path3(filtered_path, 7)
             save_zone = [[99, 2901], [99, 2901]]
             for point in filtered_path:  # checks if all waypoints are on the table
                 if save_zone[0][0] > point[0] > save_zone[0][1] or save_zone[1][0] > point[1] > save_zone[1][1]:
