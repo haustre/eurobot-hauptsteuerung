@@ -175,7 +175,7 @@ class Drive():
                 in_save_zone = False
                 wrong_point = x, y
             if in_save_zone or x == 65535 and y == 65535:
-                if len(path) > 0:  # wait for first rotation to finish.
+                if len(path) > 0 and path_speed > 0:  # wait for first rotation to finish.
                     my_x, my_y = self.my_robot.get_position()
                     path_x, path_y = path[0]
                     dx, dy = path_x - my_x, path_y - my_y
@@ -332,9 +332,8 @@ class Drive():
                 for robot in self.robots:
                     position = robot.get_position()
                     if position:
-                        drive_direction = []
-                        drive_direction[0] = my_position[0] + math.cos(my_angle) * break_distance
-                        drive_direction[1] = my_position[1] + math.sin(my_angle) * break_distance
+                        drive_direction = [my_position[0] + math.cos(my_angle) * (break_distance + 350),
+                                           my_position[1] + math.sin(my_angle) * (break_distance + 350)]
                         line = LineString([my_position, drive_direction])
                         point = Point(position)
                         distance_from_line = point.distance(line)
