@@ -216,7 +216,7 @@ class Drive():
                         }
                         self.can_socket.send(can_msg)
                 if blocking:   # TODO: add timeout
-                    return self.wait_for_arrival(path, speed=max(path_speed, end_speed))
+                    return self.wait_for_arrival(speed=max(path_speed, end_speed))
             else:
                 can_msg = {
                     'type': can.MsgTypes.Emergency_Stop.value,
@@ -266,7 +266,7 @@ class Drive():
         for index in reversed(sorted(list(set(points_to_delete)))):
             del path[index]
 
-    def wait_for_arrival(self, path, speed=100):    # TODO: add timeout
+    def wait_for_arrival(self, speed=100):    # TODO: add timeout
         """ controls if the drive is free and breaks if a robot is in the way
 
         :param path: path to check for other robots

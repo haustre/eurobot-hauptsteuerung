@@ -341,7 +341,7 @@ class StandsTask(Task):
         if object_number == 1 or object_number == 2:
 
             #Make ready also for the cup
-            if object_number == 1:
+            if object_number == 1 and False:
                 if self.side == 'left':
                     self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['ready collect left'])
                 else:
@@ -358,10 +358,10 @@ class StandsTask(Task):
             if object_number == 1:
                 stand_point = self.second_stands[0]['position']
                 #Take also the cup
-                if (self.side == 'left'):
-                    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['collect left'])
-                else:
-                    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['collect right'])
+                #if (self.side == 'left'):
+                #    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['collect left'])
+                #else:
+                #    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['collect right'])
             else:
                 stand_point = self.second_stands[1]['position']
             time.sleep(0.5)
@@ -670,10 +670,10 @@ class PopcornTask(Task):
         old_close_range_detecion_state = self.drive.close_range_detection
         if self.calibrated is False:
             self.drive.set_close_range_detection(False)
-            print(self.calibration_point)
             self.drive.drive_path([], self.calibration_point, None,  end_speed=-21)
             x, y = self.robots['me'].get_position()
             offset = self.calibration_value - x
+            print("Offset: " + str(offset))
             if abs(offset) < 50:
                 self.drive.set_offset_x(offset)
                 self.calibrated = True
@@ -721,9 +721,9 @@ class PopcornTask(Task):
         commands_other_tasks = {'cup left': 5, 'cup right': 6, 'stand': 3}
         self.send_task_command(can.MsgTypes.Cup_Command.value, commands_other_tasks['cup left'], blocking=False)
         self.send_task_command(can.MsgTypes.Cup_Command.value, commands_other_tasks['cup right'], blocking=False)
-        self.send_task_command(can.MsgTypes.Stands_Command.value, commands_other_tasks['open case'], blocking=False)
+        self.send_task_command(can.MsgTypes.Stands_Command.value, commands_other_tasks['stand'], blocking=False)
         time.sleep(0.5)
         self.drive.drive_path([], self.empty_position['popcorn_position'], None, end_speed=-15)
         self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['open case'], blocking=True)
         self.drive.set_close_range_detection(old_close_range_detecion_state)
-        self.drive.drive_path([], self.empty_position['start_position'], None, end_speed=15)
+        self.drive.request_stop()
