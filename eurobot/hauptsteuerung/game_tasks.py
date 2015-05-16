@@ -82,7 +82,7 @@ class Task():
         self.robots = robots
         self.can_socket = can_socket
         self.can_socket.create_interrupt(can_id, self.can_command)
-        self.can_socket.create_interrupt(can_id+1, self.can_status)
+        self.can_socket.create_interrupt(can_id + 1, self.can_status)
         self.my_game_elements = []
         self.enemy_game_elements = []
         self.collected = 0
@@ -102,7 +102,7 @@ class Task():
         for i, game_element in enumerate(self.my_game_elements):
             if game_element['moved'] is False:
                 stand_x, stand_y = game_element['position']
-                distance = math.sqrt((robot_x - stand_x)**2 + (robot_y - stand_y)**2)
+                distance = math.sqrt((robot_x - stand_x) ** 2 + (robot_y - stand_y) ** 2)
                 distance_list.append((distance, i))
         return distance_list
 
@@ -115,12 +115,12 @@ class Task():
                         drive_map = robot.get_map()
                         for game_element in self.my_game_elements:
                             x, y = game_element['position']
-                            x, y = int(x/10), int(y/10)
+                            x, y = int(x / 10), int(y / 10)
                             if drive_map[x, y]:
                                 game_element['moved'] = True
                         for game_element in self.enemy_game_elements:
                             x, y = game_element['position']
-                            x, y = int(x/10), int(y/10)
+                            x, y = int(x / 10), int(y / 10)
                             if drive_map[x, y]:
                                 game_element['moved'] = True
                 time.sleep(0.1)
@@ -150,7 +150,7 @@ class Task():
         }
         self.can_socket.send(can_msg)
         if blocking:
-            self.wait_for_task(msg_id+1)
+            self.wait_for_task(msg_id + 1)
 
     def wait_for_task(self, msg_id):
         """ waits for a response of the periphery board
@@ -208,13 +208,13 @@ class StairTask(Task):
             elif value == 0:
                 path_right[key] = 1
         x, y, angle = path_right['carpet 1']
-        path_right['carpet 1'] = x, y, 360-(angle - 180)
+        path_right['carpet 1'] = x, y, 360 - (angle - 180)
         x, y, angle = path_right['carpet 2']
-        path_right['carpet 2'] = x, y, 360-(angle - 180)
-            #fire1 = path_right['fire 1']
-            #fire2 = path_right['fire 2']
-            #path_right['fire 1'] = fire2
-            #path_right['fire 2'] = fire1
+        path_right['carpet 2'] = x, y, 360 - (angle - 180)
+        # fire1 = path_right['fire 1']
+        # fire2 = path_right['fire 2']
+        # path_right['fire 1'] = fire2
+        # path_right['fire 2'] = fire1
 
         if my_color == 'left':
             self.my_path = path_left
@@ -233,7 +233,7 @@ class StairTask(Task):
     def do_task(self):
         """ drives to the top of the stair """
         self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['bottom'], blocking=True)
-        timer = threading.Timer(2, self.send_climbing_top)
+        timer = threading.Timer(1.5, self.send_climbing_top)
         timer.setDaemon(True)
         timer.start()
         self.drive.drive_path([], self.my_path['top'], None)
@@ -244,7 +244,8 @@ class StairTask(Task):
             self.drive.drive_path([], self.my_path['top'], None)
             myY, myY = self.robots['me'].get_position()
 
-        self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['up'], blocking=True)
+        self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['up'], blocking=False)
+        time.sleep(3)
         self.drive.drive_path([], self.my_path['carpet 1'], None)
         self.send_task_command(can.MsgTypes.Carpet_Command.value, self.my_path['fire 1'], blocking=True)
         self.drive.drive_path([], self.my_path['top'], None, end_speed=(-self.drive.speed))
@@ -288,12 +289,12 @@ class StandsTask(Task):
         stands_right = copy.deepcopy(stands_left)
         for stand in stands_right:
             x, y = stand['position']
-            stand['position'] = (3000-x, y)
+            stand['position'] = (3000 - x, y)
             if stand['start position'] is not None:
                 x, y = stand['start position']
-                stand['start position'] = (3000-x, y)
+                stand['start position'] = (3000 - x, y)
                 x, y = stand['end position']
-                stand['end position'] = (3000-x, y)
+                stand['end position'] = (3000 - x, y)
         if my_color == 'left':
             self.my_game_elements = stands_left
             self.enemy_game_elements = stands_right
@@ -340,8 +341,8 @@ class StandsTask(Task):
 
         if object_number == 1 or object_number == 2:
 
-            #Make ready also for the cup
-            if object_number == 1 and False:
+            # Make ready also for the cup
+            if object_number == 1:
                 if self.side == 'left':
                     self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['ready collect left'])
                 else:
@@ -351,29 +352,29 @@ class StandsTask(Task):
         else:
             point2 = self.calculate_stopping_point(starting_point, stand_point, -50)
 
-        self.drive.drive_path([point1[0:2]], point2[0:2], None,  end_speed=10)
+        self.drive.drive_path([point1[0:2]], point2[0:2], None, end_speed=10)
         # Take also the second stand (Only for stand 1 and 2)
         if object_number == 1 or object_number == 2:
             starting_point = self.robots['me'].get_position()
             if object_number == 1:
                 stand_point = self.second_stands[0]['position']
-                #Take also the cup
-                #if (self.side == 'left'):
-                #    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['collect left'])
-                #else:
-                #    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['collect right'])
+                # Take also the cup
+                if (self.side == 'left'):
+                    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['collect left'])
+                else:
+                    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['collect right'])
             else:
                 stand_point = self.second_stands[1]['position']
             time.sleep(0.5)
             self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready collect'])
             point1 = self.calculate_stopping_point(starting_point, stand_point, 30)
             point2 = self.calculate_stopping_point(starting_point, stand_point, -50)
-            self.drive.drive_path([point1[0:2]], point2[0:2], None,  end_speed=5)
+            self.drive.drive_path([point1[0:2]], point2[0:2], None, end_speed=5)
             time.sleep(0.5)
 
         if object_number == 1 or object_number == 2 or object_number == 3:
             # Drive back
-            self.drive.drive_path([], self.my_game_elements[object_number]['end position'], None,  end_speed=-30)
+            self.drive.drive_path([], self.my_game_elements[object_number]['end position'], None, end_speed=-30)
 
         self.my_game_elements[object_number]['moved'] = True
         self.drive.set_close_range_detection(old_close_range_detecion_state)
@@ -427,9 +428,8 @@ class CupTask(Task):
         self.shift = 100
         self.free_arms = {'right': True, 'left': True}
         self.command = {'blocked': 0, 'ready collect left': 1, 'ready collect right': 2, 'collect left': 3,
-                        'collect right': 4,'open case left': 5,'open case right': 6,'close case left': 7,
+                        'collect right': 4, 'open case left': 5, 'open case right': 6, 'close case left': 7,
                         'close case right': 8}
-
 
         cups_left = [{'position': (250, 1750), 'pick up side': 'left'},
                      {'position': (910, 830), 'pick up side': 'right'},
@@ -505,11 +505,11 @@ class CupTask(Task):
         point1[1] = int(to_pos[1] - y)
 
         if self.my_game_elements[object_number]['pick up side'] == 'left':
-            x = math.cos(angle-math.pi/2) * self.shift
-            y = math.sin(angle-math.pi/2) * self.shift
+            x = math.cos(angle - math.pi / 2) * self.shift
+            y = math.sin(angle - math.pi / 2) * self.shift
         else:
-            x = math.cos(angle+math.pi/2) * self.shift
-            y = math.sin(angle+math.pi/2) * self.shift
+            x = math.cos(angle + math.pi / 2) * self.shift
+            y = math.sin(angle + math.pi / 2) * self.shift
         point1[0] = int(point1[0] - x)
         point1[1] = int(point1[1] - y)
 
@@ -602,8 +602,8 @@ class ClapperTask(Task):
         y0 -= self.distance
         y1 -= self.distance
 
-        if self.drive.drive_path([], ((x0 + x1)/2, y0), None):
-            #Close second clapper
+        if self.drive.drive_path([], ((x0 + x1) / 2, y0), None):
+            # Close second clapper
             self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command[side], blocking=True)
             self.drive.drive_path([], (x1, y1), None)
             self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command['up'])
@@ -617,9 +617,9 @@ class PopcornTask(Task):
         self.calibrated = False
         self.angle = 90
         self.distance = 120
-        empty_position = {'start_position': (800, 1000, 0), 'stands_position':  (320, 1000, 0),
+        empty_position = {'start_position': (800, 1000, 0), 'stands_position': (320, 1000, 0),
                           'popcorn_position': (220, 1000, 0)}
-        self.command = {'ready collect': 0, 'open case': 1,  'collect': 2}
+        self.command = {'ready collect': 0, 'open case': 1, 'collect': 2}
         popcorn_left = [{'start_position': (300, 400), 'position': (300, 0)},
                         {'start_position': (600, 400), 'position': (600, 0)}
                         ]
@@ -632,9 +632,9 @@ class PopcornTask(Task):
         popcorn_right = copy.deepcopy(popcorn_left)
         for popcorn in popcorn_right:
             x, y = popcorn['start_position']
-            popcorn['start_position'] = (3000-x, y)
+            popcorn['start_position'] = (3000 - x, y)
             x, y = popcorn['position']
-            popcorn['position'] = (3000-x, y)
+            popcorn['position'] = (3000 - x, y)
         if my_color == 'left':
             self.my_game_elements = popcorn_left
             self.enemy_game_elements = popcorn_right

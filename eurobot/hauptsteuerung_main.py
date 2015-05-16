@@ -267,20 +267,30 @@ class Main():
                             self.drive.drive_path([], (910, 900), None)
                             self.drive.drive_path([], None, 90)
                             self.drive.drive_path([], None, 180)
+                            self.drive.drive_path([], None, 270)
                             self.drive.drive_path([], None, 0)
-                            self.drive.drive_path([], None, 90)
-                            self.drive.drive_path([], None, 180)
 
-                        if True:
+                        if False:
                             self.drive.drive_path([(870, 1000)], (870, 1355), None)
                             self.drive.drive_path([(1500, 1355)], (2130, 1355), None)
                             self.drive.drive_path([(2090, 1000)], (2090, 900), None)
                             self.drive.drive_path([(1500, 900)], (910, 900), None)
                             self.drive.drive_path([], None, 90)
                             self.drive.drive_path([], None, 180)
+                            self.drive.drive_path([], None, 270)
                             self.drive.drive_path([], None, 0)
+                            self.drive.set_speed(-40)
+
+                        if True:
+                            self.drive.drive_path([(870, 1000)], (870, 1355), None)
+                            self.drive.drive_path([(1000, 1355), (1200, 1355), (1300, 1355), (1500, 1355), (1600, 1355), (1700, 1355)], (2130, 1355), None)
+                            self.drive.drive_path([(2090, 1000)], (2090, 900), None)
+                            self.drive.drive_path([(1800, 900), (1700, 900), (1500, 900), (1300, 900), (1000, 900)], (910, 900), None)
                             self.drive.drive_path([], None, 90)
                             self.drive.drive_path([], None, 180)
+                            self.drive.drive_path([], None, 270)
+                            self.drive.drive_path([], None, 90)
+                            self.drive.drive_path([], None, 0)
                             self.drive.set_speed(-40)
 
             elif self.strategy['strategy'] == 'C':  # Test strategy
@@ -293,7 +303,7 @@ class Main():
 
         if self.strategy['robot_name'] == 'Roboter-klein':
             # Wait until big robot is away
-            time.sleep(2)
+            time.sleep(1)
 
             # Check position side
             XOffset = 0
@@ -318,6 +328,9 @@ class Main():
                 # Side on wich the robot drives
                 sideState = 0
                 endPositionReached = False
+
+                # Drive caterpillar down
+                self.game_tasks['stair'].prepare_for_climbing()
 
                 while endPositionReached == False:
 
@@ -392,8 +405,6 @@ class Main():
                             else:
                                 sideState = 2
 
-                # Drive caterpillar down
-                self.game_tasks['stair'].prepare_for_climbing()
 
                 # Drive in front of the stair
                 point, angle = self.game_tasks['stair'].goto_task()
@@ -411,7 +422,7 @@ class Main():
                         self.drive.set_speed(-30)
                         self.drive.set_close_range_detection(False)
                         self.drive.set_enemy_detection(False)
-                        self.drive.drive_path([],(math.fabs(1250 - XOffset), (myY + 200)), None)
+                        self.drive.drive_path([],(math.fabs(1250 - XOffset), (myY + 100)), None)
                         self.drive.set_close_range_detection(True)
                         self.drive.set_enemy_detection(True)
                         self.drive.set_speed(100)
