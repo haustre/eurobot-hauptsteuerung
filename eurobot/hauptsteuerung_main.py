@@ -303,7 +303,7 @@ class Main():
 
         if self.strategy['robot_name'] == 'Roboter-klein':
             # Wait until big robot is away
-            time.sleep(2)
+            time.sleep(1)
 
             # Check position side
             XOffset = 0
@@ -422,7 +422,7 @@ class Main():
                         self.drive.set_speed(-30)
                         self.drive.set_close_range_detection(False)
                         self.drive.set_enemy_detection(False)
-                        self.drive.drive_path([],(math.fabs(1250 - XOffset), (myY + 200)), None)
+                        self.drive.drive_path([],(math.fabs(1250 - XOffset), (myY + 100)), None)
                         self.drive.set_close_range_detection(True)
                         self.drive.set_enemy_detection(True)
                         self.drive.set_speed(100)
