@@ -7,14 +7,15 @@ __license__ = "GPLv3"
 
 import time
 from unittest import TestCase
-from hauptsteuerung import game_tasks
+
+from hauptsteuerung.game_task import game_task
 
 
 class TestHauptsteuerung(TestCase):
     """ Unittest for Hauptsteuerung """
     def test_countdown(self):
         """ starts the countdown and checks if the time_left value is correct and the interrupt is called"""
-        countdown = game_tasks.Countdown(None)
+        countdown = game_task.Countdown(None)
         self.assertEqual(countdown.time_left(), False)
         countdown.start()
         test_object1 = CountdownTestClass(countdown)

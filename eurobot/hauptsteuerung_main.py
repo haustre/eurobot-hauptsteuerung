@@ -12,11 +12,13 @@ import subprocess
 import math
 import gc
 import datetime
+
 from libraries import can
 from libraries.start_text import print_start_text
 from hauptsteuerung import drive
 from hauptsteuerung import debug
-from hauptsteuerung import game_tasks
+from hauptsteuerung import countdown
+from hauptsteuerung.game_tasks import clapper, stair, stand, cup, popcorn
 from hauptsteuerung.robot import PositionMyRobot, PositionOtherRobot
 from hauptsteuerung.game_logic import GameLogic
 
@@ -43,7 +45,7 @@ class Main:
         if self.debug:
             self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
             #self.enemy_simulation.start()
-        self.countdown = game_tasks.Countdown(self.can_socket)
+        self.countdown = countdown.Countdown(self.can_socket)
         self.debugger = debug.LaptopCommunication(self.can_socket)
         self.drive = drive.Drive(self.can_socket)
         self.reset = False
@@ -64,11 +66,11 @@ class Main:
         self.robots = {'me': None, 'friendly robot': None, 'enemy1': None, 'enemy2': None}  # create the robot dictionary
         # create all game element objects
         self.game_tasks = \
-            {'clapper': game_tasks.ClapperTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
-             'stair': game_tasks.StairTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
-             'stand': game_tasks.StandsTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
-             'cup': game_tasks.CupTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
-             'popcorn': game_tasks.PopcornTask(self.robots, self.strategy['side'], self.can_socket, self.drive)
+            {'clapper': clapper.ClapperTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
+             'stair': stair.StairTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
+             'stand': stand.StandsTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
+             'cup': cup.CupTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
+             'popcorn': popcorn.PopcornTask(self.robots, self.strategy['side'], self.can_socket, self.drive)
              }
         self.game_logic = GameLogic(self.game_tasks, self.drive, self.countdown, self.robots, self.strategy['side'])
         self.debugger.add_game_tasks(self.game_tasks)
