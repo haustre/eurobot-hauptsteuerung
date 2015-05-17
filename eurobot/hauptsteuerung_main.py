@@ -11,7 +11,9 @@ import queue
 import subprocess
 import math
 import gc
+import datetime
 from libraries import can
+from libraries.start_text import print_start_text
 from hauptsteuerung import drive
 from hauptsteuerung import debug
 from hauptsteuerung import game_tasks
@@ -19,7 +21,7 @@ from hauptsteuerung.robot import PositionMyRobot, PositionOtherRobot
 from hauptsteuerung.game_logic import GameLogic
 
 
-class Main():
+class Main:
     """ Main program running on Robot"""
     def __init__(self):
         """ In the initialisation the program determines on which robot it is running, reads in the configuration
@@ -41,15 +43,21 @@ class Main():
         if self.debug:
             self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
             #self.enemy_simulation.start()
-        else:
-            self.clear_config('/root/gui_config')   # delete the old configuration file
-            subprocess.Popen(['software/robo_gui2'])     # start the GUI program
         self.countdown = game_tasks.Countdown(self.can_socket)
         self.debugger = debug.LaptopCommunication(self.can_socket)
         self.drive = drive.Drive(self.can_socket)
         self.reset = False
         self.debugger.start_can()
-        self. strategy = self.read_config('/root/gui_config')
+        self.strategy = False
+        while self.strategy is False:
+            if self.debug is False:
+                self.clear_config('/root/gui_config')   # delete the old configuration file
+                gui_process = subprocess.Popen(['software/robo_gui2'])     # start the GUI program
+            self.strategy = self.read_config('/root/gui_config')
+            try:
+                gui_process.kill()
+            except:
+                pass
         self.strategy['robot_name'] = hostname
         print(self.strategy)
         self.send_start_configuration()
@@ -105,6 +113,7 @@ class Main():
         :type file_name: str
         :return: configuration dictionary
         """
+        print('Waiting for Configuration')
         strategy = {
             'robot_small': True, 'robot_big': True, 'enemy_small': True, 'enemy_big': True,
             'robot_name': None, 'side': 'right', 'strategy': 'C'
@@ -124,9 +133,12 @@ class Main():
                     if complete == 'yes':
                         strategy['side'] = file_content[0].strip().strip('side: ')
                         strategy['strategy'] = file_content[1].strip().strip('strategy: ')
-                        return strategy
+                        if ((strategy['side'] == 'left' or strategy['side'] == 'right') and
+                           (strategy['strategy'] == 'A' or strategy['strategy'] == 'B' or strategy['strategy'] == 'C')):
+                            return strategy
+                        else:
+                            return False
                 else:
-                    print('Configuration not finished')
                     time.sleep(0.5)
 
     def send_start_configuration(self):
@@ -442,9 +454,11 @@ class Main():
 
 
 if __name__ == "__main__":
-    while True:
-        main_program = Main()
-        del main_program
-        print("Robot Resets")
-        gc.collect()
-        time.sleep(5)
+    time.sleep(5)
+    print_start_text('Wall - e')
+    print("Program starts: " + str(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")))
+    main_program = Main()
+    del main_program
+    gc.collect()
+    print("Program finished")
+
