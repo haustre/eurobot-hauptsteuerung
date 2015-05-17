@@ -64,7 +64,7 @@ class Main():
              }
         self.game_logic = GameLogic(self.game_tasks, self.drive, self.countdown, self.robots, self.strategy['side'])
         self.debugger.add_game_tasks(self.game_tasks)
-        #self.debugger.start_game_tasks()
+        self.debugger.start_game_tasks()
         # create all robot objects and put them in a dictionary
         if self.strategy['robot_name'] == 'Roboter-klein':
             self.robots['me'] = PositionMyRobot(self.can_socket, can.MsgTypes.Position_Robot_small.value, self.strategy['robot_name'])
@@ -187,7 +187,7 @@ class Main():
 
         :return: None
         """
-        if can_msg['emergency_stop'] == 1 and can_msg['key_inserted'] == 0 and False:  # TODO: activate
+        if can_msg['emergency_stop'] == 1 and can_msg['key_inserted'] == 0 and self.countdown.running is True:
             can_msg = {
                 'type': can.MsgTypes.EmergencyShutdown.value,
                 'code': 0,
@@ -195,6 +195,7 @@ class Main():
             self.can_socket.send(can_msg)
             print("Emergency stop")
             self.reset = True
+            self.game_end('game_end')
 
     def game_end(self, time_string):
         """ This method is called at the end of the game.
@@ -207,7 +208,10 @@ class Main():
             self.reset = True
             self.game_logic.stop()
             self.drive.turn_off()
-            self.debugger.stop()
+            try:
+                self.debugger.stop()
+            except:
+                print("Debugger not closed correctly")
             can_msg = {
                 'type': can.MsgTypes.EmergencyShutdown.value,
                 'code': 0,
@@ -346,7 +350,6 @@ class Main():
                             else:
                                 sideState = 1
 
-
                     # Change to the right side -------------------------------------------
                     if sideState == 1:
                         # Ignore emeny only for turning
@@ -369,7 +372,6 @@ class Main():
                             else:
                                 sideState = 3
 
-
                     # Drive on the right side ---------------------------------------------
                     if sideState == 2:
                         if self.drive.drive_path([],(math.fabs(1250 - XOffset), 900), 270) == True:
@@ -381,7 +383,6 @@ class Main():
                                 endPositionReached = True
                             else:
                                 sideState = 3
-
 
                     # Change to the left side -------------------------------------------
                     if sideState == 3:
@@ -404,7 +405,6 @@ class Main():
                                 sideState = 1
                             else:
                                 sideState = 2
-
 
                 # Drive in front of the stair
                 point, angle = self.game_tasks['stair'].goto_task()
@@ -447,4 +447,4 @@ if __name__ == "__main__":
         del main_program
         print("Robot Resets")
         gc.collect()
-        time.sleep(10)
+        time.sleep(5)

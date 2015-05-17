@@ -194,7 +194,10 @@ class Drive():
                         drive_queue = queue.Queue()
                         drive_queue_number = self.can_socket.create_queue(can.MsgTypes.Drive_Status.value, drive_queue)
                         self.can_socket.send(can_msg)
-                        drive_msg = drive_queue.get()
+                        try:
+                            drive_msg = drive_queue.get(timeout=3)
+                        except queue.Empty:
+                            print("Drive rotation timed out")
                         self.can_socket.remove_queue(drive_queue_number)
                 can_msg = {
                     'type': can.MsgTypes.Goto_Position.value,
@@ -285,7 +288,6 @@ class Drive():
             sensors = ['distance_front_middle', 'distance_front_left', 'distance_front_right']
             sensor_offset = [0, -15, 15]
         else:
-            break_distance = 300
             break_distance = 200
             sensor_min = 0
             sensors = ['distance_front_left', 'distance_front_right']
@@ -296,7 +298,10 @@ class Drive():
         close_range_queue_number = self.can_socket.create_queue(can.MsgTypes.Close_Range_Dedection.value, close_range_queue)
         arrived = False
         emergency = False
-        while arrived is False and emergency is False and self.stop is False:
+        start_time = time.time()
+        while (arrived is False and emergency is False and self.stop is False and self.running and
+               time.time() - start_time < 12):
+
             my_angle = math.radians(self.my_robot.get_angle())
             my_position = self.my_robot.get_position()
             try:
@@ -344,7 +349,7 @@ class Drive():
             time.sleep(0.005)
         self.can_socket.remove_queue(close_range_queue_number)
         self.can_socket.remove_queue(drive_queue_number)
-        if emergency:
+        if arrived is False:
             can_msg = {
                 'type': can.MsgTypes.Emergency_Stop.value,
                 'code': 0,
@@ -352,5 +357,4 @@ class Drive():
             self.can_socket.send(can_msg)
             return False
         else:
-            self.rotation_direction = None
             return True

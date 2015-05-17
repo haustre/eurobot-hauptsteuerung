@@ -140,6 +140,7 @@ class Server(_TcpConnection):
         self.s.bind((host, port))
         self.s.listen(3)
         self.clients = []
+        self.running = True
         # creates new thread that waits for incoming new connections
         self.t_connection = threading.Thread(target=self.wait_connections, args=[self.s])
         self.t_connection.setDaemon(1)
@@ -162,11 +163,11 @@ class Server(_TcpConnection):
         :return: None
         """
         self.clients = []
-        while 1:
+        while self.running:
             print("Waiting for Connections")
             try:
                 clientsock, clientaddr = s.accept()
-            except KeyboardInterrupt or OSError:
+            except:
                 s.close()
                 for sock in self.clients:
                     sock.close()
@@ -177,6 +178,7 @@ class Server(_TcpConnection):
             t.start()
 
     def stop(self):
+        self.running = False
         self.s.shutdown(socket.SHUT_RDWR)
         self.s.close()
         for client in self.clients:
