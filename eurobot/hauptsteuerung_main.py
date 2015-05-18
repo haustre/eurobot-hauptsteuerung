@@ -8,13 +8,13 @@ import sys
 import time
 import socket
 import queue
-import subprocess
 import math
 import gc
 import datetime
 
 from libraries import can
 from libraries.start_text import print_start_text
+from hauptsteuerung.beaglebone import GPIO
 from hauptsteuerung import drive
 from hauptsteuerung import debug
 from hauptsteuerung import countdown
@@ -41,7 +41,9 @@ class Main:
             can_connection = 'can0'
             if not (hostname == 'Roboter-klein' or hostname == 'Roboter-gross'):
                 raise Exception('Wrong Hostname\nSet Hostname to "Roboter-klein" or "Roboter-gross"')
+
         self.can_socket = can.Can(can_connection, can.MsgSender.Hauptsteuerung)
+        self.gpio = GPIO()
         if self.debug:
             self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
             #self.enemy_simulation.start()
@@ -50,16 +52,7 @@ class Main:
         self.drive = drive.Drive(self.can_socket)
         self.reset = False
         self.debugger.start_can()
-        self.strategy = False
-        while self.strategy is False:
-            if self.debug is False:
-                self.clear_config('/root/gui_config')   # delete the old configuration file
-                gui_process = subprocess.Popen(['software/robo_gui2'])     # start the GUI program
-            self.strategy = self.read_config('/root/gui_config')
-            try:
-                gui_process.kill()
-            except:
-                pass
+        self.strategy = self.read_config('/root/gui_config')
         self.strategy['robot_name'] = hostname
         print(self.strategy)
         self.send_start_configuration()
@@ -96,18 +89,6 @@ class Main:
                 self.drive.add_robot(robot)
         self.run()  # The configuration is complete. Start the game.
 
-    def clear_config(self, file_name):
-        """ deletes a given file
-
-        :param file_name: name of the file to delete
-        :type file_name: str
-        :return: None
-        """
-        try:
-            open(file_name, 'w').close()
-        except FileNotFoundError:
-            print('Configuration not found')
-
     def read_config(self, file_name):
         """ wait for the GUI program to write the config file and read it in
 
@@ -118,30 +99,36 @@ class Main:
         print('Waiting for Configuration')
         strategy = {
             'robot_small': True, 'robot_big': True, 'enemy_small': True, 'enemy_big': True,
-            'robot_name': None, 'side': 'right', 'strategy': 'C'
+            'robot_name': None, 'side': 'left', 'strategy': 'A'
         }
         if self.debug:
             print("!!!! Debug Program !!!!")
             return strategy
         else:
-            while True:
-                try:
-                    with open(file_name) as f:
-                        file_content = f.readlines()
-                except FileNotFoundError:
-                    print('Configuration not found')
-                if len(file_content) == 3:
-                    complete = file_content[2].strip().strip('complete: ')
-                    if complete == 'yes':
-                        strategy['side'] = file_content[0].strip().strip('side: ')
-                        strategy['strategy'] = file_content[1].strip().strip('strategy: ')
-                        if ((strategy['side'] == 'left' or strategy['side'] == 'right') and
-                           (strategy['strategy'] == 'A' or strategy['strategy'] == 'B' or strategy['strategy'] == 'C')):
-                            return strategy
-                        else:
-                            return False
-                else:
-                    time.sleep(0.5)
+            self.gpio.set_led(0, 1)
+            self.gpio.set_led(1, 0)
+            self.gpio.set_led(2, 1)
+            self.gpio.set_led(3, 0)
+            while self.gpio.get_button(4) == 0:  # Start not pressed
+                if self.gpio.get_button(0):
+                    strategy['side'] = 'left'
+                    self.gpio.set_led(0, 1)
+                    self.gpio.set_led(1, 0)
+                elif self.gpio.get_button(1):
+                    strategy['side'] = 'right'
+                    self.gpio.set_led(0, 0)
+                    self.gpio.set_led(1, 1)
+
+                if self.gpio.get_button(2):
+                    strategy['strategy'] = 'A'
+                    self.gpio.set_led(2, 1)
+                    self.gpio.set_led(3, 0)
+                elif self.gpio.get_button(3):
+                    strategy['strategy'] = 'B'
+                    self.gpio.set_led(2, 0)
+                    self.gpio.set_led(3, 1)
+        self.gpio.blink_led()
+        return strategy
 
     def send_start_configuration(self):
         """ sends the configuration over CAN to the other boards
@@ -222,6 +209,7 @@ class Main:
             self.reset = True
             self.game_logic.stop()
             self.drive.turn_off()
+            self.countdown.stop()
             try:
                 self.debugger.stop()
             except:
@@ -232,6 +220,11 @@ class Main:
             }
             self.can_socket.send(can_msg)
             time.sleep(2)  # TODO: make longer
+            del self.drive
+            del self.countdown
+            del self.gpio
+            del self.debugger
+            del self.can_socket
             print("Game End")
 
     def strategy_start(self):  # TODO: Contains multiple test scenarios which will be removed
@@ -243,7 +236,7 @@ class Main:
             if self.strategy['strategy'] == 'A':
                 # Set start values
                 self.drive.set_close_range_detection(True)
-                self.drive.set_enemy_detection(False)
+                self.drive.set_enemy_detection(True)
                 self.drive.set_speed(40)
 
                 # Collect stand 1(with cup), 3 and 4
@@ -272,49 +265,8 @@ class Main:
 
             elif self.strategy['strategy'] == 'B':
                 if True:
-                    self.drive.set_close_range_detection(False)
-                    self.drive.set_enemy_detection(False)
-                    self.drive.set_speed(40)
-
-                    # Drive Test
-                    while True:
-                        if False:
-                            self.drive.drive_path([], (870, 1355), None)
-                            self.drive.drive_path([], (2130, 1355), None)
-                            self.drive.drive_path([], (2090, 900), None)
-                            self.drive.drive_path([], (910, 900), None)
-                            self.drive.drive_path([], None, 90)
-                            self.drive.drive_path([], None, 180)
-                            self.drive.drive_path([], None, 270)
-                            self.drive.drive_path([], None, 0)
-
-                        if False:
-                            self.drive.drive_path([(870, 1000)], (870, 1355), None)
-                            self.drive.drive_path([(1500, 1355)], (2130, 1355), None)
-                            self.drive.drive_path([(2090, 1000)], (2090, 900), None)
-                            self.drive.drive_path([(1500, 900)], (910, 900), None)
-                            self.drive.drive_path([], None, 90)
-                            self.drive.drive_path([], None, 180)
-                            self.drive.drive_path([], None, 270)
-                            self.drive.drive_path([], None, 0)
-                            self.drive.set_speed(-40)
-
-                        if True:
-                            self.drive.drive_path([(870, 1000)], (870, 1355), None)
-                            self.drive.drive_path([(1000, 1355), (1200, 1355), (1300, 1355), (1500, 1355), (1600, 1355), (1700, 1355)], (2130, 1355), None)
-                            self.drive.drive_path([(2090, 1000)], (2090, 900), None)
-                            self.drive.drive_path([(1800, 900), (1700, 900), (1500, 900), (1300, 900), (1000, 900)], (910, 900), None)
-                            self.drive.drive_path([], None, 90)
-                            self.drive.drive_path([], None, 180)
-                            self.drive.drive_path([], None, 270)
-                            self.drive.drive_path([], None, 90)
-                            self.drive.drive_path([], None, 0)
-                            self.drive.set_speed(-40)
-
-            elif self.strategy['strategy'] == 'C':  # Test strategy
-                if True:
                     self.drive.set_close_range_detection(True)
-                    self.drive.set_enemy_detection(False)
+                    self.drive.set_enemy_detection(True)
                     self.drive.set_speed(40)
                     self.game_tasks['stand'].do_task(3)
                     self.game_logic.start()
@@ -451,8 +403,6 @@ class Main:
 
             elif self.strategy['strategy'] == 'B':
                 raise Exception('Strategy not programmed')
-            elif self.strategy['strategy'] == 'C':  # Test strategy
-                raise Exception('Strategy not programmed')
 
 
 if __name__ == "__main__":
@@ -463,4 +413,5 @@ if __name__ == "__main__":
     del main_program
     gc.collect()
     print("Program finished")
+
 

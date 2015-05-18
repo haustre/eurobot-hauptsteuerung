@@ -34,7 +34,7 @@ def tell_a_joke():
     """
     try:
         req = urllib.request.urlopen("http://api.icndb.com/jokes/random?limitTo=[nerdy]", timeout=1)
-        full_json = req.read().decode('UTF-8')
+        full_json = req.get_button().decode('UTF-8')
         full = json.loads(full_json)
         joke = full['value']['joke']
         return joke
