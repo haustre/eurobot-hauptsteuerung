@@ -16,6 +16,7 @@ from hauptsteuerung import route_finding
 
 class Drive():
     """ class for controlling the drive """
+
     def __init__(self, can_socket):
         self.can_socket = can_socket
         self.route_finder = route_finding.RouteFinding(self.can_socket)
@@ -99,7 +100,7 @@ class Drive():
             route, path_len = self.route_finder.calculate_path(destination)
             print(path_len)
             if path_len >= 100:  # TODO: Not tested
-                #return False
+                # return False
                 pass
             arrived = self.drive_path(route, destination, angle)
             if arrived:
@@ -115,7 +116,7 @@ class Drive():
 
         :return: None
         """
-        self.stop = True    # TODO: check variable in wait_for_arrival
+        self.stop = True  # TODO: check variable in wait_for_arrival
         can_msg = {
             'type': can.MsgTypes.Emergency_Stop.value,
             'code': 0,
@@ -124,7 +125,8 @@ class Drive():
         time.sleep(0.2)
         self.stop = False
 
-    def drive_path(self, path, destination, angle_in, path_speed=None, end_speed=None, blocking=True, filter_path=False):
+    def drive_path(self, path, destination, angle_in, path_speed=None, end_speed=None, blocking=True,
+                   filter_path=False):
         """ drives a path to a point if the coordinates are outside the table an exception is raised
 
         :param path: waypoints
@@ -151,9 +153,9 @@ class Drive():
             else:
                 x, y = 65535, 65535
             if angle_in is not None:
-                angle = int((abs(angle_in) % 360)*100)
+                angle = int((abs(angle_in) % 360) * 100)
             elif angle is not None:
-                angle = int((abs(angle) % 360)*100)
+                angle = int((abs(angle) % 360) * 100)
             else:
                 angle = 65535
             if end_speed is None:
@@ -181,7 +183,7 @@ class Drive():
                     path_x, path_y = path[0]
                     dx, dy = path_x - my_x, path_y - my_y
                     rotate_angle = math.atan2(dy, dx) / (2 * math.pi) * 360
-                    rotate_angle = int((rotate_angle % 360)*100)
+                    rotate_angle = int((rotate_angle % 360) * 100)
                     if abs(angle - rotate_angle) > 20 * 100:
                         can_msg = {
                             'type': can.MsgTypes.Goto_Position.value,
@@ -208,7 +210,7 @@ class Drive():
                     'path_length': len(filtered_path),
                 }
                 self.can_socket.send(can_msg)
-                time.sleep(0.002)   # necessary because software on the drive board is slow
+                time.sleep(0.002)  # necessary because software on the drive board is slow
                 if len(filtered_path) > 0:
                     for point in filtered_path:
                         can_msg = {
@@ -218,7 +220,7 @@ class Drive():
                             'speed': path_speed
                         }
                         self.can_socket.send(can_msg)
-                if blocking:   # TODO: add timeout
+                if blocking:  # TODO: add timeout
                     return self.wait_for_arrival(speed=max(path_speed, end_speed))
             else:
                 can_msg = {
@@ -237,39 +239,39 @@ class Drive():
         """
         if len(path) > 3:
             points_to_delete = []
-            for i in range(len(path)-2):
+            for i in range(len(path) - 2):
                 for dir in (0, 1):
-                    if ((path[i][dir] == path[i+1][dir] and path[i+1][dir] == path[i+2][dir]) or
-                            (path[i][0] - path[i+1][0] == path[i+1][0] - path[i+2][0]) and
-                            (path[i][1] - path[i+1][1] == path[i+1][1] - path[i+2][1])):
-                        points_to_delete.append(i+1)
+                    if ((path[i][dir] == path[i + 1][dir] and path[i + 1][dir] == path[i + 2][dir]) or
+                                (path[i][0] - path[i + 1][0] == path[i + 1][0] - path[i + 2][0]) and
+                                (path[i][1] - path[i + 1][1] == path[i + 1][1] - path[i + 2][1])):
+                        points_to_delete.append(i + 1)
             for index in reversed(sorted(list(set(points_to_delete)))):
                 del path[index]
 
     def filter_path2(self, path):
         points_to_delete = []
-        for i in range(len(path)-1):
-            if abs(path[i][0] - path[i+1][0]) <= 1 and abs(path[i][1] - path[i+1][1]) <= 5:
-                points_to_delete.append(i+1)
+        for i in range(len(path) - 1):
+            if abs(path[i][0] - path[i + 1][0]) <= 1 and abs(path[i][1] - path[i + 1][1]) <= 5:
+                points_to_delete.append(i + 1)
         for index in reversed(sorted(list(set(points_to_delete)))):
             del path[index]
 
     def filter_path3(self, path, max_error):
         points_to_delete = []
         i = 0
-        while i < len(path)-2:
-            line = LineString([path[i], path[i+2]])
-            point = Point(path[i+1])
+        while i < len(path) - 2:
+            line = LineString([path[i], path[i + 2]])
+            point = Point(path[i + 1])
             distance_from_line = point.distance(line)
             if distance_from_line <= max_error:
-                points_to_delete.append(i+1)
+                points_to_delete.append(i + 1)
                 i += 2
             else:
                 i += 1
         for index in reversed(sorted(list(set(points_to_delete)))):
             del path[index]
 
-    def wait_for_arrival(self, speed=100):    # TODO: add timeout
+    def wait_for_arrival(self, speed=100):  # TODO: add timeout
         """ controls if the drive is free and breaks if a robot is in the way
 
         :param path: path to check for other robots
@@ -295,12 +297,13 @@ class Drive():
         drive_queue = queue.Queue()
         close_range_queue = queue.Queue()
         drive_queue_number = self.can_socket.create_queue(can.MsgTypes.Drive_Status.value, drive_queue)
-        close_range_queue_number = self.can_socket.create_queue(can.MsgTypes.Close_Range_Dedection.value, close_range_queue)
+        close_range_queue_number = self.can_socket.create_queue(can.MsgTypes.Close_Range_Dedection.value,
+                                                                close_range_queue)
         arrived = False
         emergency = False
         start_time = time.time()
         while (arrived is False and emergency is False and self.stop is False and self.running and
-               time.time() - start_time < 12):
+                           time.time() - start_time < 12):
 
             my_angle = math.radians(self.my_robot.get_angle())
             my_position = self.my_robot.get_position()
@@ -322,14 +325,15 @@ class Drive():
                             if robot_big is False:
                                 emergency = True
                                 break
-                            x = my_position[0] + math.cos(my_angle)*(distance + 90)
-                            y = my_position[1] + math.sin(my_angle)*(distance + 90)
-                            sensor_offset_x = math.cos(my_angle+90)*(sensor_offset[i])
-                            sensor_offset_y = math.sin(my_angle+90)*(sensor_offset[i])
+                            x = my_position[0] + math.cos(my_angle) * (distance + 90)
+                            y = my_position[1] + math.sin(my_angle) * (distance + 90)
+                            sensor_offset_x = math.cos(my_angle + 90) * (sensor_offset[i])
+                            sensor_offset_y = math.sin(my_angle + 90) * (sensor_offset[i])
                             x += sensor_offset_x
                             y += sensor_offset_y
-                            if (x_min < x < x_max and y_min < y < y_max) and not (stair_x[0] < x < stair_x[1] and stair_y[0] < y < stair_y[1]):
-                                #print(str(sensor) + " x: " + str(x) + " y: " + str(y))
+                            if (x_min < x < x_max and y_min < y < y_max) and not (
+                                                stair_x[0] < x < stair_x[1] and stair_y[0] < y < stair_y[1]):
+                                # print(str(sensor) + " x: " + str(x) + " y: " + str(y))
                                 emergency = True
                                 break
                 except queue.Empty:
@@ -358,3 +362,11 @@ class Drive():
             return False
         else:
             return True
+
+    def try_drive_path(self, path, destination, angle_in, timeout, path_speed=None, end_speed=None, blocking=True,
+                       filter_path=False):
+        start_time = time.time()
+        while (time.time() - start_time) < timeout:
+            if self.drive_path(path, destination, angle_in, path_speed, end_speed, blocking, filter_path):
+                return True
+        return False

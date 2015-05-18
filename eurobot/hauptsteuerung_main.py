@@ -350,19 +350,17 @@ class Main:
                 # Drive caterpillar down
                 self.game_tasks['stair'].prepare_for_climbing()
 
+                smallRobotTimeout = 5
+
                 while endPositionReached == False:
 
                     # Drive on the left side ---------------------------------------------
                     if sideState == 0:
-                        if self.drive.drive_path([],(math.fabs(1250 - XOffset), 1090), 270) == True:
+                        if self.drive.try_drive_path([],(math.fabs(1250 - XOffset), 1090), 270, smallRobotTimeout) == True:
                             endPositionReached = True
 
                         else:
-                            time.sleep(2)
-                            if self.drive.drive_path([],(math.fabs(1250 - XOffset), 1090), 270) == True:
-                                endPositionReached = True
-                            else:
-                                sideState = 1
+                            sideState = 1
 
                     # Change to the right side -------------------------------------------
                     if sideState == 1:
@@ -377,26 +375,19 @@ class Main:
                         myX, myY = self.robots['me'].get_position()
 
                         # Change again to the left side, if enemy detected
-                        if self.drive.drive_path([],(myX, 900), 180) == True:
+                        if self.drive.try_drive_path([],(myX, 900), 180, smallRobotTimeout) == True:
                             sideState = 2
                         else:
-                            time.sleep(2)
-                            if self.drive.drive_path([],(myX, 900), 180) == True:
-                                sideState = 2
-                            else:
-                                sideState = 3
+                            sideState = 3
+
 
                     # Drive on the right side ---------------------------------------------
                     if sideState == 2:
-                        if self.drive.drive_path([],(math.fabs(1250 - XOffset), 900), 270) == True:
+                        if self.drive.drive_path([],(math.fabs(1250 - XOffset), 900), 270, smallRobotTimeout) == True:
                             endPositionReached = True
 
                         else:
-                            time.sleep(2)
-                            if self.drive.drive_path([],(math.fabs(1250 - XOffset), 900), 270) == True:
-                                endPositionReached = True
-                            else:
-                                sideState = 3
+                            sideState = 3
 
                     # Change to the left side -------------------------------------------
                     if sideState == 3:
@@ -411,42 +402,34 @@ class Main:
                         myX, myY = self.robots['me'].get_position()
 
                         # Change again to the right side, if enemy detected
-                        if self.drive.drive_path([],(myX, 1090), 180) == True:
+                        if self.drive.try_drive_path([],(myX, 1090), 180,smallRobotTimeout) == True:
                             sideState = 1
                         else:
-                            time.sleep(2)
-                            if self.drive.drive_path([],(myX, 1090), 180) == True:
-                                sideState = 1
-                            else:
-                                sideState = 2
+                            sideState = 2
 
                 # Drive in front of the stair
                 point, angle = self.game_tasks['stair'].goto_task()
                 tryToDriveInFrontOfStair = 0
 
-                while self.drive.drive_path([],point, angle) == False:
-                    time.sleep(1)
-                    tryToDriveInFrontOfStair += 1
+                while self.drive.drive_path([],point, angle, 2*smallRobotTimeout) == False:
 
-                    # Drive back after 6 tries
-                    if tryToDriveInFrontOfStair >= 6:
-                        # Get position
-                        myX, myY = self.robots['me'].get_position()
-                        # Drive back without enemy detection
-                        self.drive.set_speed(-30)
-                        self.drive.set_close_range_detection(False)
-                        self.drive.set_enemy_detection(False)
-                        self.drive.drive_path([],(math.fabs(1250 - XOffset), (myY + 100)), None)
-                        self.drive.set_close_range_detection(True)
-                        self.drive.set_enemy_detection(True)
-                        self.drive.set_speed(100)
-                        tryToDriveInFrontOfStair = 0
+                    # Drive back after timeout
+
+                    # Get position
+                    myX, myY = self.robots['me'].get_position()
+                    # Drive back without enemy detection
+                    self.drive.set_speed(-20)
+                    self.drive.set_close_range_detection(False)
+                    self.drive.set_enemy_detection(False)
+                    self.drive.drive_path([],(math.fabs(1250 - XOffset), (myY + 60)), None)
+                    self.drive.set_close_range_detection(True)
+                    self.drive.set_enemy_detection(True)
+                    self.drive.set_speed(100)
 
                 # Climb on the stair without enemy detection
                 print("Do Climbing Task")
                 self.drive.set_close_range_detection(False)
                 self.drive.set_enemy_detection(False)
-                self.drive.set_speed(60)
                 self.game_tasks['stair'].do_task()
 
             elif self.strategy['strategy'] == 'B':

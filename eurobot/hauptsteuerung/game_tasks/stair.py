@@ -20,7 +20,8 @@ class StairTask(Task):
                      'top not reached': (1240, 220, 270),
                      'carpet 1': (1100, 240, 185),
                      'fire 1': self.carpet_command['fire left'],
-                     'turning point': (1240, 240, 270),
+                     'turning point1': (1190, 220, 270),
+                     'turning point2': (1330, 220, 270),
                      'carpet 2': (1380, 240, 355),
                      'fire 2': self.carpet_command['fire right'],
                      'end point': (1240, 210, 90)
@@ -58,26 +59,36 @@ class StairTask(Task):
 
     def do_task(self):
         """ drives to the top of the stair """
+        self.drive.set_speed(40)
         self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['bottom'], blocking=True)
-        timer = threading.Timer(1.5, self.send_climbing_top)
+        timer = threading.Timer(1.5, self.send_climbing_middle)
         timer.setDaemon(True)
         timer.start()
+        timer2 = threading.Timer(4.5, self.send_climbing_top)
+        timer2.setDaemon(True)
+        timer2.start()
         self.drive.drive_path([], self.my_path['top'], None)
 
         myX, myY = self.robots['me'].get_position()
 
         while myY > 290:
-            self.drive.drive_path([], self.my_path['top'], None)
+            self.drive.drive_path([], self.my_path['top not reached'], None)
             myY, myY = self.robots['me'].get_position()
 
+        self.drive.set_speed(60)
         self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['up'], blocking=False)
         time.sleep(3)
         self.drive.drive_path([], self.my_path['carpet 1'], None)
         self.send_task_command(can.MsgTypes.Carpet_Command.value, self.my_path['fire 1'], blocking=True)
-        self.drive.drive_path([], self.my_path['top'], None, end_speed=(-self.drive.speed))
+        self.drive.drive_path([], self.my_path['turning point1'], None, end_speed=(-self.drive.speed))
         self.drive.drive_path([], self.my_path['carpet 2'], None)
         self.send_task_command(can.MsgTypes.Carpet_Command.value, self.my_path['fire 2'], blocking=True)
+        self.drive.drive_path([], self.my_path['turning point2'], None, end_speed=(-self.drive.speed))
         self.drive.drive_path([], self.my_path['end point'], None, end_speed=(-self.drive.speed))
+
+    def send_climbing_middle(self):
+        self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['middle'])
+
 
     def send_climbing_top(self):
         self.send_task_command(can.MsgTypes.Climbing_Command.value, self.climbing_command['top'])
