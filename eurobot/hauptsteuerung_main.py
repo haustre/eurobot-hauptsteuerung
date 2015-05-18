@@ -271,6 +271,7 @@ class Main:
                     self.game_tasks['stand'].do_task(3)
                     self.game_logic.start()
 
+
         if self.strategy['robot_name'] == 'Roboter-klein':
             # Wait until big robot is away
             time.sleep(1)
@@ -289,7 +290,7 @@ class Main:
                 self.drive.set_speed(100)
 
                 # Drive out of the start area
-                self.drive.drive_path([], (math.fabs(480-XOffset), 1090), None)
+                self.drive.drive_path([], (math.fabs(480-XOffset), 1060), None)
 
                 # Pay attention for emenies
                 self.drive.set_close_range_detection(True)
@@ -335,7 +336,7 @@ class Main:
 
                     # Drive on the right side ---------------------------------------------
                     if sideState == 2:
-                        if self.drive.drive_path([],(math.fabs(1250 - XOffset), 900), 270, smallRobotTimeout) == True:
+                        if self.drive.try_drive_path([],(math.fabs(1250 - XOffset), 900), 270, smallRobotTimeout) == True:
                             endPositionReached = True
 
                         else:
@@ -363,7 +364,7 @@ class Main:
                 point, angle = self.game_tasks['stair'].goto_task()
                 tryToDriveInFrontOfStair = 0
 
-                while self.drive.drive_path([],point, angle, 2*smallRobotTimeout) == False:
+                while self.drive.try_drive_path([],point, angle, 2*smallRobotTimeout) == False:
 
                     # Drive back after timeout
 
