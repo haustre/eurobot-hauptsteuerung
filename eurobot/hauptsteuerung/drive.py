@@ -14,7 +14,7 @@ from libraries import can
 from hauptsteuerung import route_finding
 
 
-class Drive():
+class Drive:
     """ class for controlling the drive """
 
     def __init__(self, can_socket):
@@ -30,6 +30,7 @@ class Drive():
         self.stop = False
         self.running = True
         self.offset = [0, 0]
+        self.close_range_detection_old = [True, True]
 
     def add_my_robot(self, robot):
         """ adds a reference to the robot
@@ -65,6 +66,7 @@ class Drive():
         :return: None
         """
         self.close_range_detection = activate
+        self.close_range_detection_old[0] = activate
 
     def set_enemy_detection(self, activate):
         """ activates detection of enemies with the data of the navigation system.
@@ -73,6 +75,15 @@ class Drive():
         :return: None
         """
         self.enemy_detection = activate
+        self.close_range_detection_old[1] = activate
+
+    def enable_detection(self, active):
+        if active:
+            self.close_range_detection = self.close_range_detection_old[0]
+            self.enemy_detection = self.close_range_detection_old[1]
+        else:
+            self.close_range_detection = False
+            self.enemy_detection = False
 
     def turn_off(self):
         """ deactivate the drive at game end """
@@ -342,8 +353,8 @@ class Drive():
                 for robot in self.robots:
                     position = robot.get_position()
                     if position:
-                        drive_direction = [my_position[0] + math.cos(my_angle) * (break_distance + 350),
-                                           my_position[1] + math.sin(my_angle) * (break_distance + 350)]
+                        drive_direction = [my_position[0] + math.cos(my_angle) * break_distance,
+                                           my_position[1] + math.sin(my_angle) * break_distance]
                         line = LineString([my_position, drive_direction])
                         point = Point(position)
                         distance_from_line = point.distance(line)

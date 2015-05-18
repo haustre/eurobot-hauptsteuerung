@@ -20,7 +20,7 @@ class PopcornTask(Task):
         popcorn_left = [{'start_position': (300, 400), 'position': (300, 0)},
                         {'start_position': (600, 400), 'position': (600, 0)}
                         ]
-        self.calibration_point = [120, popcorn_left[0]['start_position'][1]]
+        self.calibration_point = [100, popcorn_left[0]['start_position'][1]]
         self.calibration_value = 148
 
         for popcorn in popcorn_left:
@@ -64,9 +64,8 @@ class PopcornTask(Task):
 
         :param object_number:  specifies which game element is chosen
         """
-        old_close_range_detecion_state = self.drive.close_range_detection
         if self.calibrated is False:
-            self.drive.set_close_range_detection(False)
+            self.drive.enable_detection(False)
             self.drive.drive_path([], self.calibration_point, None,  end_speed=-21)
             x, y = self.robots['me'].get_position()
             offset = self.calibration_value - x
@@ -78,14 +77,14 @@ class PopcornTask(Task):
                 print("Calibration failed")
                 self.my_game_elements[0]['moved'] = True
                 self.my_game_elements[1]['moved'] = True
-                self.drive.set_close_range_detection(old_close_range_detecion_state)
+                self.drive.enable_detection(True)
                 return
-            self.drive.set_close_range_detection(old_close_range_detecion_state)
+            self.drive.enable_detection(True)
             while self.drive.drive_path([], self.my_game_elements[object_number]['start_position'], None) is False:
                 pass
 
         if self.calibrated is True:
-            self.drive.set_close_range_detection(False)
+            self.drive.enable_detection(False)
             self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['ready collect'], blocking=False)
             x, y = self.my_game_elements[object_number]['position']
             y += self.distance
@@ -94,7 +93,7 @@ class PopcornTask(Task):
             # self.wait_for_task(can.MsgTypes.Popcorn_Command.value+1)
             # self.drive.request_stop()
             self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['collect'], blocking=True)
-            self.drive.set_close_range_detection(old_close_range_detecion_state)
+            self.drive.enable_detection(True)
             while self.drive.drive_path([], self.my_game_elements[object_number]['start_position'], None) is False:
                 pass
             self.my_game_elements[object_number]['moved'] = True
@@ -111,16 +110,15 @@ class PopcornTask(Task):
 
         :return: None
         """
-        old_close_range_detecion_state = self.drive.close_range_detection
-        self.drive.set_close_range_detection(False)
+        self.drive.enable_detection(False)
         self.drive.drive_path([], self.empty_position['stands_position'], None, end_speed=-15)
 
         commands_other_tasks = {'cup left': 5, 'cup right': 6, 'stand': 3}
         self.send_task_command(can.MsgTypes.Cup_Command.value, commands_other_tasks['cup left'], blocking=False)
         self.send_task_command(can.MsgTypes.Cup_Command.value, commands_other_tasks['cup right'], blocking=False)
         self.send_task_command(can.MsgTypes.Stands_Command.value, commands_other_tasks['stand'], blocking=False)
-        time.sleep(0.5)
+        time.sleep(1)
         self.drive.drive_path([], self.empty_position['popcorn_position'], None, end_speed=-15)
         self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['open case'], blocking=True)
-        self.drive.set_close_range_detection(old_close_range_detecion_state)
+        self.drive.enable_detection(True)
         self.drive.request_stop()

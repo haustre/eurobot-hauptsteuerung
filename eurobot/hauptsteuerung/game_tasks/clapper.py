@@ -55,8 +55,7 @@ class ClapperTask(Task):
         if clapper_number == 0 and self.my_game_elements[1]['moved'] is False:
             self.do_both_clapper_fast()
         else:
-            old_close_range_detecion_state = self.drive.close_range_detection
-            self.drive.set_close_range_detection(False)
+            self.drive.enable_detection(False)
             side = self.my_game_elements[clapper_number]['side']
             self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command[side], blocking=False)
             if side == 'right':
@@ -66,7 +65,7 @@ class ClapperTask(Task):
             self.drive.drive_path([], None, angle, end_speed=40)
             self.send_task_command(can.MsgTypes.Clapper_Command.value, self.command['up'])
             self.my_game_elements[clapper_number]['moved'] = True
-            self.drive.set_close_range_detection(old_close_range_detecion_state)
+            self.drive.enable_detection(True)
 
     def do_both_clapper_fast(self):
         # Close first clapper

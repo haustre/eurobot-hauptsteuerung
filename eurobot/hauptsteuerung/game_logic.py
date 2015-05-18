@@ -7,7 +7,7 @@ __license__ = "GPLv3"
 import math
 
 
-class GameLogic():
+class GameLogic:
     def __init__(self, game_tasks, drive, countdown, robots, side):
         self.points = {'stand': [6, 8, 6, 8, 8, 8],
                        'cup': [-100, -100, -100, -100, -100],
@@ -48,6 +48,7 @@ class GameLogic():
                 print("Empty Popcorn")
                 if self.drive_fast(point, angle):
                     self.game_tasks['popcorn'].do_empty()
+                    break
                 continue
             point, angle = self.game_tasks[task_name].goto_task(element_number)
             print("Doing Task: " + str(task_name) + ", Nr:" + str(element_number))

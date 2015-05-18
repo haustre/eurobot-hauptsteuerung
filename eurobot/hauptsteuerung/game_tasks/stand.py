@@ -78,9 +78,8 @@ class StandsTask(Task):
 
         :param object_number:  specifies which game element is chosen
         """
-        old_close_range_detecion_state = self.drive.close_range_detection
         if object_number == 0 or object_number == 1 or object_number == 2:
-            self.drive.set_close_range_detection(False)
+            self.drive.enable_detection(False)
         starting_point = self.robots['me'].get_position()
         stand_point = self.my_game_elements[object_number]['position']
         self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready collect'])
@@ -97,7 +96,7 @@ class StandsTask(Task):
 
             point2 = self.calculate_stopping_point(starting_point, stand_point, -35)
         else:
-            point2 = self.calculate_stopping_point(starting_point, stand_point, -50)
+            point2 = self.calculate_stopping_point(starting_point, stand_point, -70)
 
         self.drive.drive_path([point1[0:2]], point2[0:2], None, end_speed=10)
         # Take also the second stand (Only for stand 1 and 2)
@@ -124,7 +123,7 @@ class StandsTask(Task):
             self.drive.drive_path([], self.my_game_elements[object_number]['end position'], None, end_speed=-30)
 
         self.my_game_elements[object_number]['moved'] = True
-        self.drive.set_close_range_detection(old_close_range_detecion_state)
+        self.drive.enable_detection(True)
 
     def calculate_stopping_point(self, from_pos, to_pos, distance):
         """ calculates the correct position to collect the stand
@@ -154,8 +153,7 @@ class StandsTask(Task):
 
     def do_empty(self):
         """ puts down the stands """
-        old_close_range_detecion_state = self.drive.close_range_detection
-        self.drive.set_close_range_detection(False)
+        self.drive.enable_detection(False)
         self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready platform'], blocking=True)
         self.drive.drive_path([], self.empty_position['position'], None, end_speed=25)
         self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['open case'], blocking=True)
@@ -163,4 +161,4 @@ class StandsTask(Task):
         self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready collect'])
         self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['blocked'])
         time.sleep(0.5)
-        self.drive.set_close_range_detection(old_close_range_detecion_state)
+        self.drive.enable_detection(True)

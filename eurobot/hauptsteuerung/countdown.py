@@ -18,6 +18,7 @@ class Countdown:
         self.timers_to_start = []
         self.timer_loop = threading.Thread(target=self._loop)
         self.timer_loop.setDaemon(1)
+        self.running = True
 
     def start(self):
         """ starts the countdown
@@ -29,6 +30,9 @@ class Countdown:
         for timer in self.timers_to_start:
             threading.Timer(timer).start()
         self.timer_loop.start()
+
+    def stop(self):
+        self.running = False
 
     def time_left(self):
         """ returns the time left to the end of the game or false if the game is not started
@@ -59,7 +63,7 @@ class Countdown:
     def _loop(self):
         """ loop counting down the remaining time """
         time_left = 90
-        while time_left >= 0:
+        while time_left >= 0 and self.running:
             print(int(time_left))
             can_msg = {
                 'type': can.MsgTypes.Game_End.value,
