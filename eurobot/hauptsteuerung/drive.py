@@ -211,7 +211,6 @@ class Drive:
                         except queue.Empty:
                             print("Drive rotation timed out")
                         self.can_socket.remove_queue(drive_queue_number)
-                print(x - self.offset[0], y - self.offset[1], angle, end_speed, len(filtered_path))
                 if x is False or y is False:
                     x = 65535
                     y = 65535

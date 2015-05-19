@@ -85,7 +85,7 @@ class Main:
             self.robots['enemy2'] = PositionOtherRobot(self.can_socket, can.MsgTypes.Position_Enemy_big.value)
         self.drive.add_my_robot(self.robots['me'])
         for name, robot in self.robots.items():
-            if robot is not None and name != 'me':
+            if robot is not None and not(name == 'me' or name == 'friendly robot'):
                 self.drive.add_robot(robot)
         self.run()  # The configuration is complete. Start the game.
 
@@ -270,7 +270,6 @@ class Main:
                     self.drive.set_speed(40)
                     self.game_tasks['stand'].do_task(3)
                     self.game_logic.start()
-
 
         if self.strategy['robot_name'] == 'Roboter-klein':
             # Wait until big robot is away
