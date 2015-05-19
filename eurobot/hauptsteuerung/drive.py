@@ -110,7 +110,7 @@ class Drive:
             route, path_len = self.route_finder.calculate_path(destination)
             print(path_len)
             if path_len >= 100:  # TODO: Not tested
-                #return False
+                # return False
                 pass
             arrived = self.drive_path(route, destination, angle)
             if arrived:
@@ -126,7 +126,7 @@ class Drive:
 
         :return: None
         """
-        self.stop = True    # TODO: check variable in wait_for_arrival
+        self.stop = True  # TODO: check variable in wait_for_arrival
         can_msg = {
             'type': can.MsgTypes.Emergency_Stop.value,
             'code': 0,
@@ -135,7 +135,8 @@ class Drive:
         time.sleep(0.2)
         self.stop = False
 
-    def drive_path(self, path, destination, angle_in, path_speed=None, end_speed=None, blocking=True, filter_path=False):
+    def drive_path(self, path, destination, angle_in, path_speed=None, end_speed=None, blocking=True,
+                   filter_path=False):
         """ drives a path to a point if the coordinates are outside the table an exception is raised
 
         :param path: waypoints
@@ -376,3 +377,14 @@ class Drive:
             return False
         else:
             return True
+
+    def try_drive_path(self, path, destination, angle_in, timeout, path_speed=None, end_speed=None, blocking=True,
+                       filter_path=False):
+
+        if self.drive_path(path, destination, angle_in, path_speed, end_speed, blocking, filter_path) == False:
+            start_time = time.time()
+            while (time.time() - start_time) < timeout:
+                if self.drive_path(path, destination, angle_in, path_speed, end_speed, blocking, filter_path):
+                    return True
+            return False
+        return True
