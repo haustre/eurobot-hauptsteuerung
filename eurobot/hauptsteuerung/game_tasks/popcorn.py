@@ -15,10 +15,10 @@ class PopcornTask(Task):
         self.angle = 90
         self.distance = 120
         empty_position = {'start_position': (800, 1000, 0), 'stands_position': (320, 1000, 0),
-                          'popcorn_position': (200, 1000, 0)}
+                          'popcorn_position': (180, 1000, 0)}
         self.command = {'ready collect': 0, 'open case': 1, 'collect': 2}
-        popcorn_left = [{'start_position': (300, 400), 'position': (300, 0)},
-                        {'start_position': (600, 400), 'position': (600, 0)}
+        popcorn_left = [{'start_position': (300, 420), 'position': (300, 0)},
+                        {'start_position': (600, 420), 'position': (600, 0)}
                         ]
         self.calibration_point = [100, popcorn_left[0]['start_position'][1]]
         self.calibration_value = 148

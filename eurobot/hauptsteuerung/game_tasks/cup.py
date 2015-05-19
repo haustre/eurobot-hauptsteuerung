@@ -13,14 +13,14 @@ class CupTask(Task):
         super().__init__(robots, can_socket, can.MsgTypes.Cup_Command.value, drive)
         self.my_color = my_color
         self.distance = 150
-        self.shift = 100
+        self.shift = 120
         self.free_arms = {'right': True, 'left': True}
         self.command = {'blocked': 0, 'ready collect left': 1, 'ready collect right': 2, 'collect left': 3,
                         'collect right': 4, 'open case left': 5, 'open case right': 6, 'close case left': 7,
                         'close case right': 8}
 
         cups_left = [{'position': (250, 1750), 'pick up side': 'left'},
-                     {'position': (910, 830), 'pick up side': 'right'},
+                     {'position': (910, 830), 'pick up side': 'left'},
                      {'position': (1500, 1650), 'pick up side': 'right'},
                      {'position': (2090, 830), 'pick up side': 'left'},
                      {'position': (2750, 1750), 'pick up side': 'right'}
@@ -36,7 +36,7 @@ class CupTask(Task):
         :param object_number: specifies which game element is chosen
         :return: position, angle
         """
-        return self.my_game_elements[object_number]['position'], None  # TODO: set correct position
+        return (670, 1300), None  # TODO: set correct position
 
     def do_task(self, object_number):
         """ collects the chosen cup
