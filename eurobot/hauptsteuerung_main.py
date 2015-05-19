@@ -302,7 +302,7 @@ class Main:
                 # Drive caterpillar down
                 self.game_tasks['stair'].prepare_for_climbing()
 
-                smallRobotTimeout = 5
+                smallRobotTimeout = 10
 
                 while endPositionReached == False:
 
@@ -363,7 +363,7 @@ class Main:
                 point, angle = self.game_tasks['stair'].goto_task()
                 tryToDriveInFrontOfStair = 0
 
-                while self.drive.try_drive_path([],point, angle, 2*smallRobotTimeout) == False:
+                while self.drive.try_drive_path([],point, angle, 1.5*smallRobotTimeout) == False:
 
                     # Drive back after timeout
 
