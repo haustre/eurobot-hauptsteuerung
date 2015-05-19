@@ -9,10 +9,10 @@ import math
 
 class GameLogic:
     def __init__(self, game_tasks, drive, countdown, robots, side):
-        self.points = {'stand': [6, 8, 6, 8, 8, 8],
-                       'cup': [-100, -100, -100, -100, -100],
+        self.points = {'stand': [2, 8, 2, 8, 8, 8],
+                       'cup': [7, -100, -100, -100, -100],
                        'clapper': [5, 5, 1],
-                       'popcorn': [6, 4]}
+                       'popcorn': [7, 4]}
         self.game_tasks = game_tasks
         self.drive = drive
         self.countdown = countdown
@@ -42,8 +42,7 @@ class GameLogic:
                 if self.drive_fast(point, angle):
                     self.game_tasks['stand'].do_empty()
                 continue
-            if (popcorn_collected >= 10) or \
-                    (self.countdown.time_left() <= 20):
+            if self.countdown.time_left() <= 20:
                 point, angle = self.game_tasks['popcorn'].goto_empty()
                 print("Empty Popcorn")
                 if self.drive_fast(point, angle):

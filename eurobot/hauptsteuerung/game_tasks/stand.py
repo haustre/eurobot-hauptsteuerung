@@ -86,46 +86,18 @@ class StandsTask(Task):
         stand_point = self.my_game_elements[object_number]['position']
         self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready collect'])
         point1 = self.calculate_stopping_point(starting_point, stand_point, 30)
-
-        if object_number == 1 or object_number == 2:
-
-            # Make ready also for the cup
-            if object_number == 1:
-                if self.side == 'left':
-                    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['ready collect left'])
-                else:
-                    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['ready collect right'])
-
-            point2 = self.calculate_stopping_point(starting_point, stand_point, -35)
-        else:
-            point2 = self.calculate_stopping_point(starting_point, stand_point, -70)
-
+        point2 = self.calculate_stopping_point(starting_point, stand_point, -70)
         self.drive.drive_path([point1[0:2]], point2[0:2], None, end_speed=10)
-        # Take also the second stand (Only for stand 1 and 2)
-        if (object_number == 1 or object_number == 2) and self.collected < 4:
-            starting_point = self.robots['me'].get_position()
-            if object_number == 1:
-                stand_point = self.second_stands[0]['position']
-                # Take also the cup
-                if (self.side == 'left'):
-                    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['collect left'])
-                else:
-                    self.send_task_command(can.MsgTypes.Cup_Command.value, self.commandCup['collect right'])
-            else:
-                stand_point = self.second_stands[1]['position']
-            time.sleep(0.5)
-            self.send_task_command(can.MsgTypes.Stands_Command.value, self.command['ready collect'])
-            point1 = self.calculate_stopping_point(starting_point, stand_point, 30)
-            point2 = self.calculate_stopping_point(starting_point, stand_point, -50)
-            self.drive.drive_path([point1[0:2]], point2[0:2], None, end_speed=5)
-            time.sleep(0.5)
 
-        if object_number == 1 or object_number == 2 or object_number == 3:
-            # Drive back
-            if object_number == 2:
-                self.drive.drive_path([], self.my_game_elements[object_number]['end position'], self.angleStandStair, end_speed=-30)
+        if object_number == 1:
+            time.sleep(0.5)
+            if self.side == 'left':
+                self.drive.drive_path([], None, 45)
             else:
-                self.drive.drive_path([], self.my_game_elements[object_number]['end position'], None, end_speed=-30)
+                self.drive.drive_path([], None, 180-45)
+        elif object_number == 2:
+            time.sleep(0.5)
+            self.drive.drive_path([], None, 270)
 
         self.my_game_elements[object_number]['moved'] = True
         self.drive.enable_detection(True)
