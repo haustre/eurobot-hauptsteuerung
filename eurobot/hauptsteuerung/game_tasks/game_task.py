@@ -44,8 +44,8 @@ class Task:
         """ loop checking which game elements have been moved """
         while True:
             if self.movable:
-                for robot in self.robots.values():
-                    if robot:
+                for robot_name, robot in self.robots.items():
+                    if robot and robot_name != 'me' and robot_name != 'friendly robot':
                         drive_map = robot.get_map()
                         for game_element in self.my_game_elements:
                             x, y = game_element['position']

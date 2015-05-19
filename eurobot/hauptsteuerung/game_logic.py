@@ -4,21 +4,21 @@ This module decides which Task to do next
 __author__ = 'Wuersch Marcel'
 __license__ = "GPLv3"
 
-import math
-
+import time
 
 class GameLogic:
     def __init__(self, game_tasks, drive, countdown, robots, side):
         self.points = {'stand': [2, 8, 2, 8, 8, 8],
-                       'cup': [7, -100, -100, -100, -100],
+                       'cup': [-100, 4, -100, -100, -100],
                        'clapper': [5, 5, 1],
-                       'popcorn': [7, 4]}
+                       'popcorn': [6, 3]}
         self.game_tasks = game_tasks
         self.drive = drive
         self.countdown = countdown
         self.robots = robots
         self.side = side
         self.running = True
+        self.finished = False
 
     def start(self):
         while self.running:
@@ -42,12 +42,23 @@ class GameLogic:
                 if self.drive_fast(point, angle):
                     self.game_tasks['stand'].do_empty()
                 continue
-            if self.countdown.time_left() <= 20:
+            if self.countdown.time_left() <= 20 or self.finished:
+                if self.countdown.time_left() > 15:
+                    if self.robots['me'].get_position()[1] > 800:
+                        # self.game_tasks['cup'].goto_task(1)
+                        pass
+                    self.game_tasks['cup'].do_task(1)
                 point, angle = self.game_tasks['popcorn'].goto_empty()
                 print("Empty Popcorn")
                 if self.drive_fast(point, angle):
                     self.game_tasks['popcorn'].do_empty()
                     break
+                continue
+            if task_name == 'clapper' and element_number == 2:
+                self.finished = True
+                continue
+            if task_name == 'cup':
+                self.game_tasks[task_name].my_game_elements[element_number]['moved'] = True
                 continue
             point, angle = self.game_tasks[task_name].goto_task(element_number)
             print("Doing Task: " + str(task_name) + ", Nr:" + str(element_number))
@@ -55,6 +66,9 @@ class GameLogic:
             if arrived:
                 self.game_tasks[task_name].do_task(element_number)
                 self.game_tasks[task_name].my_game_elements[element_number]['moved'] = True
+            else:
+                self.points[task_name][element_number] -= 0.1
+                time.sleep(0.1)
 
     def drive_fast(self, destination, angle):
         path = []
