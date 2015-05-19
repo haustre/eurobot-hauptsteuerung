@@ -18,11 +18,11 @@ class StairTask(Task):
                      'beginning': (1240, 650, 270),
                      'top': (1240, 200, 270),
                      'top not reached': (1240, 220, 270),
-                     'carpet 1': (1100, 240, 185),
+                     'carpet 1': (1100, 245, 185),
                      'fire 1': self.carpet_command['fire left'],
                      'turning point1': (1190, 220, 270),
                      'turning point2': (1330, 220, 270),
-                     'carpet 2': (1380, 240, 355),
+                     'carpet 2': (1380, 245, 355),
                      'fire 2': self.carpet_command['fire right'],
                      'end point': (1240, 210, 90)
                      }
