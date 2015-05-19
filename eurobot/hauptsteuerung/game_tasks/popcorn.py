@@ -15,7 +15,7 @@ class PopcornTask(Task):
         self.angle = 90
         self.distance = 120
         empty_position = {'start_position': (800, 1000, 0), 'stands_position': (320, 1000, 0),
-                          'popcorn_position': (220, 1000, 0)}
+                          'popcorn_position': (200, 1000, 0)}
         self.command = {'ready collect': 0, 'open case': 1, 'collect': 2}
         popcorn_left = [{'start_position': (300, 400), 'position': (300, 0)},
                         {'start_position': (600, 400), 'position': (600, 0)}
@@ -89,7 +89,7 @@ class PopcornTask(Task):
             x, y = self.my_game_elements[object_number]['position']
             y += self.distance
             path_point = x, y + 80
-            self.drive.drive_path([path_point], (x, y), self.angle, path_speed=-30, end_speed=-5, blocking=True)
+            self.drive.drive_path([path_point], (x, y), self.angle, path_speed=-20, end_speed=-5, blocking=True)
             # self.wait_for_task(can.MsgTypes.Popcorn_Command.value+1)
             # self.drive.request_stop()
             self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['collect'], blocking=True)
@@ -111,14 +111,18 @@ class PopcornTask(Task):
         :return: None
         """
         self.drive.enable_detection(False)
-        self.drive.drive_path([], self.empty_position['stands_position'], None, end_speed=-15)
+        self.drive.drive_path([], self.empty_position['stands_position'], None, end_speed=-30)
 
         commands_other_tasks = {'cup left': 5, 'cup right': 6, 'stand': 3}
         self.send_task_command(can.MsgTypes.Cup_Command.value, commands_other_tasks['cup left'], blocking=False)
         self.send_task_command(can.MsgTypes.Cup_Command.value, commands_other_tasks['cup right'], blocking=False)
         self.send_task_command(can.MsgTypes.Stands_Command.value, commands_other_tasks['stand'], blocking=False)
         time.sleep(1)
-        self.drive.drive_path([], self.empty_position['popcorn_position'], None, end_speed=-15)
-        self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['open case'], blocking=True)
+        self.drive.drive_path([], self.empty_position['popcorn_position'], None, end_speed=-30)
+        self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['open case'], blocking=False)
+        angle = self.empty_position['popcorn_position'][2]
+        for _ in range(5):
+            for rotation in (-3, 3):
+                self.drive.drive_path([], None, angle + rotation)
         self.drive.enable_detection(True)
         self.drive.request_stop()

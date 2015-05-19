@@ -406,7 +406,7 @@ class Main:
 
 
 if __name__ == "__main__":
-    time.sleep(5)
+    time.sleep(1)
     print_start_text('Wall - e')
     print("Program starts: " + str(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")))
     main_program = Main()

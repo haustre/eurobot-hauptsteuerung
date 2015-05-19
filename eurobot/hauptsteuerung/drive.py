@@ -160,11 +160,11 @@ class Drive:
                     raise Exception('Destination formatted wrong')
                 x, y = int(x), int(y)
             else:
-                x, y = 65535, 65535
+                x, y = False, False
             if angle_in is not None:
-                angle = int((abs(angle_in) % 360)*100)
+                angle = int((angle_in % 360)*100)
             elif angle is not None:
-                angle = int((abs(angle) % 360)*100)
+                angle = int((angle % 360)*100)
             else:
                 angle = 65535
             if end_speed is None:
@@ -186,7 +186,7 @@ class Drive:
             if save_zone[0][0] > x > save_zone[0][1] or save_zone[1][0] > y > save_zone[1][1]:
                 in_save_zone = False
                 wrong_point = x, y
-            if in_save_zone or x == 65535 and y == 65535:
+            if in_save_zone or x is False and y is False:
                 if len(path) > 0 and path_speed > 0:  # wait for first rotation to finish.
                     my_x, my_y = self.my_robot.get_position()
                     path_x, path_y = path[0]
@@ -210,10 +210,17 @@ class Drive:
                         except queue.Empty:
                             print("Drive rotation timed out")
                         self.can_socket.remove_queue(drive_queue_number)
+                print(x - self.offset[0], y - self.offset[1], angle, end_speed, len(filtered_path))
+                if x is False or y is False:
+                    x = 65535
+                    y = 65535
+                else:
+                    x -= self.offset[0]
+                    y -= self.offset[1]
                 can_msg = {
                     'type': can.MsgTypes.Goto_Position.value,
-                    'x_position': x - self.offset[0],
-                    'y_position': y - self.offset[1],
+                    'x_position': x,
+                    'y_position': y,
                     'angle': angle,
                     'speed': end_speed,
                     'path_length': len(filtered_path),
@@ -234,7 +241,7 @@ class Drive:
             else:
                 can_msg = {
                     'type': can.MsgTypes.Emergency_Stop.value,
-                    'code': 0,
+                    'code': 1,
                 }
                 self.can_socket.send(can_msg)
                 raise Exception('Coordinates outside the table:' + str(wrong_point[0]) + str(wrong_point[1]))
@@ -363,7 +370,7 @@ class Drive:
         if arrived is False:
             can_msg = {
                 'type': can.MsgTypes.Emergency_Stop.value,
-                'code': 0,
+                'code': 1,
             }
             self.can_socket.send(can_msg)
             return False
