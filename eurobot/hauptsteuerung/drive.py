@@ -376,8 +376,11 @@ class Drive:
 
     def try_drive_path(self, path, destination, angle_in, timeout, path_speed=None, end_speed=None, blocking=True,
                        filter_path=False):
-        start_time = time.time()
-        while (time.time() - start_time) < timeout:
-            if self.drive_path(path, destination, angle_in, path_speed, end_speed, blocking, filter_path):
-                return True
-        return False
+
+        if self.drive_path(path, destination, angle_in, path_speed, end_speed, blocking, filter_path) == False:
+            start_time = time.time()
+            while (time.time() - start_time) < timeout:
+                if self.drive_path(path, destination, angle_in, path_speed, end_speed, blocking, filter_path):
+                    return True
+            return False
+        return True

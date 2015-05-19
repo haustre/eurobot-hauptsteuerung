@@ -20,7 +20,7 @@ class StandsTask(Task):
                            'close case right': 8}
         stands_left = [{'position': (90, 200), 'start position': (300, 490), 'end position': (230, 490)},
                        {'position': (90, 1750), 'start position': (300, 1460), 'end position': (230, 1500)},
-                       {'position': (850, 200), 'start position': (650, 490), 'end position': (750, 300)},
+                       {'position': (850, 200), 'start position': (650, 490), 'end position': (660, 300)},
                        {'position': (870, 1355), 'start position': None, 'end position': None},
                        {'position': (1100, 1770), 'start position': None, 'end position': None},
                        {'position': (1300, 1400), 'start position': None, 'end position': None},
@@ -47,6 +47,7 @@ class StandsTask(Task):
             self.enemy_game_elements = stands_right
             self.empty_position = empty_position
             self.side = 'left'
+            self.angleStandStair = 180
 
         elif my_color == 'right':
             self.empty_position = {}
@@ -60,6 +61,7 @@ class StandsTask(Task):
             self.second_stands[0]['position'] = 3000 - x, y
             x, y = self.second_stands[1]['position']
             self.second_stands[1]['position'] = 3000 - x, y
+            self.angleStandStair = 0
 
             self.side = 'right'
         else:
@@ -100,7 +102,7 @@ class StandsTask(Task):
 
         self.drive.drive_path([point1[0:2]], point2[0:2], None, end_speed=10)
         # Take also the second stand (Only for stand 1 and 2)
-        if object_number == 1 or object_number == 2:
+        if (object_number == 1 or object_number == 2) and self.collected < 4:
             starting_point = self.robots['me'].get_position()
             if object_number == 1:
                 stand_point = self.second_stands[0]['position']
@@ -120,7 +122,10 @@ class StandsTask(Task):
 
         if object_number == 1 or object_number == 2 or object_number == 3:
             # Drive back
-            self.drive.drive_path([], self.my_game_elements[object_number]['end position'], None, end_speed=-30)
+            if object_number == 2:
+                self.drive.drive_path([], self.my_game_elements[object_number]['end position'], self.angleStandStair, end_speed=-30)
+            else:
+                self.drive.drive_path([], self.my_game_elements[object_number]['end position'], None, end_speed=-30)
 
         self.my_game_elements[object_number]['moved'] = True
         self.drive.enable_detection(True)
