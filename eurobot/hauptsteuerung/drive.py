@@ -306,7 +306,7 @@ class Drive:
             sensors = ['distance_front_middle', 'distance_front_left', 'distance_front_right']
             sensor_offset = [0, -15, 15]
         else:
-            break_distance = 200
+            break_distance = 250
             sensor_min = 0
             sensors = ['distance_front_left', 'distance_front_right']
             sensor_offset = [0, -10, 10]
