@@ -13,7 +13,7 @@ class StandsTask(Task):
         super().__init__(robots, can_socket, can.MsgTypes.Stands_Command.value, drive)
         self.distance_to_stand = 200
         self.special_cup = 0
-        empty_position = {'start_position': (1250, 1620, 90), 'position': (1250, 1750, 90)}
+        empty_position = {'start_position': (1250, 1620, 90), 'position': (1250, 1770, 90)}
         self.command = {'blocked': 0, 'ready collect': 1, 'ready platform': 2, 'open case': 3}
         self.commandCup = {'blocked': 0, 'ready collect left': 1, 'ready collect right': 2, 'collect left': 3,
                            'collect right': 4, 'open case left': 5, 'open case right': 6, 'close case left': 7,
@@ -89,6 +89,8 @@ class StandsTask(Task):
         point2 = self.calculate_stopping_point(starting_point, stand_point, -70)
         self.drive.drive_path([point1[0:2]], point2[0:2], None, end_speed=10)
 
+        if object_number == 0:
+            time.sleep(0.5)
         if object_number == 1:
             time.sleep(0.5)
             if self.side == 'left':

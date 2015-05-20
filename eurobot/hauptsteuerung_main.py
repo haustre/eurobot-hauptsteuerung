@@ -208,18 +208,18 @@ class Main:
         if time_string is 'game_end':
             self.reset = True
             self.game_logic.stop()
-            self.drive.turn_off()
-            self.countdown.stop()
             try:
                 self.debugger.stop()
             except:
                 print("Debugger not closed correctly")
+            self.drive.turn_off()
             can_msg = {
                 'type': can.MsgTypes.EmergencyShutdown.value,
-                'code': 0,
+                'code': 1,
             }
             self.can_socket.send(can_msg)
-            time.sleep(2)  # TODO: make longer
+            time.sleep(2)
+            self.countdown.stop()
             del self.drive
             del self.countdown
             del self.gpio
@@ -264,88 +264,16 @@ class Main:
                 self.drive.set_close_range_detection(True)
                 self.drive.set_enemy_detection(True)
 
-                # Side on wich the robot drives
-                sideState = 0
-                endPositionReached = False
-
-                # Drive caterpillar down
                 self.game_tasks['stair'].prepare_for_climbing()
 
-                smallRobotTimeout = 10
-
-                while endPositionReached == False:
-
-                    # Drive on the left side ---------------------------------------------
-                    if sideState == 0:
-                        if self.drive.try_drive_path([],(math.fabs(1250 - XOffset), 1090), 270, smallRobotTimeout) == True:
-                            endPositionReached = True
-
-                        else:
-                            sideState = 1
-
-                    # Change to the right side -------------------------------------------
-                    if sideState == 1:
-                        # Ignore emeny only for turning
-                        self.drive.set_close_range_detection(False)
-                        self.drive.set_enemy_detection(False)
-                        self.drive.drive_path([], None, 270)
-                        self.drive.set_close_range_detection(True)
-                        self.drive.set_enemy_detection(True)
-
-                        # Get position
-                        myX, myY = self.robots['me'].get_position()
-
-                        # Change again to the left side, if enemy detected
-                        if self.drive.try_drive_path([],(myX, 900), 180, smallRobotTimeout) == True:
-                            sideState = 2
-                        else:
-                            sideState = 3
-
-
-                    # Drive on the right side ---------------------------------------------
-                    if sideState == 2:
-                        if self.drive.try_drive_path([],(math.fabs(1250 - XOffset), 900), 270, smallRobotTimeout) == True:
-                            endPositionReached = True
-
-                        else:
-                            sideState = 3
-
-                    # Change to the left side -------------------------------------------
-                    if sideState == 3:
-                        # Ignore emeny only for turning
-                        self.drive.set_close_range_detection(False)
-                        self.drive.set_enemy_detection(False)
-                        self.drive.drive_path([], None, 90)
-                        self.drive.set_close_range_detection(True)
-                        self.drive.set_enemy_detection(True)
-
-                        # Get position
-                        myX, myY = self.robots['me'].get_position()
-
-                        # Change again to the right side, if enemy detected
-                        if self.drive.try_drive_path([],(myX, 1090), 180,smallRobotTimeout) == True:
-                            sideState = 1
-                        else:
-                            sideState = 2
+                while self.drive.drive_path([], (math.fabs(1250 - XOffset), 1090), 270) is False:
+                    pass
 
                 # Drive in front of the stair
                 point, angle = self.game_tasks['stair'].goto_task()
-                tryToDriveInFrontOfStair = 0
 
-                while self.drive.try_drive_path([],point, angle, 1.5*smallRobotTimeout) == False:
-
-                    # Drive back after timeout
-
-                    # Get position
-                    myX, myY = self.robots['me'].get_position()
-                    # Drive back without enemy detection
-                    self.drive.set_speed(-20)
-                    self.drive.set_close_range_detection(False)
-                    self.drive.set_enemy_detection(False)
-                    self.drive.drive_path([],(math.fabs(1250 - XOffset), (myY + 60)), None)
-                    self.drive.set_close_range_detection(True)
-                    self.drive.set_enemy_detection(True)
-                    self.drive.set_speed(100)
+                while self.drive.drive_path([], point, angle) is False:
+                    pass
 
                 # Climb on the stair without enemy detection
                 print("Do Climbing Task")

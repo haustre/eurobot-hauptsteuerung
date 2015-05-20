@@ -246,6 +246,12 @@ class Drive:
                 self.can_socket.send(can_msg)
                 raise Exception('Coordinates outside the table:' + str(wrong_point[0]) + str(wrong_point[1]))
             return True
+        else:
+            can_msg = {
+                'type': can.MsgTypes.Emergency_Stop.value,
+                'code': 1,
+            }
+            self.can_socket.send(can_msg)
 
     def filter_path(self, path):
         """ filters a path to cause less CAN traffic
@@ -306,7 +312,7 @@ class Drive:
             sensors = ['distance_front_middle', 'distance_front_left', 'distance_front_right']
             sensor_offset = [0, -15, 15]
         else:
-            break_distance = 250
+            break_distance = 150
             sensor_min = 0
             sensors = ['distance_front_left', 'distance_front_right']
             sensor_offset = [0, -10, 10]
@@ -336,6 +342,8 @@ class Drive:
                         close_range_queue.get_nowait()
                     for i, sensor in enumerate(sensors):
                         distance = max(range_msg[sensor], sensor_min)
+                        if robot_big is False:
+                            distance -= 100
                         if distance < break_distance:
                             if robot_big is False:
                                 emergency = True

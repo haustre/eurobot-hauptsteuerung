@@ -70,7 +70,7 @@ class PopcornTask(Task):
             x, y = self.robots['me'].get_position()
             offset = self.calibration_value - x
             print("Offset: " + str(offset))
-            if abs(offset) < 50:
+            if abs(offset) < 500:
                 self.drive.set_offset_x(offset)
                 self.calibrated = True
             else:
