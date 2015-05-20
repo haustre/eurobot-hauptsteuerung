@@ -233,14 +233,7 @@ class Main:
         :return: None
         """
         if self.strategy['robot_name'] == 'Roboter-gross':  # check on which robot the program is running
-            if self.strategy['strategy'] == 'A':
-                self.drive.set_close_range_detection(True)
-                self.drive.set_enemy_detection(True)
-                self.drive.set_speed(40)
-                self.game_tasks['stand'].do_task(3)
-                self.game_logic.start()
-
-            elif self.strategy['strategy'] == 'B':
+            if self.strategy['strategy'] == 'A' or self.strategy['strategy'] == 'B':
                 self.drive.set_close_range_detection(True)
                 self.drive.set_enemy_detection(True)
                 self.drive.set_speed(40)
@@ -256,7 +249,7 @@ class Main:
             if self.strategy['side'] == 'right':
                 XOffset = 3000
 
-            if self.strategy['strategy'] == 'A':
+            if self.strategy['strategy'] == 'A' or self.strategy['strategy'] == 'B':
                 # Ignore emeny in start area
                 self.drive.set_close_range_detection(False)
                 self.drive.set_enemy_detection(False)
@@ -360,12 +353,8 @@ class Main:
                 self.drive.set_enemy_detection(False)
                 self.game_tasks['stair'].do_task()
 
-            elif self.strategy['strategy'] == 'B':
-                raise Exception('Strategy not programmed')
-
 
 if __name__ == "__main__":
-    time.sleep(1)
     print_start_text('Wall - e')
     print("Program starts: " + str(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")))
     main_program = Main()

@@ -43,11 +43,6 @@ class GameLogic:
                     self.game_tasks['stand'].do_empty()
                 continue
             if self.countdown.time_left() <= 20 or self.finished:
-                if self.countdown.time_left() > 15:
-                    if self.robots['me'].get_position()[1] > 800:
-                        # self.game_tasks['cup'].goto_task(1)
-                        pass
-                    self.game_tasks['cup'].do_task(1)
                 point, angle = self.game_tasks['popcorn'].goto_empty()
                 print("Empty Popcorn")
                 if self.drive_fast(point, angle):
