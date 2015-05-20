@@ -99,7 +99,10 @@ class StandsTask(Task):
                 self.drive.drive_path([], None, 180-45)
         elif object_number == 2:
             time.sleep(0.5)
-            self.drive.drive_path([], None, 270)
+            if self.side == 'left':
+                self.drive.drive_path([], None, 225)
+            else:
+                self.drive.drive_path([], None, 315)
 
         self.my_game_elements[object_number]['moved'] = True
         self.drive.enable_detection(True)
