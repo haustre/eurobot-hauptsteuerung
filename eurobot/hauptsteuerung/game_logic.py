@@ -68,7 +68,7 @@ class GameLogic:
     def drive_fast(self, destination, angle):
         path = []
         if self.side == 'left':
-            path = [[700, 700], [700, 1300]]
+            path = [[700, 650], [700, 1350]]
         elif self.side == 'right':
             path = [[3000 - 700, 700], [3000 - 700, 1300]]
         if not(destination is None and angle is None):
@@ -76,7 +76,7 @@ class GameLogic:
             if (self.robots['me'].get_position()[1] > y_border) == (destination[1] > y_border):
                 return self.drive.drive_path([], destination, angle)
             elif destination[1] == 1000:  # empty popcorn
-                return self.drive.drive_path([], destination, angle)
+                return self.drive.drive_path([path[0]], destination, angle)
             elif self.robots['me'].get_position()[1] < y_border:
                 return self.drive.drive_path([path[0], path[1]], destination, angle)
             elif self.robots['me'].get_position()[1] > y_border:

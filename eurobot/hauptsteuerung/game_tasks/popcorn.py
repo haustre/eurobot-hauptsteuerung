@@ -21,7 +21,7 @@ class PopcornTask(Task):
                         {'start_position': (600, 420), 'position': (600, 0)}
                         ]
         self.calibration_point = [100, popcorn_left[0]['start_position'][1]]
-        self.calibration_value = 148
+        self.calibration_value = 149
 
         for popcorn in popcorn_left:
             popcorn['moved'] = False
@@ -122,7 +122,7 @@ class PopcornTask(Task):
         self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['open case'], blocking=False)
         angle = self.empty_position['popcorn_position'][2]
         for _ in range(5):
-            for rotation in (-3, 3):
+            for rotation in (-4, 4):
                 self.drive.drive_path([], None, angle + rotation)
         self.drive.enable_detection(True)
         self.drive.request_stop()

@@ -18,9 +18,9 @@ class StandsTask(Task):
         self.commandCup = {'blocked': 0, 'ready collect left': 1, 'ready collect right': 2, 'collect left': 3,
                            'collect right': 4, 'open case left': 5, 'open case right': 6, 'close case left': 7,
                            'close case right': 8}
-        stands_left = [{'position': (90, 200), 'start position': (300, 490), 'end position': (230, 490)},
+        stands_left = [{'position': (90, 200), 'start position': (280, 490), 'end position': (280, 490)},
                        {'position': (90, 1750), 'start position': (300, 1460), 'end position': (230, 1500)},
-                       {'position': (850, 200), 'start position': (650, 490), 'end position': (660, 300)},
+                       {'position': (850, 200), 'start position': (650, 490), 'end position': (650, 490)},
                        {'position': (870, 1355), 'start position': None, 'end position': None},
                        {'position': (1100, 1770), 'start position': None, 'end position': None},
                        {'position': (1300, 1400), 'start position': None, 'end position': None},
@@ -91,6 +91,11 @@ class StandsTask(Task):
 
         if object_number == 0:
             time.sleep(0.5)
+            end_point = self.my_game_elements[object_number]['end position']
+            if self.side == 'left':
+                self.drive.drive_path([], end_point, 0, end_speed=-20)
+            else:
+                self.drive.drive_path([], end_point, 180, end_speed=-20)
         if object_number == 1:
             time.sleep(0.5)
             if self.side == 'left':
@@ -99,10 +104,11 @@ class StandsTask(Task):
                 self.drive.drive_path([], None, 180-45)
         elif object_number == 2:
             time.sleep(0.5)
+            end_point = self.my_game_elements[object_number]['end position']
             if self.side == 'left':
-                self.drive.drive_path([], None, 225)
+                self.drive.drive_path([], end_point, 225, end_speed=-20)
             else:
-                self.drive.drive_path([], None, 315)
+                self.drive.drive_path([], end_point, 315, end_speed=-20)
 
         self.my_game_elements[object_number]['moved'] = True
         self.drive.enable_detection(True)
