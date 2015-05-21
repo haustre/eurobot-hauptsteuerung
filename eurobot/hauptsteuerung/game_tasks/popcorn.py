@@ -13,7 +13,7 @@ class PopcornTask(Task):
         super().__init__(robots, can_socket, can.MsgTypes.Popcorn_Command.value, drive)
         self.calibrated = False
         self.angle = 90
-        self.distance = 120
+        self.distance = 110
         empty_position = {'start_position': (800, 1000, 0), 'stands_position': (320, 1000, 0),
                           'popcorn_position': (180, 1000, 0)}
         self.command = {'ready collect': 0, 'open case': 1, 'collect': 2}
@@ -117,7 +117,7 @@ class PopcornTask(Task):
         self.send_task_command(can.MsgTypes.Cup_Command.value, commands_other_tasks['cup left'], blocking=False)
         self.send_task_command(can.MsgTypes.Cup_Command.value, commands_other_tasks['cup right'], blocking=False)
         self.send_task_command(can.MsgTypes.Stands_Command.value, commands_other_tasks['stand'], blocking=False)
-        time.sleep(1)
+        time.sleep(1.5)
         self.drive.drive_path([], self.empty_position['popcorn_position'], None, end_speed=-30)
         self.send_task_command(can.MsgTypes.Popcorn_Command.value, self.command['open case'], blocking=False)
         angle = self.empty_position['popcorn_position'][2]

@@ -249,7 +249,7 @@ class Main:
             if self.strategy['side'] == 'right':
                 XOffset = 3000
 
-            if self.strategy['strategy'] == 'A' or self.strategy['strategy'] == 'B':
+            if self.strategy['strategy'] == 'A':
                 # Ignore emeny in start area
                 self.drive.set_close_range_detection(False)
                 self.drive.set_enemy_detection(False)
@@ -280,6 +280,45 @@ class Main:
                 self.drive.set_close_range_detection(False)
                 self.drive.set_enemy_detection(False)
                 self.game_tasks['stair'].do_task()
+
+            elif self.strategy['strategy'] == 'B':
+                # Ignore emeny in start area
+                self.drive.set_close_range_detection(False)
+                self.drive.set_enemy_detection(False)
+
+                # Full speed
+                self.drive.set_speed(100)
+
+                # Drive out of the start area
+                self.drive.drive_path([], (math.fabs(480-XOffset), 1060), None)
+
+                # Pay attention for emenies
+                self.drive.set_close_range_detection(True)
+                self.drive.set_enemy_detection(False)
+
+                self.game_tasks['stair'].prepare_for_climbing()
+
+                if self.drive.drive_path([], (math.fabs(1250 - XOffset), 1090), 270) is False:
+                    self.drive.request_stop()
+                    self.drive.turn_off()
+                    while True:
+                        pass
+
+                # Drive in front of the stair
+                point, angle = self.game_tasks['stair'].goto_task()
+
+                if self.drive.drive_path([], point, angle) is False:
+                    self.drive.request_stop()
+                    self.drive.turn_off()
+                    while True:
+                        pass
+
+                # Climb on the stair without enemy detection
+                print("Do Climbing Task")
+                self.drive.set_close_range_detection(False)
+                self.drive.set_enemy_detection(False)
+                self.game_tasks['stair'].do_task()
+
 
 
 if __name__ == "__main__":
