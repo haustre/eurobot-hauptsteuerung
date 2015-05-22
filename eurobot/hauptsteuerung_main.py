@@ -233,11 +233,25 @@ class Main:
         :return: None
         """
         if self.strategy['robot_name'] == 'Roboter-gross':  # check on which robot the program is running
-            if self.strategy['strategy'] == 'A' or self.strategy['strategy'] == 'B':
+            if self.strategy['strategy'] == 'A':
                 self.drive.set_close_range_detection(True)
                 self.drive.set_enemy_detection(True)
                 self.drive.set_speed(40)
                 self.game_tasks['stand'].do_task(3)
+                self.game_logic.start()
+
+            if self.strategy['strategy'] == 'B':
+                self.drive.set_close_range_detection(True)
+                self.drive.set_enemy_detection(True)
+                self.drive.set_speed(40)
+                self.game_tasks['stand'].do_task(3)
+                self.game_tasks['stand'].do_task(5)
+                if self.strategy['side'] == 'left':
+                    coordinates = (1500, 1300)
+                else:
+                    coordinates = (3000 - 1500, 1300)
+                while self.drive.drive_path([], coordinates, 90) is False:
+                    pass
                 self.game_logic.start()
 
         if self.strategy['robot_name'] == 'Roboter-klein':
