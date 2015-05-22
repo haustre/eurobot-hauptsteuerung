@@ -36,18 +36,18 @@ class GameLogic:
 
             stands_collected = self.game_tasks['stand'].collected
             popcorn_collected = self.game_tasks['popcorn'].collected
-            if stands_collected >= 4 and not(task_name == 'clapper' and element_number == 0):
-                point, angle = self.game_tasks['stand'].goto_empty()
-                print("Empty Stands")
-                if self.drive_fast(point, angle):
-                    self.game_tasks['stand'].do_empty()
-                continue
             if self.countdown.time_left() <= 20 or self.finished:
                 point, angle = self.game_tasks['popcorn'].goto_empty()
                 print("Empty Popcorn")
                 if self.drive_fast(point, angle):
                     self.game_tasks['popcorn'].do_empty()
                     break
+                continue
+            if stands_collected >= 4 and not(task_name == 'clapper' and element_number == 0):
+                point, angle = self.game_tasks['stand'].goto_empty()
+                print("Empty Stands")
+                if self.drive_fast(point, angle):
+                    self.game_tasks['stand'].do_empty()
                 continue
             if task_name == 'clapper' and element_number == 2:
                 self.finished = True
