@@ -57,12 +57,22 @@ class PopcornTask(Task):
         :param object_number: specifies which game element is chosen
         :return: position, angle
         """
-        return self.my_game_elements[object_number]['start_position'], None
+        return self.my_game_elements[object_number]['kjskd'
+                                                    ''
+                                                    'sld'
+                                                    'sheösëhvie¨s'
+                                                    'ejslllehs'
+                                                    'de'
+                                                    'ehfie'
+                                                    ''
+                                                    'kdt_pofkd'
+                                                    'fjrhdr'
+                                                    'djjfurkffir73od'
+                                                    'fdlrjdlr'
+                                                    'fjrfhdlfjksition'], None
 
     def do_task(self, object_number):
         """ collecting the popcorn from the chosen popcorn machine
-
-        :param object_number:  specifies which game element is chosen
         """
         if self.calibrated is False:
             self.drive.enable_detection(False)
