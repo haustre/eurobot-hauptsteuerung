@@ -23,9 +23,9 @@ from hauptsteuerung.robot import PositionMyRobot, PositionOtherRobot
 from hauptsteuerung.game_logic import GameLogic
 from hauptsteuerung.navigation_test_and_calibration import NavigationTest
 
+
 class Main:
     """ Main program running on Robot"""
-
     def __init__(self):
         """ In the initialisation the program determines on which robot it is running, reads in the configuration
         and creates all necessary objects.
@@ -38,7 +38,7 @@ class Main:
             can_connection = sys.argv[1]
             hostname = sys.argv[2]
             self.debug = True
-        else:  # running on the robot
+        else:   # running on the robot
             can_connection = 'can0'
             if not (hostname == 'Roboter-klein' or hostname == 'Roboter-gross'):
                 raise Exception('Wrong Hostname\nSet Hostname to "Roboter-klein" or "Roboter-gross"')
@@ -46,8 +46,8 @@ class Main:
         self.can_socket = can.Can(can_connection, can.MsgSender.Hauptsteuerung)
         self.gpio = GPIO()
         if self.debug:
-            self.enemy_simulation = debug.EnemySimulation(self.can_socket, 4, 20)
-            # self.enemy_simulation.start()
+            self.enemy_simulation = debug.EnemySimulation(self.can_socket,  4, 20)
+            #self.enemy_simulation.start()
         self.countdown = countdown.Countdown(self.can_socket)
         self.debugger = debug.LaptopCommunication(self.can_socket)
         self.drive = drive.Drive(self.can_socket)
@@ -57,8 +57,7 @@ class Main:
         self.strategy['robot_name'] = hostname
         print(self.strategy)
         self.send_start_configuration()
-        self.robots = {'me': None, 'friendly robot': None, 'enemy1': None,
-                       'enemy2': None}  # create the robot dictionary
+        self.robots = {'me': None, 'friendly robot': None, 'enemy1': None, 'enemy2': None}  # create the robot dictionary
         # create all game element objects
         self.game_tasks = \
             {'clapper': clapper.ClapperTask(self.robots, self.strategy['side'], self.can_socket, self.drive),
@@ -73,17 +72,13 @@ class Main:
         self.debugger.start_game_tasks()
         # create all robot objects and put them in a dictionary
         if self.strategy['robot_name'] == 'Roboter-klein':
-            self.robots['me'] = PositionMyRobot(self.can_socket, can.MsgTypes.Position_Robot_small.value,
-                                                self.strategy['robot_name'])
+            self.robots['me'] = PositionMyRobot(self.can_socket, can.MsgTypes.Position_Robot_small.value, self.strategy['robot_name'])
             if self.strategy['robot_big']:
-                self.robots['friendly robot'] = PositionOtherRobot(self.can_socket,
-                                                                   can.MsgTypes.Position_Robot_big.value)
+                self.robots['friendly robot'] = PositionOtherRobot(self.can_socket, can.MsgTypes.Position_Robot_big.value)
         elif self.strategy['robot_name'] == 'Roboter-gross':
-            self.robots['me'] = PositionMyRobot(self.can_socket, can.MsgTypes.Position_Robot_big.value,
-                                                self.strategy['robot_name'])
+            self.robots['me'] = PositionMyRobot(self.can_socket, can.MsgTypes.Position_Robot_big.value, self.strategy['robot_name'])
             if self.strategy['robot_small']:
-                self.robots['friendly robot'] = PositionOtherRobot(self.can_socket,
-                                                                   can.MsgTypes.Position_Robot_small.value)
+                self.robots['friendly robot'] = PositionOtherRobot(self.can_socket, can.MsgTypes.Position_Robot_small.value)
         else:
             raise Exception("Wrong Robot name")
         if self.strategy['enemy_small']:
@@ -92,7 +87,7 @@ class Main:
             self.robots['enemy2'] = PositionOtherRobot(self.can_socket, can.MsgTypes.Position_Enemy_big.value)
         self.drive.add_my_robot(self.robots['me'])
         for name, robot in self.robots.items():
-            if robot is not None and not (name == 'me' or name == 'friendly robot'):
+            if robot is not None and not(name == 'me' or name == 'friendly robot'):
                 self.drive.add_robot(robot)
         self.run()  # The configuration is complete. Start the game.
 
@@ -147,9 +142,9 @@ class Main:
         else:
             side = 0
         if self.strategy['strategy'] == 'C' and False:
-            start_orientation = 0  # near Clapper
+            start_orientation = 0   # near Clapper
         else:
-            start_orientation = 1  # near Stair
+            start_orientation = 1   # near Stair
         can_msg = {
             'type': can.MsgTypes.Configuration.value,
             'is_robot_small': self.strategy['robot_small'],
@@ -168,7 +163,7 @@ class Main:
         :return: None
         """
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
-        time.sleep(0.02)  # wait for gyro
+        time.sleep(0.02)    # wait for gyro
         self.countdown.start()
         self.can_socket.create_interrupt(can.MsgTypes.Peripherie_inputs.value, self.periphery_input)
         self.countdown.set_interrupt(self.game_end, 'game_end', 3)
@@ -240,7 +235,7 @@ class Main:
         :return: None
         """
         if self.strategy['robot_name'] == 'Roboter-gross':  # check on which robot the program is running
-            if self.strategy['strategy'] == 'A':
+            if self.strategy['strategy'] == 'A' or self.strategy['strategy'] == 'B':
                 self.drive.set_close_range_detection(True)
                 self.drive.set_enemy_detection(True)
                 self.drive.set_speed(40)
@@ -268,93 +263,68 @@ class Main:
                 # run program
                 self.navigation_test.run_test("rcr")
 
+                # Drive out of the start area
+                self.drive.drive_path([], (math.fabs(480-XOffset), 1060), None)
 
+                # Pay attention for emenies
+                self.drive.set_close_range_detection(True)
+                self.drive.set_enemy_detection(True)
 
+                self.game_tasks['stair'].prepare_for_climbing()
 
-
-
-
-
-
-
-    if self.strategy['robot_name'] == 'Roboter-klein':
-        # Wait until big robot is away
-        time.sleep(1)
-
-        # Check position side
-        XOffset = 0
-        if self.strategy['side'] == 'right':
-            XOffset = 3000
-
-        if self.strategy['strategy'] == 'A':
-            # Ignore emeny in start area
-            self.drive.set_close_range_detection(False)
-            self.drive.set_enemy_detection(False)
-
-            # Full speed
-            self.drive.set_speed(100)
-
-            # Drive out of the start area
-            self.drive.drive_path([], (math.fabs(480 - XOffset), 1060), None)
-
-            # Pay attention for emenies
-            self.drive.set_close_range_detection(True)
-            self.drive.set_enemy_detection(True)
-
-            self.game_tasks['stair'].prepare_for_climbing()
-
-            while self.drive.drive_path([], (math.fabs(1250 - XOffset), 1090), 270) is False:
-                pass
-
-            # Drive in front of the stair
-            point, angle = self.game_tasks['stair'].goto_task()
-
-            while self.drive.drive_path([], point, angle) is False:
-                pass
-
-            # Climb on the stair without enemy detection
-            print("Do Climbing Task")
-            self.drive.set_close_range_detection(False)
-            self.drive.set_enemy_detection(False)
-            self.game_tasks['stair'].do_task()
-
-        elif self.strategy['strategy'] == 'B':
-            # Ignore emeny in start area
-            self.drive.set_close_range_detection(False)
-            self.drive.set_enemy_detection(False)
-
-            # Full speed
-            self.drive.set_speed(100)
-
-            # Drive out of the start area
-            self.drive.drive_path([], (math.fabs(480 - XOffset), 1060), None)
-
-            # Pay attention for emenies
-            self.drive.set_close_range_detection(True)
-            self.drive.set_enemy_detection(False)
-
-            self.game_tasks['stair'].prepare_for_climbing()
-
-            if self.drive.drive_path([], (math.fabs(1250 - XOffset), 1090), 270) is False:
-                self.drive.request_stop()
-                self.drive.turn_off()
-                while True:
+                while self.drive.drive_path([], (math.fabs(1250 - XOffset), 1090), 270) is False:
                     pass
 
-            # Drive in front of the stair
-            point, angle = self.game_tasks['stair'].goto_task()
+                # Drive in front of the stair
+                point, angle = self.game_tasks['stair'].goto_task()
 
-            if self.drive.drive_path([], point, angle) is False:
-                self.drive.request_stop()
-                self.drive.turn_off()
-                while True:
+                while self.drive.drive_path([], point, angle) is False:
                     pass
 
-            # Climb on the stair without enemy detection
-            print("Do Climbing Task")
-            self.drive.set_close_range_detection(False)
-            self.drive.set_enemy_detection(False)
-            self.game_tasks['stair'].do_task()
+                # Climb on the stair without enemy detection
+                print("Do Climbing Task")
+                self.drive.set_close_range_detection(False)
+                self.drive.set_enemy_detection(False)
+                self.game_tasks['stair'].do_task()
+
+            elif self.strategy['strategy'] == 'B':
+                # Ignore emeny in start area
+                self.drive.set_close_range_detection(False)
+                self.drive.set_enemy_detection(False)
+
+                # Full speed
+                self.drive.set_speed(100)
+
+                # Drive out of the start area
+                self.drive.drive_path([], (math.fabs(480-XOffset), 1060), None)
+
+                # Pay attention for emenies
+                self.drive.set_close_range_detection(True)
+                self.drive.set_enemy_detection(False)
+
+                self.game_tasks['stair'].prepare_for_climbing()
+
+                if self.drive.drive_path([], (math.fabs(1250 - XOffset), 1090), 270) is False:
+                    self.drive.request_stop()
+                    self.drive.turn_off()
+                    while True:
+                        pass
+
+                # Drive in front of the stair
+                point, angle = self.game_tasks['stair'].goto_task()
+
+                if self.drive.drive_path([], point, angle) is False:
+                    self.drive.request_stop()
+                    self.drive.turn_off()
+                    while True:
+                        pass
+
+                # Climb on the stair without enemy detection
+                print("Do Climbing Task")
+                self.drive.set_close_range_detection(False)
+                self.drive.set_enemy_detection(False)
+                self.game_tasks['stair'].do_task()
+
 
 
 if __name__ == "__main__":
