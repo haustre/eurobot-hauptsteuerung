@@ -67,7 +67,7 @@ class Main:
              'popcorn': popcorn.PopcornTask(self.robots, self.strategy['side'], self.can_socket, self.drive)
              }
         self.game_logic = GameLogic(self.game_tasks, self.drive, self.countdown, self.robots, self.strategy['side'])
-        self.navigation_test = NavigationTest(self.can_socket)
+        self.navigation_test = NavigationTest(self.can_socket,self.drive)
         self.debugger.add_game_tasks(self.game_tasks)
         self.debugger.start_game_tasks()
         # create all robot objects and put them in a dictionary
@@ -164,9 +164,9 @@ class Main:
         """
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
         time.sleep(0.02)    # wait for gyro
-        self.countdown.start()
+        #self.countdown.start()
         self.can_socket.create_interrupt(can.MsgTypes.Peripherie_inputs.value, self.periphery_input)
-        self.countdown.set_interrupt(self.game_end, 'game_end', 3)
+        #self.countdown.set_interrupt(self.game_end, 'game_end', 3)
         self.strategy_start()  # run the start strategy
         print("Programm End")
 
@@ -235,7 +235,7 @@ class Main:
         :return: None
         """
         if self.strategy['robot_name'] == 'Roboter-gross':  # check on which robot the program is running
-            if self.strategy['strategy'] == 'A' or self.strategy['strategy'] == 'B':
+            if self.strategy['strategy'] == 'A':
                 self.drive.set_close_range_detection(True)
                 self.drive.set_enemy_detection(True)
                 self.drive.set_speed(40)
@@ -243,25 +243,60 @@ class Main:
                 self.game_logic.start()
 
             else:
+
                 ##########################################################################################
                 # Calibration and tests of navigation system                                             #
                 ##########################################################################################
 
-                # rcr = Rotation calibration clockwise
-                # rcl = Rotation calibration counterclockwise
+                # ------------------------------------------------
+                # Options
+                #
+                # test_programm:
+                # rtr = Rotation test clockwise (right)
+                # rtl = Rotation test counterclockwise (left)
+                # st1 = System test beginning with Point 1
+                # st2 = System test beginning with Point 2
+                # st3 = System test beginning with Point 3
+                # st4 = System test beginning with Point 4
+                #
+                # number:
+                # number of turns or repeats (1-100)
+                #
+                # speed:
+                # speed of driving (10-100)
+                #
+                # ------------------------------------------------
 
-                # tt1 = Total test beginning with Point 1
-                # tt2 = Total test beginning with Point 2
-                # tt3 = Total test beginning with Point 3
-                # tt4 = Total test beginning with Point 4
-
+                test_programm = "rtr"
+                number = 10
+                speed = 100
 
                 # Ignore emeny
                 self.drive.set_close_range_detection(False)
                 self.drive.set_enemy_detection(False)
 
-                # run program
-                self.navigation_test.run_test("rcr")
+                # Run test or calibration
+                self.navigation_test.run_test(test_programm, number, speed)
+
+
+
+
+        if self.strategy['robot_name'] == 'Roboter-klein':
+            # Wait until big robot is away
+            time.sleep(1)
+
+            # Check position side
+            XOffset = 0
+            if self.strategy['side'] == 'right':
+                XOffset = 3000
+
+            if self.strategy['strategy'] == 'A':
+                # Ignore emeny in start area
+                self.drive.set_close_range_detection(False)
+                self.drive.set_enemy_detection(False)
+
+                # Full speed
+                self.drive.set_speed(100)
 
                 # Drive out of the start area
                 self.drive.drive_path([], (math.fabs(480-XOffset), 1060), None)
