@@ -21,6 +21,7 @@ from hauptsteuerung import countdown
 from hauptsteuerung.game_tasks import clapper, stair, stand, cup, popcorn
 from hauptsteuerung.robot import PositionMyRobot, PositionOtherRobot
 from hauptsteuerung.game_logic import GameLogic
+from hauptsteuerung.navigation_test_and_calibration import NavigationTest
 
 
 class Main:
@@ -66,6 +67,7 @@ class Main:
              'popcorn': popcorn.PopcornTask(self.robots, self.strategy['side'], self.can_socket, self.drive)
              }
         self.game_logic = GameLogic(self.game_tasks, self.drive, self.countdown, self.robots, self.strategy['side'])
+        self.navigation_test = NavigationTest(self.can_socket,self.drive)
         self.debugger.add_game_tasks(self.game_tasks)
         self.debugger.start_game_tasks()
         # create all robot objects and put them in a dictionary
@@ -162,9 +164,9 @@ class Main:
         """
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
         time.sleep(0.02)    # wait for gyro
-        self.countdown.start()
+        #self.countdown.start()
         self.can_socket.create_interrupt(can.MsgTypes.Peripherie_inputs.value, self.periphery_input)
-        self.countdown.set_interrupt(self.game_end, 'game_end', 3)
+        #self.countdown.set_interrupt(self.game_end, 'game_end', 3)
         self.strategy_start()  # run the start strategy
         print("Programm End")
 
@@ -240,19 +242,44 @@ class Main:
                 self.game_tasks['stand'].do_task(3)
                 self.game_logic.start()
 
-            if self.strategy['strategy'] == 'B':
-                self.drive.set_close_range_detection(True)
-                self.drive.set_enemy_detection(True)
-                self.drive.set_speed(40)
-                self.game_tasks['stand'].do_task(3)
-                self.game_tasks['stand'].do_task(5)
-                if self.strategy['side'] == 'left':
-                    coordinates = (1500, 1300)
-                else:
-                    coordinates = (3000 - 1500, 1300)
-                while self.drive.drive_path([], coordinates, 90) is False:
-                    pass
-                self.game_logic.start()
+            else:
+
+                ##########################################################################################
+                # Calibration and tests of navigation system                                             #
+                ##########################################################################################
+
+                # ------------------------------------------------
+                # Options
+                #
+                # test_programm:
+                # rtr = Rotation test clockwise (right)
+                # rtl = Rotation test counterclockwise (left)
+                # st1 = System test beginning with Point 1
+                # st2 = System test beginning with Point 2
+                # st3 = System test beginning with Point 3
+                # st4 = System test beginning with Point 4
+                #
+                # number:
+                # number of turns or repeats (1-100)
+                #
+                # speed:
+                # speed of driving (10-100)
+                #
+                # ------------------------------------------------
+
+                test_programm = "rtr"
+                number = 10
+                speed = 100
+
+                # Ignore emeny
+                self.drive.set_close_range_detection(False)
+                self.drive.set_enemy_detection(False)
+
+                # Run test or calibration
+                self.navigation_test.run_test(test_programm, number, speed)
+
+
+
 
         if self.strategy['robot_name'] == 'Roboter-klein':
             # Wait until big robot is away
