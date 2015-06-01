@@ -15,7 +15,7 @@ from libraries import can
 from libraries.ethernet import Server
 
 
-class LaptopCommunication():
+class LaptopCommunication:
     def __init__(self, can_socket):
         """
         This class starts a tcp server on the Beaglebone and starts the communication to the computer.
@@ -84,7 +84,7 @@ class LaptopCommunication():
         self.running = False
 
 
-class EnemySimulation():
+class EnemySimulation:
     """
     This Class simulates the enemy robots
     The simulation is used to test the pathfinding and the game strategy.
@@ -128,7 +128,7 @@ class EnemySimulation():
         pass
 
 
-class Position():
+class Position:
     """ This class generates the coordinates of a virtual robot. """
     def __init__(self, speed):
         self.speed = speed

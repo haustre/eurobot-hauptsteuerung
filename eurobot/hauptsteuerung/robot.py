@@ -42,7 +42,7 @@ class RobotPosition():
         """ waits for new position information, saves them and puts them in the map """
         margin = int(200 / self.scale)  # minimum distance to an object
         # TODO: check sender ID (in case drive and navigation both send)
-        if can_msg['position_correct'] and can_msg['sender'] == MsgSender.Navigation.value:
+        if can_msg['position_correct'] and can_msg['sender'] == MsgSender.Navigation.value or can_msg['sender'] == MsgSender.Hauptsteuerung.value:
             x, y = can_msg['x_position'], can_msg['y_position']
             with self.lock:
                 self.position = x, y

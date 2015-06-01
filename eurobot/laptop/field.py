@@ -125,27 +125,28 @@ class GameField(QWidget):  # TODO: add roboter2 and enemy2
         :return: None
         """
         redraw = False
-        position_sender_id = can.MsgSender.Navigation.value
+        navigation_id = can.MsgSender.Hauptsteuerung.value
+        control_id = can.MsgSender.Navigation.value
         if msg_frame['type'] == can.MsgTypes.Position_Robot_big.value:
-            if msg_frame['position_correct'] and msg_frame['sender'] == position_sender_id:
+            if msg_frame['position_correct'] and (msg_frame['sender'] == navigation_id or msg_frame['sender'] == control_id):
                 self.robot_big['x_position'] = msg_frame['x_position']
                 self.robot_big['y_position'] = msg_frame['y_position']
                 self.robot_big['angle'] = msg_frame['angle'] / 100
                 redraw = True
         elif msg_frame['type'] == can.MsgTypes.Position_Robot_small.value:
-            if msg_frame['position_correct'] and msg_frame['sender'] == position_sender_id:
+            if msg_frame['position_correct'] and (msg_frame['sender'] == navigation_id or msg_frame['sender'] == control_id):
                 self.robot_small['x_position'] = msg_frame['x_position']
                 self.robot_small['y_position'] = msg_frame['y_position']
                 self.robot_small['angle'] = msg_frame['angle'] / 100
                 redraw = True
         elif msg_frame['type'] == can.MsgTypes.Position_Enemy_big.value:
-            if msg_frame['position_correct'] and msg_frame['sender'] == position_sender_id:
+            if msg_frame['position_correct'] and (msg_frame['sender'] == navigation_id or msg_frame['sender'] == control_id):
                 self.enemy_big['x_position'] = msg_frame['x_position']
                 self.enemy_big['y_position'] = msg_frame['y_position']
                 self.enemy_big['angle'] = msg_frame['angle'] / 100
                 redraw = True
         elif msg_frame['type'] == can.MsgTypes.Position_Enemy_small.value:
-            if msg_frame['position_correct'] and msg_frame['sender'] == position_sender_id:
+            if msg_frame['position_correct'] and (msg_frame['sender'] == navigation_id or msg_frame['sender'] == control_id):
                 self.enemy_small['x_position'] = msg_frame['x_position']
                 self.enemy_small['y_position'] = msg_frame['y_position']
                 self.enemy_small['angle'] = msg_frame['angle'] / 100
