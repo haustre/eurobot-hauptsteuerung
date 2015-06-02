@@ -115,7 +115,7 @@ class NavigationTest:
         time.sleep(15)
 
         # Drive to point 2
-        self.drive.drive_path([], (400, 1600), 0, end_speed=40)
+        self.drive.drive_path([], (770, 1600), 0, end_speed=40)
 
         # Set direction
         if turn_direction == "right":

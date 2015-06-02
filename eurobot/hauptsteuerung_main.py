@@ -278,6 +278,9 @@ class Main:
                 # Run test or calibration
                 self.navigation_test.run_test(test_programm, number, speed)
 
+                # Wait for taking meassurments
+                time.sleep(60)
+
 
 
 
