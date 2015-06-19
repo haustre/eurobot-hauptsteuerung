@@ -164,9 +164,9 @@ class Main:
         """
         self.wait_for_game_start()  # start of the game (key removed, emergency stop not pressed)
         time.sleep(0.02)    # wait for gyro
-        #self.countdown.start()
+       # self.countdown.start()
         self.can_socket.create_interrupt(can.MsgTypes.Peripherie_inputs.value, self.periphery_input)
-        #self.countdown.set_interrupt(self.game_end, 'game_end', 3)
+       # self.countdown.set_interrupt(self.game_end, 'game_end', 3)
         self.strategy_start()  # run the start strategy
         print("Programm End")
 
@@ -254,6 +254,7 @@ class Main:
                 # test_programm:
                 # rtr = Rotation test clockwise (right)
                 # rtl = Rotation test counterclockwise (left)
+                # sdt = Straight drive test
                 # st1 = System test beginning with Point 1
                 # st2 = System test beginning with Point 2
                 # st3 = System test beginning with Point 3
@@ -263,13 +264,13 @@ class Main:
                 # number of turns or repeats (1-100)
                 #
                 # speed:
-                # speed of driving (10-100)
+                # speed of driving (5-100)
                 #
                 # ------------------------------------------------
 
-                test_programm = "rtr"
-                number = 10
-                speed = 100
+                test_programm = "sdt"
+                number = 1
+                speed = 40
 
                 # Ignore emeny
                 self.drive.set_close_range_detection(False)

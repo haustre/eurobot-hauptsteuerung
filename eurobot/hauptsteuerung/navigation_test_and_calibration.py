@@ -38,6 +38,7 @@ class NavigationTest:
         # test_programm:
         # rtr = Rotation test clockwise (right)
         # rtl = Rotation test counterclockwise (left)
+        # sdt = Straight drive test
         # st1 = System test beginning with Point 1
         # st2 = System test beginning with Point 2
         # st3 = System test beginning with Point 3
@@ -47,7 +48,7 @@ class NavigationTest:
         # number of turns or repeats (1-100)
         #
         # speed:
-        # speed of driving (10-100)
+        # speed of driving (5-100)
         #
         # ------------------------------------------------
 
@@ -71,6 +72,10 @@ class NavigationTest:
 
         elif test_program == "rtl":
             self.rotation_test("left", number, speed)
+
+        # Straight drive test ------------------------------------------------------------------- #
+        elif test_program == "sdt":
+            self.straight_drive_test(speed)
 
         # System test --------------------------------------------------------------------- #
         elif test_program == "st1":
@@ -96,7 +101,7 @@ class NavigationTest:
 
         :param turn_direction: direction of turning
         :param number: number of turns or repeats (1-100)
-        :param speed: speed of driving (10-100)
+        :param speed: speed of driving (5-100)
         :return: None
         """
         # Set speed
@@ -138,8 +143,28 @@ class NavigationTest:
         self.can_socket.send(can_msg)
 
         # Wait until number of turns are over
-        waitTime = 0.7808 * 100 / speed * number
+        waitTime = 0.786 * 100 / speed * number
         time.sleep(waitTime)
+
+        # Stop robot
+        can_msg = {
+            'type': can.MsgTypes.Debug_Drive.value,
+            'speed_left': int(0),
+            'speed_right': int(0)
+        }
+        self.can_socket.send(can_msg)
+
+        time.sleep(1)
+
+        # Drive back robot
+        can_msg = {
+            'type': can.MsgTypes.Debug_Drive.value,
+            'speed_left': int(-20),
+            'speed_right': int(-20)
+        }
+        self.can_socket.send(can_msg)
+
+        time.sleep(3)
 
         # Stop robot
         can_msg = {
@@ -160,13 +185,70 @@ class NavigationTest:
         print(" ")
         print("=========================")
 
+    def straight_drive_test(self, speed):
+        """ program to calibrate and test straight drive
+
+        :param speed: speed of driving (5-100)
+        :return: None
+        """
+        # Set speed
+        self.drive.set_speed(speed)
+
+        # Drive to point 1
+        self.drive.drive_path([], (1150, 1600), None, end_speed=40)
+
+        # Drive to point 2
+        self.drive.drive_path([], (400, 1600), None, end_speed=-40)
+
+        # Drive to point 3 and reference on side fence
+        self.drive.drive_path([], (100, 1600), None, end_speed=-10)
+
+        # Wait 45 seconds, that user can measure angle of robot
+        time.sleep(15)
+
+        # Drive forward robot
+        can_msg = {
+            'type': can.MsgTypes.Debug_Drive.value,
+            'speed_left': int(speed),
+            'speed_right': int(speed)
+        }
+
+        # Take start time
+        start_time = time.time()
+
+        # Send values to RoboDrive
+        self.can_socket.send(can_msg)
+
+        # Wait until 2.5m are driven
+        waitTime = 2 * 100 / speed
+        time.sleep(waitTime)
+
+        # Stop robot
+        can_msg = {
+            'type': can.MsgTypes.Debug_Drive.value,
+            'speed_left': int(0),
+            'speed_right': int(0)
+        }
+        self.can_socket.send(can_msg)
+
+
+
+        # Calculate rotation time
+        deltaTime = time.time() - start_time
+
+        print("Straight drive test is finished")
+        print("===============================")
+        print(" ")
+        print("Drive time: ", int(deltaTime), "s")
+        print(" ")
+        print("=========================")
 
     def system_test(self, first_point, numberOfPoints, speed):
         """ program to test the whole navigation system
 
         :param first_point: first point, where the robot drive
         :param numberOfPoints: number repeats (1-100)
-        :param speed: speed of driving (10-100)
+        :param speed: speed of driving (5-100)
         :return: None
         """
         PointsLeft = numberOfPoints
