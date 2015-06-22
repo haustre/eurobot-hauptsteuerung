@@ -194,6 +194,7 @@ class NavigationTest:
         # Set speed
         self.drive.set_speed(speed)
 
+        """
         # Drive to point 1
         self.drive.drive_path([], (1150, 1600), None, end_speed=40)
 
@@ -205,6 +206,7 @@ class NavigationTest:
 
         # Wait 45 seconds, that user can measure angle of robot
         time.sleep(15)
+        """
 
         # Drive forward robot
         can_msg = {
@@ -219,8 +221,8 @@ class NavigationTest:
         # Send values to RoboDrive
         self.can_socket.send(can_msg)
 
-        # Wait until 2.5m are driven
-        waitTime = 2 * 100 / speed
+        # Wait until 2.7m are driven
+        waitTime = 2.7 * 100 / speed
         time.sleep(waitTime)
 
         # Stop robot
@@ -233,13 +235,17 @@ class NavigationTest:
 
 
 
-        # Calculate rotation time
-        deltaTime = time.time() - start_time
+        # Calculate drive time
+        deltaTime = time.time() - start_time + speed / 100 * 1.0621 / 35.404
+        n_samples = deltaTime / 0.02
 
         print("Straight drive test is finished")
         print("===============================")
         print(" ")
-        print("Drive time: ", int(deltaTime), "s")
+        print("Drive time: ", deltaTime, "s")
+        print(" ")
+        print(" ")
+        print("# samples of odometry: ", n_samples)
         print(" ")
         print("=========================")
 
